@@ -1,0 +1,36 @@
+{
+  "environments": {
+    "default": {
+      "machines": {
+        "dev-machine": {
+          "servers": {},
+          "agents": [
+            "org.eclipse.che.terminal",
+            "org.eclipse.che.ws-agent",
+            "org.eclipse.che.ssh"
+          ],
+          "attributes": {
+            "memoryLimitBytes": "2147483648"
+          }
+        }
+      },
+      "recipe": {
+        "location": "eclipse/ubuntu_jdk8",
+        "type": "dockerimage"
+      }
+    }
+  },
+  "defaultEnv": "default",
+  "name": "workspace-java",
+  "projects": [],
+  "description": null,
+  "commands": [
+    {
+      "commandLine": "mvn clean install -f ${current.project.path}",
+      "name": "build",
+      "type": "mvn",
+      "attributes": {}
+    }
+  ],
+  "links": []
+}
