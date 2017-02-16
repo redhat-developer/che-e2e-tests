@@ -14,12 +14,22 @@ public class CheWorkspace {
 	
 	private String id;
 	private String name;
-	private String URL;
+	private String workspaceURL;
+	private String serverURL;
+	private String wsAgentURL;
 	
-	public CheWorkspace(String id, String name, String URL) {
+	/**
+	 * Creates a new Che workspace.
+	 * @param id id of a workspace
+	 * @param name name of a workspace
+	 * @param workspaceURL workspace IDE URL
+	 * @param serverURL URL of Che server where this workspace belongs to
+	 */
+	public CheWorkspace(String id, String name, String workspaceURL, String serverURL) {
 		this.id = id;
 		this.name = name;
-		this.URL = URL;
+		this.workspaceURL = workspaceURL;
+		this.serverURL = serverURL;
 	}
 	
 	public String getId() {
@@ -30,7 +40,19 @@ public class CheWorkspace {
 		return name;
 	}
 
-	public String getURL() {
-		return URL;
+	public String getWorkspaceURL() {
+		return workspaceURL;
+	}
+	
+	public String getServerURL() {
+		return serverURL;
+	}
+	
+	public String getWsAgentURL() {
+		return wsAgentURL;
+	}
+	
+	public void setWsAgentURL(String wsAgentURL) {
+		this.wsAgentURL = wsAgentURL;
 	}
 }
