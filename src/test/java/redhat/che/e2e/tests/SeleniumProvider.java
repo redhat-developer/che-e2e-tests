@@ -13,19 +13,26 @@ package redhat.che.e2e.tests;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
 import org.openqa.selenium.chrome.ChromeDriverService;
 
 public class SeleniumProvider {
 
+	private static final Logger logger = Logger.getLogger(SeleniumProvider.class);
+	
 	public static void setUpSeleniumChromeDriver() {
+		logger.info("Downloading Selenium chrome driver.");
 		String driverZipPath = Utils.downloadSeleniumChromeDriver();
+		logger.info("Extracting Selenium chrome driver.");
 		Utils.extractZipFile(driverZipPath);
 		String pathToChromeDriver = Utils
 				.setChromeDriverExecutable(driverZipPath.substring(0, driverZipPath.lastIndexOf(File.separator)));
+		logger.info("Setting up path to Selenium chrome driver.");
 		System.setProperty("webdriver.chrome.driver", pathToChromeDriver);
 	}
 
 	public static ChromeDriverService startChromeDriverService() {
+		logger.info("Starting chrome service");
 		ChromeDriverService chromeService = ChromeDriverService.createDefaultService();
 		try {
 			chromeService.start();
@@ -39,6 +46,7 @@ public class SeleniumProvider {
 	}
 
 	public static void stopChromeDriverService(ChromeDriverService chromeService) {
+		logger.info("Stopping chrome service");
 		if (chromeService.isRunning()) {
 			chromeService.stop();
 		}

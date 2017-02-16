@@ -1,36 +1,45 @@
 {
-  "environments": {
-    "default": {
-      "machines": {
-        "dev-machine": {
-          "servers": {},
-          "agents": [
-            "org.eclipse.che.terminal",
-            "org.eclipse.che.ws-agent",
-            "org.eclipse.che.ssh"
-          ],
-          "attributes": {
-            "memoryLimitBytes": "2147483648"
-          }
-        }
-      },
-      "recipe": {
-        "location": "eclipse/ubuntu_jdk8",
-        "type": "dockerimage"
-      }
-    }
-  },
-  "defaultEnv": "default",
-  "name": "{workspace.name}",
-  "projects": [],
-  "description": null,
-  "commands": [
-    {
-      "commandLine": "mvn clean install -f ${current.project.path}",
-      "name": "build",
-      "type": "mvn",
-      "attributes": {}
-    }
-  ],
-  "links": []
+	"environments": {
+		"default": {
+			"machines": {
+				"dev-machine": {
+					"servers": {
+						
+					},
+					"agents": [
+						"org.eclipse.che.terminal",
+						"org.eclipse.che.ws-agent",
+						"org.eclipse.che.ssh"
+					],
+					"attributes": {
+						"memoryLimitBytes": "2147483648"
+					}
+				}
+			},
+			"recipe": {
+				"location": "registry.centos.org/che-stacks/vertx",
+				"type": "dockerimage"
+			}
+		}
+	},
+	"defaultEnv": "default",
+	"name": "{workspace.name}",
+	"projects": [],
+	"description": null,
+	"commands": [
+		{
+			"commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
+			"name": "build",
+			"type": "mvn"
+		},
+		{
+			"commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-fat.jar'",
+			"name": "run",
+			"type": "custom",
+			"attributes": {
+				"previewUrl": "http://${server.port.8080}"
+			}
+		}
+	],
+	"links": []
 }

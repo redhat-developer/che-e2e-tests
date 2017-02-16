@@ -13,6 +13,8 @@ package redhat.che.e2e.tests.workspace;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 
@@ -23,6 +25,8 @@ import redhat.che.e2e.tests.rest.RequestType;
 
 public class CheWorkspaceService {
 
+	private static final Logger logger = Logger.getLogger(CheWorkspaceService.class);
+	
 	private static String CREATE_WORKSPACE_ENDPOINT = "/api/workspace";
 	private static String OPERATE_WORKSPACE_ENDPOINT = "/api/workspace/{id}/runtime";
 	private static String WORKSPACE_ENDPOINT = "/api/workspace/{id}";
@@ -36,7 +40,7 @@ public class CheWorkspaceService {
 	// Wait time in seconds
 	private static int WAIT_TIME = 300;
 
-	public static String getCreateWorkspaceEndpoint() {
+	private static String getCreateWorkspaceEndpoint() {
 		return CREATE_WORKSPACE_ENDPOINT;
 	}
 
@@ -46,11 +50,11 @@ public class CheWorkspaceService {
 	 * @param id
 	 * @return
 	 */
-	public static String getWorkspaceRuntimeEndpoint(String id) {
+	private static String getWorkspaceRuntimeEndpoint(String id) {
 		return OPERATE_WORKSPACE_ENDPOINT.replace("{id}", id);
 	}
 
-	public static String getWorkspaceEndpoint(String id) {
+	private static String getWorkspaceEndpoint(String id) {
 		return WORKSPACE_ENDPOINT.replace("{id}", id);
 	}
 
@@ -64,6 +68,7 @@ public class CheWorkspaceService {
 	 * @return CheWorkspace created on a Che server from provided JSON request
 	 */
 	public static CheWorkspace createWorkspace(String cheServerURL, String pathToJSON) {
+		logger.info("Creating a new Che workspace on server " + cheServerURL);
 		CheRestClient client = new CheRestClient(cheServerURL);
 		String requestBody = Utils.getTextFromFile(pathToJSON).replaceAll(WS_NAME_VAR, getWorkspaceName());
 		Response response = client.sentRequest(getCreateWorkspaceEndpoint(), RequestType.POST, requestBody);
@@ -84,11 +89,13 @@ public class CheWorkspaceService {
 	 * @param id
 	 */
 	public static void deleteWorkspace(CheWorkspace workspace) {
+		logger.info("Deleting " + workspace);
 		CheRestClient client = new CheRestClient(workspace.getServerURL());
 		client.sentRequest(getWorkspaceEndpoint(workspace.getId()), RequestType.DELETE).close();
 		
 		int counter = 0;
 		int maxCount = Math.round(WAIT_TIME / (SLEEP_TIME_TICK / 1000));
+		logger.info("Waiting for " + WAIT_TIME + " seconds until workspace is deleted from Che server.");
 		while (counter < maxCount && workspaceExists(client, workspace)) {
 			counter++;
 			try {
@@ -98,8 +105,11 @@ public class CheWorkspaceService {
 		}
 
 		if (counter == maxCount && workspaceExists(client, workspace)) {
+			logger.error("Workspace has not been deleted on a server after waiting for " + WAIT_TIME + " seconds");
 			throw new RuntimeException("After waiting for " + WAIT_TIME + " seconds the workspace is still"
 					+ " existing");
+		} else {
+			logger.info("Workspace has been successfully deleted from Che server");
 		}
 	}
 	
@@ -130,6 +140,7 @@ public class CheWorkspaceService {
 	 * @param workspace workspace to start
 	 */
 	public static void startWorkspace(CheWorkspace workspace) {
+		logger.info("Starting " + workspace);
 		operateWorkspaceState(workspace, RequestType.POST, CheWorkspaceStatus.RUNNING.getStatus());
 	}
 	
@@ -139,6 +150,7 @@ public class CheWorkspaceService {
 	 * @param id
 	 */
 	public static void stopWorkspace(CheWorkspace workspace) {
+		logger.info("Stopping " + workspace);
 		operateWorkspaceState(workspace, RequestType.DELETE, CheWorkspaceStatus.STOPPED.getStatus());
 	}
 
@@ -150,6 +162,7 @@ public class CheWorkspaceService {
 	 * @return
 	 */
 	public static String getWorkspaceStatus(CheWorkspace workspace) {
+		logger.info("Getting status of " +workspace);
 		CheRestClient client = new CheRestClient(workspace.getServerURL());
 		return getWorkspaceStatus(client, workspace);
 	}
@@ -166,7 +179,9 @@ public class CheWorkspaceService {
 		client.sentRequest(getWorkspaceRuntimeEndpoint(workspace.getId()), requestType).close();
 		int counter = 0;
 		int maxCount = Math.round(WAIT_TIME / (SLEEP_TIME_TICK / 1000));
-		String currentState = getWorkspaceStatus(client, workspace); // revamp bcs it internaly create another client
+		String currentState = getWorkspaceStatus(client, workspace);
+		logger.info("Waiting for " + WAIT_TIME + " seconds until workspace gets from state "
+				+ currentState + " to state " + resultState);
 		while (counter < maxCount && !resultState.equals(currentState)) {
 			counter++;
 			try {
@@ -177,11 +192,14 @@ public class CheWorkspaceService {
 		}
 		
 		if (counter == maxCount && !resultState.equals(currentState)) {
+			logger.error("Workspace has not successfuly changed its state in required time period of"
+					+ WAIT_TIME + " seconds");
 			throw new RuntimeException("After waiting for " + WAIT_TIME + " seconds the workspace is still"
 					+ " not in state " + resultState);
 		}
 		
 		if (CheWorkspaceStatus.RUNNING.getStatus().equals(currentState)) {
+			logger.info("Settings WS agent URL for workspace");
 			Response response = client.sentRequest(getWorkspaceEndpoint(workspace.getId()), RequestType.GET);
 			Object document = getDocumentFromResponse(response);
 			response.close();
