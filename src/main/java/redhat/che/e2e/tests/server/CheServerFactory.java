@@ -10,13 +10,14 @@
 */
 package redhat.che.e2e.tests.server;
 
+import org.apache.log4j.Logger;
+
 import redhat.che.e2e.tests.ObjectState;
 import redhat.che.e2e.tests.Utils;
 
 public class CheServerFactory {
 
-	//curl -X GET -H "Authorization: Bearer <token>" https://OPENSHIFT_URL:8443/oapi/v1 
-	// --insecure
+	private static final Logger logger = Logger.getLogger(CheServerFactory.class);
 	
 	/**
 	 * Gets a Che server.
@@ -43,9 +44,12 @@ public class CheServerFactory {
 	}
 	
 	private static CheServer getExistingCheServer(String URL) {
+		logger.info("Trying to reach an existing Che server at " + URL);
 		if (Utils.isURLReachable(URL)) {
+			logger.info("Che server is accessible at " + URL);
 			return new CheServer(URL);
 		} 
+		logger.error("Che server is not accessible at " + URL);
 		throw new RuntimeException("Existing Che Server is unreachable");
 	}
 	

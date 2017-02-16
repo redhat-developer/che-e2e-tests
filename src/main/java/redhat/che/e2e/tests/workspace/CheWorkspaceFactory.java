@@ -10,9 +10,13 @@
 */
 package redhat.che.e2e.tests.workspace;
 
+import org.apache.log4j.Logger;
+
 import redhat.che.e2e.tests.ObjectState;
 
 public class CheWorkspaceFactory {
+	
+	private static final Logger logger = Logger.getLogger(CheWorkspaceFactory.class);
 	
 	/**
 	 * Gets a Che workspace.
@@ -25,6 +29,7 @@ public class CheWorkspaceFactory {
 	 */
 	public static CheWorkspace getCheWorkspace(ObjectState state, String... args) {
 		if (ObjectState.CUSTOM.equals(state)) {
+			logger.info("Creating a new Che workspace directly via Che server REST API");
 			if (args.length != 2) {
 				throw new RuntimeException("Insufficient amount of arguments. Pass Che server URL and path to"
 						+ " JSON file with workspace configuration");

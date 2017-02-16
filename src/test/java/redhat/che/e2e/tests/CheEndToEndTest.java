@@ -10,6 +10,7 @@
 */
 package redhat.che.e2e.tests;
 
+import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -33,6 +34,8 @@ import redhat.che.e2e.tests.workspace.CheWorkspaceStatus;
 @RunWith(JUnit4.class)
 public class CheEndToEndTest {
 
+	private static final Logger logger = Logger.getLogger(CheEndToEndTest.class);
+	
 	public static final String CHE_SERVER_PROPERTY_NAME = "cheServerURL";
 	
 	public static final String WORKSPACE_JSON = "src/main/resources/create-ws.json";
@@ -45,9 +48,8 @@ public class CheEndToEndTest {
 	private static CheWorkspace workspace;
 
 	public static void setUpEnvVars() {
-		if (System.getProperty(CHE_SERVER_PROPERTY_NAME) == null) {
-			System.out.println(
-					"cheServerURL property is empty. Setting up default URL for Che server to " + DEFAULT_CHE_URL);
+		if (getCheServerURL() == null) {
+			logger.info("cheServerURL property is empty. Setting up default URL for Che server to " + DEFAULT_CHE_URL);
 			System.setProperty(CHE_SERVER_PROPERTY_NAME, DEFAULT_CHE_URL);
 		}
 	}
@@ -62,15 +64,16 @@ public class CheEndToEndTest {
 	@Test
 	public void testFirstCheScenario() {
 		// First step - getting a Che Server (che-starter)
-		System.out.println("Creating a Che server");
-		CheServerFactory.getCheServer(ObjectState.EXISTING, System.getProperty(CHE_SERVER_PROPERTY_NAME));
-		System.out.println("Che server created");
+		CheServerFactory.getCheServer(ObjectState.EXISTING, getCheServerURL());
 
-		// Second step - create a new workspace (che-starter)
-		System.out.println("Creating a new Che workspace");
+		// Second step, part A - create a new workspace (che-starter)
 		workspace = CheWorkspaceFactory.getCheWorkspace(ObjectState.CUSTOM,
-				System.getProperty(CHE_SERVER_PROPERTY_NAME), WORKSPACE_JSON);
-		System.out.println("Che workspace created");
+				getCheServerURL(), WORKSPACE_JSON);
+		
+		// Second step, part B - importing a project to workspace (che-starter) 
+		logger.info("Deploying a project to workspace " + workspace.getName() + 
+				" accessible at " + workspace.getWorkspaceURL());
+		
 		
 		// TODO Add project to a workspace
 		
@@ -117,6 +120,10 @@ public class CheEndToEndTest {
 		}
 	}
 	
+	private static String getCheServerURL() {
+		return System.getProperty(CHE_SERVER_PROPERTY_NAME);
+	}
+	
 	// DIV ID to whole workspace
 	// codenvyIdeWorkspaceViewImpl
 	
@@ -141,10 +148,10 @@ public class CheEndToEndTest {
 		}
 		if (workspace != null) {
 			if (CheWorkspaceService.getWorkspaceStatus(workspace).equals(CheWorkspaceStatus.RUNNING.getStatus())) {
-				System.out.println("Stopping workspace with ID " + workspace.getId());
+				logger.info("Stopping workspace with ID " + workspace.getId());
 				CheWorkspaceService.stopWorkspace(workspace);
 			}
-			System.out.println("Deleting workspace with ID " + workspace.getId());
+			logger.info("Deleting workspace with ID " + workspace.getId());
 			CheWorkspaceService.deleteWorkspace(workspace);
 		}
 	}

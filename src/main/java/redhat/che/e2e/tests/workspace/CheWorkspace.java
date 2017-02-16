@@ -55,4 +55,9 @@ public class CheWorkspace {
 	public void setWsAgentURL(String wsAgentURL) {
 		this.wsAgentURL = wsAgentURL;
 	}
+	
+	@Override
+	public String toString() {
+		return "workspace " + name + " with ID " + id + " accessible at " + workspaceURL;
+	}
 }
