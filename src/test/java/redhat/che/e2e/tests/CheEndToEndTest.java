@@ -18,75 +18,134 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.junit.runners.MethodSorters;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 import redhat.che.e2e.tests.server.CheServerFactory;
 import redhat.che.e2e.tests.workspace.CheWorkspace;
-import redhat.che.e2e.tests.workspace.CheWorkspaceAPI;
 import redhat.che.e2e.tests.workspace.CheWorkspaceFactory;
+import redhat.che.e2e.tests.workspace.CheWorkspaceService;
+import redhat.che.e2e.tests.workspace.CheWorkspaceStatus;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(JUnit4.class)
 public class CheEndToEndTest {
 
-	public static final String CHE_SERVER_PROP = "cheServerURL";
+	public static final String CHE_SERVER_PROPERTY_NAME = "cheServerURL";
+	
 	public static final String WORKSPACE_JSON = "src/main/resources/create-ws.json";
 
 	public static final String DEFAULT_CHE_URL = "http://demo.che.ci.centos.org";
+
+	private static WebDriver driver;
+	private static ChromeDriverService chromeService;
 	
-	private static String workspaceId; 
-	
+	private static CheWorkspace workspace;
+
 	public static void setUpEnvVars() {
-		if (System.getProperty(CHE_SERVER_PROP) == null) {
-			System.out.println("cheServerURL property is empty. Setting up default URL for Che server to " +
-					DEFAULT_CHE_URL);
-			System.setProperty(CHE_SERVER_PROP, DEFAULT_CHE_URL);
+		if (System.getProperty(CHE_SERVER_PROPERTY_NAME) == null) {
+			System.out.println(
+					"cheServerURL property is empty. Setting up default URL for Che server to " + DEFAULT_CHE_URL);
+			System.setProperty(CHE_SERVER_PROPERTY_NAME, DEFAULT_CHE_URL);
 		}
 	}
 
 	@BeforeClass
 	public static void setUp() {
 		setUpEnvVars();
+		SeleniumProvider.setUpSeleniumChromeDriver();
+		chromeService = SeleniumProvider.startChromeDriverService();
 	}
-	
+
 	@Test
 	public void testFirstCheScenario() {
 		// First step - getting a Che Server (che-starter)
 		System.out.println("Creating a Che server");
-		CheServerFactory.getCheServer(ObjectState.EXISTING, System.getProperty(CHE_SERVER_PROP));
+		CheServerFactory.getCheServer(ObjectState.EXISTING, System.getProperty(CHE_SERVER_PROPERTY_NAME));
+		System.out.println("Che server created");
 
 		// Second step - create a new workspace (che-starter)
 		System.out.println("Creating a new Che workspace");
-		CheWorkspace ws = CheWorkspaceFactory.getCheWorkspace(ObjectState.CUSTOM, 
-				System.getProperty(CHE_SERVER_PROP), WORKSPACE_JSON);
-		workspaceId = ws.getId();
-	
+		workspace = CheWorkspaceFactory.getCheWorkspace(ObjectState.CUSTOM,
+				System.getProperty(CHE_SERVER_PROPERTY_NAME), WORKSPACE_JSON);
+		System.out.println("Che workspace created");
+		
+		// TODO Add project to a workspace
+		
+		// to test workspace via selenium
+		// setWebDriver(URL);
+		// doMagic();
+		// closeWebDriver();
+		
 		// Third step - run a single Test class and check results
 		
-		// Fourth step - open Che workspace and navigate to a project file - NOT a test
-	
-		// Fifth step - do some Bayesian incompatible change, correct it via codeAssist/contextAssist/whatever
-		
+		// Fourth step - open Che workspace and navigate to a project file - NOT
+		// a test
+
+		// Fifth step - do some Bayesian incompatible change, correct it via
+		// codeAssist/contextAssist/whatever
+
 		// Sixth step - commit and push
 	}
-	
+
 	@Test
 	@Ignore("Not implemented yet")
 	public void testSecondCheScenario() {
-		// Che server is already running, or should be from previous step, because of test order
+		// Che server is already running, or should be from previous step,
+		// because of test order
 		// check its existence and proceed
-		
-		// Opens a workspace with opened file on a specific line... - context oriented development
-		
+
+		// Opens a workspace with opened file on a specific line... - context
+		// oriented development
+
 		// Correct file
-		
+
 		// Commit and push
 	}
+
+	private static void setWebDriver(String URL) {
+		DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+		capabilities.setCapability("networkConnectionEnabled", "true");
+		driver = new RemoteWebDriver(chromeService.getUrl(), capabilities);
+	}
 	
+	private static void closeWebDriver() {
+		if (driver != null) {
+			driver.close();
+		}
+	}
+	
+	// DIV ID to whole workspace
+	// codenvyIdeWorkspaceViewImpl
+	
+	// DIV ID to project explorer
+	// gwt-debug-projectTree
+	
+	// Projects have attribute "path" "project" class=GJHBXB5BACB id=gwt-uid-XXX
+	
+	// ID Of Context menu of a project
+	// menu-lock-layer-id
+	
+	// Single class JUnit run context menu item ID
+	// gwt-debug-contextMenu/Test/TestActionRunClassContext
+
 	@AfterClass
 	public static void cleanUp() {
-		System.out.println("Stopping workspace with ID " + workspaceId);
-		CheWorkspaceAPI.stopWorkspace(System.getProperty(CHE_SERVER_PROP), workspaceId);
-		System.out.println("Deleting workspace with ID " + workspaceId);
-		CheWorkspaceAPI.deleteWorkspace(System.getProperty(CHE_SERVER_PROP), workspaceId);
+		if (driver != null) {
+			driver.close();
+		}
+		if (chromeService != null && chromeService.isRunning()) {
+			SeleniumProvider.stopChromeDriverService(chromeService);
+		}
+		if (workspace != null) {
+			if (CheWorkspaceService.getWorkspaceStatus(workspace).equals(CheWorkspaceStatus.RUNNING.getStatus())) {
+				System.out.println("Stopping workspace with ID " + workspace.getId());
+				CheWorkspaceService.stopWorkspace(workspace);
+			}
+			System.out.println("Deleting workspace with ID " + workspace.getId());
+			CheWorkspaceService.deleteWorkspace(workspace);
+		}
 	}
 }

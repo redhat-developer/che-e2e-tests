@@ -21,7 +21,7 @@
     }
   },
   "defaultEnv": "default",
-  "name": "workspace-java",
+  "name": "{workspace.name}",
   "projects": [],
   "description": null,
   "commands": [

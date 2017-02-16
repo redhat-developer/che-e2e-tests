@@ -31,8 +31,8 @@ public class CheWorkspaceFactory {
 			}
 			String cheServerURL = args[0];
 			String pathToJson = args[1];
-			CheWorkspace workspace = CheWorkspaceAPI.createWorkspace(cheServerURL, pathToJson);
-			CheWorkspaceAPI.startWorkspace(cheServerURL, workspace.getId());
+			CheWorkspace workspace = CheWorkspaceService.createWorkspace(cheServerURL, pathToJson);
+			CheWorkspaceService.startWorkspace(workspace);
 			return workspace;
 		} else if (ObjectState.NEW.equals(state)) {
 			///////////////////////////////////

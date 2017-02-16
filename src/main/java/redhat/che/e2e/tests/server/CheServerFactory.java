@@ -10,10 +10,8 @@
 */
 package redhat.che.e2e.tests.server;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 import redhat.che.e2e.tests.ObjectState;
+import redhat.che.e2e.tests.Utils;
 
 public class CheServerFactory {
 
@@ -45,20 +43,11 @@ public class CheServerFactory {
 	}
 	
 	private static CheServer getExistingCheServer(String URL) {
-		if (isServerReachable(URL)) {
+		if (Utils.isURLReachable(URL)) {
 			return new CheServer(URL);
 		} 
 		throw new RuntimeException("Existing Che Server is unreachable");
 	}
 	
-	private static boolean isServerReachable(String URL) {
-        try {
-            HttpURLConnection.setFollowRedirects(false);
-            HttpURLConnection connection = (HttpURLConnection) new URL(URL).openConnection();
-            connection.setRequestMethod("HEAD");
-            return (connection.getResponseCode() == HttpURLConnection.HTTP_OK);
-        } catch (Exception e) {
-            return false;
-        }
-    }
+	
 }
