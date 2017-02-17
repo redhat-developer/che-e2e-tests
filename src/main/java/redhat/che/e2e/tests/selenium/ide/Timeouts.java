@@ -8,26 +8,11 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
 */
-package redhat.che.e2e.tests.workspace;
+package redhat.che.e2e.tests.selenium.ide;
 
-public enum CheWorkspaceStatus {
+public class Timeouts {
 
-	RUNNING("RUNNING"),
-	STOPPED("STOPPED");
-	
-	private String status;
-	
-	private CheWorkspaceStatus(String status) {
-		this.status = status;
-	}
-	
-	public String getStatus() {
-		return status;
-	}
-	
-	@Override
-	public String toString() {
-		return status;
-	}
+	// Timeouts in seconds
+	public static final long REDRAW = 10;
+	public static final long REVALIDATING = 15;
 }
-

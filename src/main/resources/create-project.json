@@ -1,0 +1,19 @@
+[{
+  "name": "vertx-with-che",
+  "type": "maven",
+  "description": "Vertx app on Che",
+  "path": "/vertx-with-che",
+  "source": {
+    "parameters": {
+      "branch": "master",
+      "keepVcs": "true"
+    },
+    "type": "git",
+    "location": "https://github.com/mlabuda/vertx-with-che.git"
+  },
+  "attributes": {},
+  "links": [ { } ],
+  "mixins": [
+    "git"
+  ]
+}]

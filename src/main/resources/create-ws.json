@@ -30,15 +30,12 @@
 		{
 			"commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
 			"name": "build",
-			"type": "mvn"
+			"type": "custom"
 		},
 		{
-			"commandLine": "cd ${current.project.path} && scl enable rh-maven33 'java -jar target/*-fat.jar'",
-			"name": "run",
-			"type": "custom",
-			"attributes": {
-				"previewUrl": "http://${server.port.8080}"
-			}
+			"commandLine": "cd ${current.project.path} && scl enable rh-maven33 'mvn clean verify -f ${current.project.path}''",
+			"name": "verify",
+			"type": "custom"
 		}
 	],
 	"links": []

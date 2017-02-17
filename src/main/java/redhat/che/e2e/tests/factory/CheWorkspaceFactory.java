@@ -8,11 +8,13 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
 */
-package redhat.che.e2e.tests.workspace;
+package redhat.che.e2e.tests.factory;
 
 import org.apache.log4j.Logger;
 
 import redhat.che.e2e.tests.ObjectState;
+import redhat.che.e2e.tests.resource.CheWorkspace;
+import redhat.che.e2e.tests.service.CheWorkspaceService;
 
 public class CheWorkspaceFactory {
 	
