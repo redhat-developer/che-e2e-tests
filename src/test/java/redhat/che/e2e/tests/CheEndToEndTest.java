@@ -41,6 +41,7 @@ public class CheEndToEndTest {
 	private static final Logger logger = Logger.getLogger(CheEndToEndTest.class);
 	
 	public static final String CHE_SERVER_PROPERTY_NAME = "cheServerURL";
+	public static final String PRESERVE_WORKSPACE_PROPERTY_NAME = "preserveWorkspace";
 	
 	public static final String WORKSPACE_JSON = "src/main/resources/create-ws.json";
 	public static final String PROJECT_JSON = "src/main/resources/create-project.json";
@@ -148,6 +149,18 @@ public class CheEndToEndTest {
 		return System.getProperty(CHE_SERVER_PROPERTY_NAME);
 	}
 	
+	private static boolean shouldNotDeleteWorkspace() {
+		String preserveWorkspaceProperty = System.getProperty(PRESERVE_WORKSPACE_PROPERTY_NAME);
+		if (preserveWorkspaceProperty == null) {
+			return false;
+		}
+		if (preserveWorkspaceProperty.toLowerCase().equals("true")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	@AfterClass
 	public static void cleanUp() {
 		if (driver != null) {
@@ -161,13 +174,15 @@ public class CheEndToEndTest {
 		if (chromeService != null && chromeService.isRunning()) {
 			SeleniumProvider.stopChromeDriverService(chromeService);
 		}
-		if (workspace != null) {
+		if (workspace != null && !shouldNotDeleteWorkspace()) {
 			if (CheWorkspaceService.getWorkspaceStatus(workspace).equals(CheWorkspaceStatus.RUNNING.getStatus())) {
 				logger.info("Stopping workspace with ID " + workspace.getId());
 				CheWorkspaceService.stopWorkspace(workspace);
 			}
 			logger.info("Deleting workspace with ID " + workspace.getId());
 			CheWorkspaceService.deleteWorkspace(workspace);
+		} else {
+			logger.info("Property to preserve workspace is set to true, skipping workspace deletion");
 		}
 	}
 }
