@@ -8,22 +8,15 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
 */
-package redhat.che.e2e.tests.server;
+package redhat.che.e2e.tests.selenium.ide;
 
-public class CheServer {
+public class Labels {
 
-	private String URL;
-	
-	/**
-	 * Creates a new Che Server by providing its URL
-	 * 
-	 * @param URL
-	 */
-	public CheServer(String URL) {
-		this.URL = URL;
+	public static class ContextMenuItem {
+		public static final String NEW = "contextMenu/New";
+		public static final String TEST = "contextMenu/Test";
+		public static final String NEW_JAVA_PACKAGE = "contextMenu/New/Java Package";
+		public static final String JUNIT_CLASS = "contextMenu/Test/JUnit Class";
 	}
 	
-	public String getURL() {
-		return URL;
-	}
 }

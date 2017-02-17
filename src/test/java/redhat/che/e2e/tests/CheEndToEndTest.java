@@ -24,11 +24,15 @@ import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import redhat.che.e2e.tests.server.CheServerFactory;
-import redhat.che.e2e.tests.workspace.CheWorkspace;
-import redhat.che.e2e.tests.workspace.CheWorkspaceFactory;
-import redhat.che.e2e.tests.workspace.CheWorkspaceService;
-import redhat.che.e2e.tests.workspace.CheWorkspaceStatus;
+import redhat.che.e2e.tests.factory.CheServerFactory;
+import redhat.che.e2e.tests.factory.CheWorkspaceFactory;
+import redhat.che.e2e.tests.resource.CheWorkspace;
+import redhat.che.e2e.tests.resource.CheWorkspaceStatus;
+import redhat.che.e2e.tests.selenium.SeleniumProvider;
+import redhat.che.e2e.tests.selenium.ide.Labels;
+import redhat.che.e2e.tests.selenium.ide.ProjectExplorer;
+import redhat.che.e2e.tests.service.CheWorkspaceService;
+import redhat.che.e2e.tests.service.ProjectService;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(JUnit4.class)
@@ -39,9 +43,17 @@ public class CheEndToEndTest {
 	public static final String CHE_SERVER_PROPERTY_NAME = "cheServerURL";
 	
 	public static final String WORKSPACE_JSON = "src/main/resources/create-ws.json";
+	public static final String PROJECT_JSON = "src/main/resources/create-project.json";
 
 	public static final String DEFAULT_CHE_URL = "http://demo.che.ci.centos.org";
-
+	public static final String DEFAULT_PROJECT_REPO = "https://github.com/mlabuda/vertx-with-che.git";
+	public static final String DEFAULT_PROJECT_REPO_BRANCH = "master";
+	
+	private static String projectName = "vertx-with-che";
+	private static String testFile = "MainVerticleTest.java";
+	private static String[] pathToTestFile = new String[] 
+			{projectName, "src", "test", "java", "io", "vertx", "starter", testFile};
+	
 	private static WebDriver driver;
 	private static ChromeDriverService chromeService;
 	
@@ -71,18 +83,16 @@ public class CheEndToEndTest {
 				getCheServerURL(), WORKSPACE_JSON);
 		
 		// Second step, part B - importing a project to workspace (che-starter) 
-		logger.info("Deploying a project to workspace " + workspace.getName() + 
-				" accessible at " + workspace.getWorkspaceURL());
+		logger.info("Deploying Vert.x project to workspace " + workspace.getName() + 
+				" accessible at " + workspace.getWorkspaceURL());	
+		ProjectService.createNewProject(workspace, PROJECT_JSON);		
 		
-		
-		// TODO Add project to a workspace
-		
-		// to test workspace via selenium
-		// setWebDriver(URL);
-		// doMagic();
-		// closeWebDriver();
+		// Set web driver at the beginning of all Web UI tests
+		setWebDriver(workspace.getWorkspaceURL());
 		
 		// Third step - run a single Test class and check results
+		logger.info("Running JUnit test class on the project");
+		runProjectOnTest(projectName);
 		
 		// Fourth step - open Che workspace and navigate to a project file - NOT
 		// a test
@@ -91,6 +101,9 @@ public class CheEndToEndTest {
 		// codeAssist/contextAssist/whatever
 
 		// Sixth step - commit and push
+		
+		// Close web driver after all Web UI tests
+		closeWebDriver();
 	}
 
 	@Test
@@ -108,15 +121,26 @@ public class CheEndToEndTest {
 		// Commit and push
 	}
 
+	private static void runProjectOnTest(String projectName) {
+		ProjectExplorer explorer = new ProjectExplorer(driver);
+		explorer.selectItem(pathToTestFile);		
+		explorer.openContextMenuOnItem(pathToTestFile);
+		explorer.selectContextMenuItem(Labels.ContextMenuItem.TEST, Labels.ContextMenuItem.JUNIT_CLASS);
+		
+		// TODO Check results, blocked by not working JUnit test for vert.x Test class (hanging job)
+	}
+	
 	private static void setWebDriver(String URL) {
 		DesiredCapabilities capabilities = DesiredCapabilities.chrome();
 		capabilities.setCapability("networkConnectionEnabled", "true");
 		driver = new RemoteWebDriver(chromeService.getUrl(), capabilities);
+		driver.navigate().to(URL);
 	}
 	
 	private static void closeWebDriver() {
 		if (driver != null) {
-			driver.close();
+			driver.quit();
+			driver = null;
 		}
 	}
 	
@@ -124,24 +148,15 @@ public class CheEndToEndTest {
 		return System.getProperty(CHE_SERVER_PROPERTY_NAME);
 	}
 	
-	// DIV ID to whole workspace
-	// codenvyIdeWorkspaceViewImpl
-	
-	// DIV ID to project explorer
-	// gwt-debug-projectTree
-	
-	// Projects have attribute "path" "project" class=GJHBXB5BACB id=gwt-uid-XXX
-	
-	// ID Of Context menu of a project
-	// menu-lock-layer-id
-	
-	// Single class JUnit run context menu item ID
-	// gwt-debug-contextMenu/Test/TestActionRunClassContext
-
 	@AfterClass
 	public static void cleanUp() {
 		if (driver != null) {
-			driver.close();
+			try {
+				driver.quit();
+			} catch (Exception ex) { 
+				// if something went wrong and driver couldnt quit, mostly bcs it is disposed
+				logger.info("Driver could not be disposed. Probably it is already disposed.");
+			}
 		}
 		if (chromeService != null && chromeService.isRunning()) {
 			SeleniumProvider.stopChromeDriverService(chromeService);

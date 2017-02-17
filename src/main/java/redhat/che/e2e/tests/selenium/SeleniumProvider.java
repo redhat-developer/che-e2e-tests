@@ -8,13 +8,15 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
 */
-package redhat.che.e2e.tests;
+package redhat.che.e2e.tests.selenium;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.chrome.ChromeDriverService;
+
+import redhat.che.e2e.tests.Utils;
 
 public class SeleniumProvider {
 

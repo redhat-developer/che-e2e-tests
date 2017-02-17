@@ -8,12 +8,13 @@
  * Contributors: 
  * Red Hat, Inc. - initial API and implementation 
 */
-package redhat.che.e2e.tests.server;
+package redhat.che.e2e.tests.factory;
 
 import org.apache.log4j.Logger;
 
 import redhat.che.e2e.tests.ObjectState;
 import redhat.che.e2e.tests.Utils;
+import redhat.che.e2e.tests.resource.CheServer;
 
 public class CheServerFactory {
 
