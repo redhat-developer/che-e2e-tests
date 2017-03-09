@@ -14,22 +14,26 @@ public class CheWorkspace {
 	
 	private String id;
 	private String name;
+	private String workspaceIDEURL;
 	private String workspaceURL;
 	private String serverURL;
+	private String workspaceRuntimeURL;
 	private String wsAgentURL;
 	
 	/**
 	 * Creates a new Che workspace.
 	 * @param id id of a workspace
 	 * @param name name of a workspace
-	 * @param workspaceURL workspace IDE URL
-	 * @param serverURL URL of Che server where this workspace belongs to
+	 * @param workspaceIDEURL workspace IDE URL
+	 * @param workspaceURL workspace URL (to get info)
+	 * @param workspaceRuntimeURL workspace runtime URL (to operate states)
 	 */
-	public CheWorkspace(String id, String name, String workspaceURL, String serverURL) {
+	public CheWorkspace(String id, String name, String workspaceIDEURL, String workspaceURL, String workspaceRuntimeURL) {
 		this.id = id;
 		this.name = name;
+		this.workspaceIDEURL = workspaceIDEURL;
+		this.workspaceRuntimeURL = workspaceRuntimeURL;
 		this.workspaceURL = workspaceURL;
-		this.serverURL = serverURL;
 	}
 	
 	public String getId() {
@@ -39,9 +43,21 @@ public class CheWorkspace {
 	public String getName() {
 		return name;
 	}
-
+	
 	public String getWorkspaceURL() {
 		return workspaceURL;
+	}
+	
+	public String getWorkspaceIDEURL() {
+		return workspaceIDEURL;
+	}
+	
+	public String getWorkspaceRuntimeURL() {
+		return workspaceRuntimeURL;
+	}
+	
+	public void setServerURL(String serverURL) {
+		this.serverURL = serverURL;
 	}
 	
 	public String getServerURL() {
@@ -58,6 +74,6 @@ public class CheWorkspace {
 	
 	@Override
 	public String toString() {
-		return "workspace " + name + " with ID " + id + " accessible at " + workspaceURL;
+		return "workspace " + name + " with ID " + id + " accessible at " + workspaceIDEURL;
 	}
 }

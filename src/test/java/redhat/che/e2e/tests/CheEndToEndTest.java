@@ -10,6 +10,8 @@
 */
 package redhat.che.e2e.tests;
 
+import static redhat.che.e2e.tests.Constants.*;
+
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -40,48 +42,54 @@ public class CheEndToEndTest {
 
 	private static final Logger logger = Logger.getLogger(CheEndToEndTest.class);
 	
-	public static final String CHE_SERVER_PROPERTY_NAME = "cheServerURL";
-	public static final String PRESERVE_WORKSPACE_PROPERTY_NAME = "preserveWorkspace";
-	
-	public static final String WORKSPACE_JSON = "src/main/resources/create-ws.json";
-	public static final String PROJECT_JSON = "src/main/resources/create-project.json";
-
-	public static final String DEFAULT_CHE_URL = "http://demo.che.ci.centos.org";
-	public static final String DEFAULT_PROJECT_REPO = "https://github.com/mlabuda/vertx-with-che.git";
-	public static final String DEFAULT_PROJECT_REPO_BRANCH = "master";
-	
-	private static String projectName = "vertx-with-che";
-	private static String testFile = "MainVerticleTest.java";
-	private static String[] pathToTestFile = new String[] 
-			{projectName, "src", "test", "java", "io", "vertx", "starter", testFile};
-	
 	private static WebDriver driver;
 	private static ChromeDriverService chromeService;
 	
 	private static CheWorkspace workspace;
 
-	public static void setUpEnvVars() {
-		if (getCheServerURL() == null) {
-			logger.info("cheServerURL property is empty. Setting up default URL for Che server to " + DEFAULT_CHE_URL);
-			System.setProperty(CHE_SERVER_PROPERTY_NAME, DEFAULT_CHE_URL);
-		}
-	}
-
 	@BeforeClass
 	public static void setUp() {
-		setUpEnvVars();
 		SeleniumProvider.setUpSeleniumChromeDriver();
 		chromeService = SeleniumProvider.startChromeDriverService();
 	}
 
 	@Test
-	public void testFirstCheScenario() {
+	public void testFirstCheScenarioWithCheStarterAndOpenShiftInvolved() {
+		logger.info("Calling che starter to create a new workspace on OpenShift");
+		
+		workspace = CheWorkspaceFactory.getCheWorkspace(ObjectState.NEW, CHE_STARTER_URL,
+				OPENSHIFT_MASTER_URL, OPENSHIFT_TOKEN, CREATE_WORKSPACE_REQUEST_JSON);
+		CheWorkspaceService.waitUntilWorkspaceGetsToState(workspace, CheWorkspaceStatus.RUNNING.getStatus());
+		
+		// Set web driver at the beginning of all Web UI tests
+		setWebDriver(workspace.getWorkspaceIDEURL());
+		
+		// Third step - run a single Test class and check results
+		logger.info("Running JUnit test class on the project");
+		runProjectOnTest(PROJECT_NAME);
+		
+		// Fourth step - open Che workspace and navigate to a project file - NOT
+		// a test
+
+		// Fifth step - do some Bayesian incompatible change, correct it via
+		// codeAssist/contextAssist/whatever
+
+		// Sixth step - commit and push
+		
+		// Close web driver after all Web UI tests
+		closeWebDriver();
+	}
+	
+	@Test
+	@Ignore
+	public void testFirstCheScenarioWithDirectCheServerCalls() {
 		// First step - getting a Che Server (che-starter)
-		CheServerFactory.getCheServer(ObjectState.EXISTING, getCheServerURL());
+		CheServerFactory.getCheServer(ObjectState.EXISTING, CHE_SERVER);
 
 		// Second step, part A - create a new workspace (che-starter)
 		workspace = CheWorkspaceFactory.getCheWorkspace(ObjectState.CUSTOM,
-				getCheServerURL(), WORKSPACE_JSON);
+				CHE_SERVER, WORKSPACE_JSON);
+		CheWorkspaceService.startWorkspace(workspace);
 		
 		// Second step, part B - importing a project to workspace (che-starter) 
 		logger.info("Deploying Vert.x project to workspace " + workspace.getName() + 
@@ -93,7 +101,7 @@ public class CheEndToEndTest {
 		
 		// Third step - run a single Test class and check results
 		logger.info("Running JUnit test class on the project");
-		runProjectOnTest(projectName);
+		runProjectOnTest(PROJECT_NAME);
 		
 		// Fourth step - open Che workspace and navigate to a project file - NOT
 		// a test
@@ -124,8 +132,8 @@ public class CheEndToEndTest {
 
 	private static void runProjectOnTest(String projectName) {
 		ProjectExplorer explorer = new ProjectExplorer(driver);
-		explorer.selectItem(pathToTestFile);		
-		explorer.openContextMenuOnItem(pathToTestFile);
+		explorer.selectItem(PATH_TO_TEST_FILE);		
+		explorer.openContextMenuOnItem(PATH_TO_TEST_FILE);
 		explorer.selectContextMenuItem(Labels.ContextMenuItem.TEST, Labels.ContextMenuItem.JUNIT_CLASS);
 		
 		// TODO Check results, blocked by not working JUnit test for vert.x Test class (hanging job)
@@ -143,10 +151,6 @@ public class CheEndToEndTest {
 			driver.quit();
 			driver = null;
 		}
-	}
-	
-	private static String getCheServerURL() {
-		return System.getProperty(CHE_SERVER_PROPERTY_NAME);
 	}
 	
 	private static boolean shouldNotDeleteWorkspace() {

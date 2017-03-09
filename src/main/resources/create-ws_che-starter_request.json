@@ -1,0 +1,8 @@
+{
+  "branch": "master",
+  "description": "https://github.com/mlabuda/vertx-with-che#master",
+  "id": "vertxstackid13",
+  "name": "vertxstack",
+  "repo": "https://github.com/mlabuda/vertx-with-che.git",
+  "stack": "vert.x"
+}
