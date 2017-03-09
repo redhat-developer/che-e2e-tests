@@ -23,7 +23,7 @@ public abstract class AbstractService {
 	// Wait time in seconds
 	protected static int WAIT_TIME = 300;
 	
-	protected static Object getDocumentFromResponse(Response response) {
+	public static Object getDocumentFromResponse(Response response) {
 		String responseString = null;
 		if (response.isSuccessful()) {
 			try {

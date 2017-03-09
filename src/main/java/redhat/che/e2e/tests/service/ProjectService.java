@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 import okhttp3.Response;
 import redhat.che.e2e.tests.Utils;
 import redhat.che.e2e.tests.resource.CheWorkspace;
-import redhat.che.e2e.tests.rest.CheRestClient;
+import redhat.che.e2e.tests.rest.RestClient;
 import redhat.che.e2e.tests.rest.RequestType;
 
 public class ProjectService extends AbstractService {
@@ -31,7 +31,7 @@ public class ProjectService extends AbstractService {
 	public static void createNewProject(CheWorkspace workspace, String pathToProjectTemplate) {
 		logger.info("Creating new project in workspace with ID " + workspace.getId() + " and name " + workspace.getName() +
 				" from resource " + pathToProjectTemplate);
-		CheRestClient client = new CheRestClient(workspace.getWsAgentURL());
+		RestClient client = new RestClient(workspace.getWsAgentURL());
 		String requestBody = Utils.getTextFromFile(pathToProjectTemplate);
 		Response response = client.sentRequest(getCreateProjectEndpoint(), RequestType.POST, requestBody);
 		if (response.isSuccessful()) {

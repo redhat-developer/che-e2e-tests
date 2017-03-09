@@ -13,7 +13,8 @@ package redhat.che.e2e.tests.resource;
 public enum CheWorkspaceStatus {
 
 	RUNNING("RUNNING"),
-	STOPPED("STOPPED");
+	STOPPED("STOPPED"),
+	STARTING("STARTING");
 	
 	private String status;
 	
