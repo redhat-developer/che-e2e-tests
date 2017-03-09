@@ -10,7 +10,13 @@
 */
 package redhat.che.e2e.tests;
 
-import static redhat.che.e2e.tests.Constants.*;
+import static redhat.che.e2e.tests.Constants.CHE_STARTER_URL;
+import static redhat.che.e2e.tests.Constants.CREATE_WORKSPACE_REQUEST_JSON;
+import static redhat.che.e2e.tests.Constants.OPENSHIFT_MASTER_URL;
+import static redhat.che.e2e.tests.Constants.OPENSHIFT_TOKEN;
+import static redhat.che.e2e.tests.Constants.PATH_TO_TEST_FILE;
+import static redhat.che.e2e.tests.Constants.PRESERVE_WORKSPACE_PROPERTY_NAME;
+import static redhat.che.e2e.tests.Constants.PROJECT_NAME;
 
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
@@ -26,15 +32,13 @@ import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import redhat.che.e2e.tests.factory.CheServerFactory;
-import redhat.che.e2e.tests.factory.CheWorkspaceFactory;
+import redhat.che.e2e.tests.provider.CheWorkspaceProvider;
 import redhat.che.e2e.tests.resource.CheWorkspace;
 import redhat.che.e2e.tests.resource.CheWorkspaceStatus;
 import redhat.che.e2e.tests.selenium.SeleniumProvider;
 import redhat.che.e2e.tests.selenium.ide.Labels;
 import redhat.che.e2e.tests.selenium.ide.ProjectExplorer;
 import redhat.che.e2e.tests.service.CheWorkspaceService;
-import redhat.che.e2e.tests.service.ProjectService;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(JUnit4.class)
@@ -57,47 +61,12 @@ public class CheEndToEndTest {
 	public void testFirstCheScenarioWithCheStarterAndOpenShiftInvolved() {
 		logger.info("Calling che starter to create a new workspace on OpenShift");
 		
-		workspace = CheWorkspaceFactory.getCheWorkspace(ObjectState.NEW, CHE_STARTER_URL,
-				OPENSHIFT_MASTER_URL, OPENSHIFT_TOKEN, CREATE_WORKSPACE_REQUEST_JSON);
+		workspace = CheWorkspaceProvider.createCheWorkspace(CHE_STARTER_URL, OPENSHIFT_MASTER_URL, 
+				OPENSHIFT_TOKEN, CREATE_WORKSPACE_REQUEST_JSON);
 		CheWorkspaceService.waitUntilWorkspaceGetsToState(workspace, CheWorkspaceStatus.RUNNING.getStatus());
 		
 		// Set web driver at the beginning of all Web UI tests
 		setWebDriver(workspace.getWorkspaceIDEURL());
-		
-		// Third step - run a single Test class and check results
-		logger.info("Running JUnit test class on the project");
-		runProjectOnTest(PROJECT_NAME);
-		
-		// Fourth step - open Che workspace and navigate to a project file - NOT
-		// a test
-
-		// Fifth step - do some Bayesian incompatible change, correct it via
-		// codeAssist/contextAssist/whatever
-
-		// Sixth step - commit and push
-		
-		// Close web driver after all Web UI tests
-		closeWebDriver();
-	}
-	
-	@Test
-	@Ignore
-	public void testFirstCheScenarioWithDirectCheServerCalls() {
-		// First step - getting a Che Server (che-starter)
-		CheServerFactory.getCheServer(ObjectState.EXISTING, CHE_SERVER);
-
-		// Second step, part A - create a new workspace (che-starter)
-		workspace = CheWorkspaceFactory.getCheWorkspace(ObjectState.CUSTOM,
-				CHE_SERVER, WORKSPACE_JSON);
-		CheWorkspaceService.startWorkspace(workspace);
-		
-		// Second step, part B - importing a project to workspace (che-starter) 
-		logger.info("Deploying Vert.x project to workspace " + workspace.getName() + 
-				" accessible at " + workspace.getWorkspaceURL());	
-		ProjectService.createNewProject(workspace, PROJECT_JSON);		
-		
-		// Set web driver at the beginning of all Web UI tests
-		setWebDriver(workspace.getWorkspaceURL());
 		
 		// Third step - run a single Test class and check results
 		logger.info("Running JUnit test class on the project");

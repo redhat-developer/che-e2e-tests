@@ -10,55 +10,41 @@
 */
 package redhat.che.e2e.tests.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 
 import okhttp3.Response;
-import redhat.che.e2e.tests.Utils;
 import redhat.che.e2e.tests.resource.CheWorkspace;
 import redhat.che.e2e.tests.resource.CheWorkspaceStatus;
-import redhat.che.e2e.tests.rest.RestClient;
 import redhat.che.e2e.tests.rest.RequestType;
+import redhat.che.e2e.tests.rest.RestClient;
 
-public class CheWorkspaceService extends AbstractService {
+public class CheWorkspaceService {
 
 	private static final Logger logger = Logger.getLogger(CheWorkspaceService.class);
 
-	private static String CREATE_WORKSPACE_ENDPOINT = "/api/workspace";
-	private static String WORKSPACE_ENDPOINT = "/api/workspace/{id}";
+	// Interval between querying
+	private static long SLEEP_TIME_TICK = 2000;
+	// Wait time in seconds
+	private static int WAIT_TIME = 300;
 
-	private static String WS_NAME_VAR = "\\{workspace.name\\}";
-
-	private static String getCreateWorkspaceEndpoint() {
-		return CREATE_WORKSPACE_ENDPOINT;
-	}
-
-	private static String getWorkspaceEndpoint(String id) {
-		return WORKSPACE_ENDPOINT.replace("{id}", id);
-	}
-
-	/**
-	 * Create a new Che workspace on a Che server. Workspace is
-	 * 
-	 * @param cheServerURL
-	 *            URL of Che server
-	 * @param pathToJSON
-	 *            path to workspace JSON request
-	 * @return CheWorkspace created on a Che server from provided JSON request
-	 */
-	public static CheWorkspace createWorkspace(String cheServerURL, String pathToJSON) {
-		logger.info("Creating a new Che workspace on server " + cheServerURL);
-		RestClient client = new RestClient(cheServerURL);
-		String requestBody = Utils.getTextFromFile(pathToJSON).replaceAll(WS_NAME_VAR, getWorkspaceName());
-		Response response = client.sentRequest(getCreateWorkspaceEndpoint(), RequestType.POST, requestBody);
-		Object document = getDocumentFromResponse(response);
-		response.close();
-		CheWorkspace workspace = getWorkspaceFromDocument(document);
-		workspace.setServerURL(cheServerURL);
-		return workspace;
+	public static Object getDocumentFromResponse(Response response) {
+		String responseString = null;
+		if (response.isSuccessful()) {
+			try {
+				responseString = response.body().string();
+			} catch (IOException e) {
+			}
+		}
+		if (responseString == null) {
+			throw new RuntimeException("Something went wrong and response is empty");
+		}
+		return Configuration.defaultConfiguration().jsonProvider().parse(responseString);
 	}
 
 	public static CheWorkspace getWorkspaceFromDocument(Object document) {
@@ -66,20 +52,16 @@ public class CheWorkspaceService extends AbstractService {
 				getWorkspaceURL(document), getWorkspaceRuntime(document));
 	}
 
-	private static String getWorkspaceName() {
-		return "ws" + Long.valueOf(System.currentTimeMillis()).hashCode();
-	}
-
 	/**
 	 * Sent a delete request and wait while workspace is existing.
 	 * 
-	 * @param cheServerURL
-	 * @param id
+	 * @param workspace
+	 *            workspace to delete
 	 */
 	public static void deleteWorkspace(CheWorkspace workspace) {
 		logger.info("Deleting " + workspace);
-		RestClient client = new RestClient(workspace.getServerURL());
-		client.sentRequest(getWorkspaceEndpoint(workspace.getId()), RequestType.DELETE).close();
+		RestClient client = new RestClient(workspace.getWorkspaceURL());
+		client.sentRequest(null, RequestType.DELETE).close();
 
 		int counter = 0;
 		int maxCount = Math.round(WAIT_TIME / (SLEEP_TIME_TICK / 1000));
@@ -99,10 +81,11 @@ public class CheWorkspaceService extends AbstractService {
 		} else {
 			logger.info("Workspace has been successfully deleted from Che server");
 		}
+		client.close();
 	}
 
 	private static boolean workspaceExists(RestClient client, CheWorkspace workspace) {
-		Response response = client.sentRequest(getWorkspaceEndpoint(workspace.getId()), RequestType.GET);
+		Response response = client.sentRequest(workspace.getWorkspaceURL(), RequestType.GET);
 		boolean isSuccessful = response.isSuccessful();
 		response.close();
 		return isSuccessful;
@@ -122,8 +105,8 @@ public class CheWorkspaceService extends AbstractService {
 	/**
 	 * Stops a workspace and wait until it is stopped.
 	 * 
-	 * @param URL
-	 * @param id
+	 * @param workspace
+	 *            workspace to stop
 	 */
 	public static void stopWorkspace(CheWorkspace workspace) {
 		logger.info("Stopping " + workspace);
@@ -133,9 +116,9 @@ public class CheWorkspaceService extends AbstractService {
 	/**
 	 * Gets current status of a workspace.
 	 * 
-	 * @param URL
-	 * @param id
-	 * @return
+	 * @param workspace
+	 *            workspace to get its status
+	 * @return status of workspace
 	 */
 	public static String getWorkspaceStatus(CheWorkspace workspace) {
 		logger.info("Getting status of " + workspace);
@@ -159,18 +142,6 @@ public class CheWorkspaceService extends AbstractService {
 		client.close();
 
 		waitUntilWorkspaceGetsToState(workspace, resultState);
-
-		String currentState = getWorkspaceStatus(workspace);
-		if (CheWorkspaceStatus.RUNNING.getStatus().equals(currentState)) {
-			logger.info("Settings WS agent URL for workspace");
-			client = new RestClient(workspace.getWorkspaceURL());
-			Response response = client.sentRequest(null, RequestType.GET);
-			Object document = getDocumentFromResponse(response);
-			response.close();
-			workspace.setWsAgentURL(getWsAgentURL(document));
-		} else if (CheWorkspaceStatus.STOPPED.getStatus().equals(currentState)) {
-			workspace.setWsAgentURL(null);
-		}
 	}
 
 	public static void waitUntilWorkspaceGetsToState(CheWorkspace workspace, String resultState) {
@@ -210,10 +181,6 @@ public class CheWorkspaceService extends AbstractService {
 	private static String getWorkspaceRuntime(Object jsonDocument) {
 		List<String> wsLinks = JsonPath.read(jsonDocument, "$.links[?(@.rel=='start workspace')].href");
 		return wsLinks.get(0);
-	}
-
-	private static String getWsAgentURL(Object jsonDocument) {
-		return JsonPath.read(jsonDocument, "$.runtime.devMachine.runtime.servers.4401/tcp.url");
 	}
 
 	private static String getWorkspaceId(Object jsonDocument) {

@@ -16,9 +16,7 @@ public class CheWorkspace {
 	private String name;
 	private String workspaceIDEURL;
 	private String workspaceURL;
-	private String serverURL;
 	private String workspaceRuntimeURL;
-	private String wsAgentURL;
 	
 	/**
 	 * Creates a new Che workspace.
@@ -54,22 +52,6 @@ public class CheWorkspace {
 	
 	public String getWorkspaceRuntimeURL() {
 		return workspaceRuntimeURL;
-	}
-	
-	public void setServerURL(String serverURL) {
-		this.serverURL = serverURL;
-	}
-	
-	public String getServerURL() {
-		return serverURL;
-	}
-	
-	public String getWsAgentURL() {
-		return wsAgentURL;
-	}
-	
-	public void setWsAgentURL(String wsAgentURL) {
-		this.wsAgentURL = wsAgentURL;
 	}
 	
 	@Override
