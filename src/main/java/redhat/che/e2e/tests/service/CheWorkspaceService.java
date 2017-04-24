@@ -18,8 +18,10 @@ import org.apache.log4j.Logger;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 
+import net.minidev.json.JSONArray;
 import okhttp3.Response;
 import redhat.che.e2e.tests.resource.CheWorkspace;
+import redhat.che.e2e.tests.resource.CheWorkspaceLink;
 import redhat.che.e2e.tests.resource.CheWorkspaceStatus;
 import redhat.che.e2e.tests.rest.RequestType;
 import redhat.che.e2e.tests.rest.RestClient;
@@ -32,7 +34,7 @@ public class CheWorkspaceService {
 	private static long SLEEP_TIME_TICK = 2000;
 	// Wait time in seconds
 	private static int WAIT_TIME = 300;
-
+	
 	public static Object getDocumentFromResponse(Response response) {
 		String responseString = null;
 		if (response.isSuccessful()) {
@@ -47,9 +49,8 @@ public class CheWorkspaceService {
 		return Configuration.defaultConfiguration().jsonProvider().parse(responseString);
 	}
 
-	public static CheWorkspace getWorkspaceFromDocument(Object document) {
-		return new CheWorkspace(getWorkspaceId(document), getWorkspaceName(document), getWorkspaceIDEURL(document),
-				getWorkspaceURL(document), getWorkspaceRuntime(document));
+	public static CheWorkspaceLink getWorkspaceURLFromDocument(Object document) {
+		return new CheWorkspaceLink(getWorkspaceIDEURL(document));
 	}
 
 	/**
@@ -168,27 +169,24 @@ public class CheWorkspaceService {
 		}
 	}
 
+	public static String getWorkspaceRuntimeURL(CheWorkspaceLink workspaceIDELink, Object jsonDocument) {
+	    String workspacePath = "$[?(@.links[?(@.href=='" + workspaceIDELink.getURL() + "')])]";
+	    String linkPath = "$..links[?(@.rel=='start workspace')].href";
+	    List<String> wsLinks= JsonPath.read(jsonDocument, workspacePath);
+	    JSONArray jsonArray = (JSONArray) JsonPath.read(wsLinks.toString(), linkPath);
+	    return jsonArray.get(0).toString();
+	}
+	
+	public static String getWorkspaceURL(CheWorkspaceLink workspaceIDELink, Object jsonDocument) {
+	    String workspacePath = "$[?(@.links[?(@.href=='" + workspaceIDELink.getURL() + "')])]";
+        String linkPath = "$..links[?(@.rel=='self link')].href";
+        List<String> wsLinks= JsonPath.read(jsonDocument, workspacePath);
+        JSONArray jsonArray = (JSONArray) JsonPath.read(wsLinks.toString(), linkPath);
+        return jsonArray.get(0).toString();
+	}
+	
 	private static String getWorkspaceIDEURL(Object jsonDocument) {
-		List<String> wsLinks = JsonPath.read(jsonDocument, "$.links[?(@.rel=='ide url')].href");
-		return wsLinks.get(0);
-	}
-
-	private static String getWorkspaceURL(Object jsonDocument) {
-		List<String> wsLinks = JsonPath.read(jsonDocument, "$.links[?(@.rel=='self link')].href");
-		return wsLinks.get(0);
-	}
-
-	private static String getWorkspaceRuntime(Object jsonDocument) {
-		List<String> wsLinks = JsonPath.read(jsonDocument, "$.links[?(@.rel=='start workspace')].href");
-		return wsLinks.get(0);
-	}
-
-	private static String getWorkspaceId(Object jsonDocument) {
-		return JsonPath.read(jsonDocument, "$.id");
-	}
-
-	private static String getWorkspaceName(Object jsonDocument) {
-		return JsonPath.read(jsonDocument, "$.config.name");
+		return JsonPath.read(jsonDocument, "$.href");
 	}
 
 	private static String getWorkspaceStatus(Object jsonDocument) {

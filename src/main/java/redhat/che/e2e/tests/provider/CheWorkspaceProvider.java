@@ -13,6 +13,7 @@ package redhat.che.e2e.tests.provider;
 import okhttp3.Response;
 import redhat.che.e2e.tests.Utils;
 import redhat.che.e2e.tests.resource.CheWorkspace;
+import redhat.che.e2e.tests.resource.CheWorkspaceLink;
 import redhat.che.e2e.tests.rest.QueryParam;
 import redhat.che.e2e.tests.rest.RequestType;
 import redhat.che.e2e.tests.rest.RestClient;
@@ -29,14 +30,41 @@ public class CheWorkspaceProvider {
 	 * @param pathToJson  path to a json file containing workspace definition for REST call of Che starter
 	 * @return Che workspace
 	 */
-	public static CheWorkspace createCheWorkspace(String cheStarterURL, String openShiftMasterURL, String openShiftToken, String pathToJson) {
+	public static CheWorkspaceLink createCheWorkspace(String cheStarterURL, String openShiftMasterURL, String keycloakToken,
+	            String pathToJson, String namespace) {
+	    
 			String json = Utils.getTextFromFile(pathToJson);
 			json = json.replaceAll("\\{ws.id\\}", "workspace" + System.currentTimeMillis());
 			RestClient client = new RestClient(cheStarterURL);
-			Response response = client.sentRequest("/workspace", RequestType.POST, json, openShiftToken,
-					new QueryParam("masterUrl", openShiftMasterURL));
-			CheWorkspace workspace = CheWorkspaceService.getWorkspaceFromDocument(CheWorkspaceService.getDocumentFromResponse(response));
+			Response response = client.sentRequest("/workspace/oso", RequestType.POST, json, keycloakToken,
+					new QueryParam("masterUrl", openShiftMasterURL), new QueryParam("namespace", namespace));
+			Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
 			response.close();
-			return workspace;
+			client.close();
+			return CheWorkspaceService.getWorkspaceURLFromDocument(jsonDocument);
+	}
+	
+	/**
+	 * Gets CheWorkspace containing several links (self, runtime, IDE).
+	 * 
+	 * @param cheStarterURL che starter URL
+	 * @param openShiftMasterURL OpenShift master URL
+	 * @param keycloakToken keycloak token
+	 * @param namespace OpenShift namespace
+	 * @param workspaceLink workspace IDE link
+	 * @return CheWorkspace instance with several links inside
+	 */
+	public static CheWorkspace getWorkspaceByLink(String cheStarterURL, String openShiftMasterURL, String keycloakToken, 
+	        String namespace, CheWorkspaceLink workspaceLink) {
+	    
+	    RestClient client = new RestClient(cheStarterURL);
+	    Response response = client.sentRequest("/workspace/oso", RequestType.GET, null, keycloakToken,
+	            new QueryParam("masterUrl", openShiftMasterURL), new QueryParam("namespace", namespace));
+	    Object json = CheWorkspaceService.getDocumentFromResponse(response);
+	    response.close();
+	    client.close();
+	    String runtimeURL = CheWorkspaceService.getWorkspaceRuntimeURL(workspaceLink, json);
+	    String workspaceURL = CheWorkspaceService.getWorkspaceURL(workspaceLink, json);
+	    return new CheWorkspace(workspaceLink.getURL(), workspaceURL, runtimeURL);
 	}
 }

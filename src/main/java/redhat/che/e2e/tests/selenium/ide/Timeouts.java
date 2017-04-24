@@ -13,6 +13,6 @@ package redhat.che.e2e.tests.selenium.ide;
 public class Timeouts {
 
 	// Timeouts in seconds
-	public static final long REDRAW = 10;
-	public static final long REVALIDATING = 15;
+	public static final long REDRAW = 20;
+	public static final long REVALIDATING = 30;
 }

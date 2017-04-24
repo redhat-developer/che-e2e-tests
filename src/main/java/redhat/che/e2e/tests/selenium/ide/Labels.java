@@ -14,9 +14,9 @@ public class Labels {
 
 	public static class ContextMenuItem {
 		public static final String NEW = "contextMenu/New";
-		public static final String TEST = "contextMenu/Test";
+		public static final String TEST = "contextMenu/Run Test";
 		public static final String NEW_JAVA_PACKAGE = "contextMenu/New/Java Package";
-		public static final String JUNIT_CLASS = "contextMenu/Test/JUnit Class";
+		public static final String JUNIT_CLASS = "contextMenu/Run Test/JUnit Class";
 	}
 	
 }

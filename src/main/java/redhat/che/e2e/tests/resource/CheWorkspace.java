@@ -11,39 +11,26 @@
 package redhat.che.e2e.tests.resource;
 
 public class CheWorkspace {
-	
-	private String id;
-	private String name;
+
 	private String workspaceIDEURL;
 	private String workspaceURL;
 	private String workspaceRuntimeURL;
 	
 	/**
 	 * Creates a new Che workspace.
-	 * @param id id of a workspace
-	 * @param name name of a workspace
+	 * 
 	 * @param workspaceIDEURL workspace IDE URL
-	 * @param workspaceURL workspace URL (to get info)
+	 * @param workspaceURL self link
 	 * @param workspaceRuntimeURL workspace runtime URL (to operate states)
 	 */
-	public CheWorkspace(String id, String name, String workspaceIDEURL, String workspaceURL, String workspaceRuntimeURL) {
-		this.id = id;
-		this.name = name;
+	public CheWorkspace(String workspaceIDEURL, String workspaceURL, String workspaceRuntimeURL) {
 		this.workspaceIDEURL = workspaceIDEURL;
-		this.workspaceRuntimeURL = workspaceRuntimeURL;
 		this.workspaceURL = workspaceURL;
+		this.workspaceRuntimeURL = workspaceRuntimeURL;
 	}
-	
-	public String getId() {
-		return id;
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
+
 	public String getWorkspaceURL() {
-		return workspaceURL;
+	    return workspaceURL;
 	}
 	
 	public String getWorkspaceIDEURL() {
@@ -56,6 +43,6 @@ public class CheWorkspace {
 	
 	@Override
 	public String toString() {
-		return "workspace " + name + " with ID " + id + " accessible at " + workspaceIDEURL;
+		return "workspace accessible at " + workspaceIDEURL;
 	}
 }

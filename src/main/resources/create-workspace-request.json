@@ -1,8 +1,6 @@
 {
   "branch": "master",
-  "description": "https://github.com/mlabuda/vertx-with-che#master",
-  "id": "{ws.id}",
-  "name": "vertxstack",
-  "repo": "https://github.com/mlabuda/vertx-with-che.git",
-  "stack": "vert.x"
+  "description": "mycustomdescription",
+  "repo": "https://github.com/openshiftio-vertx-boosters/vertx-http-booster",
+  "stackId": "vert.x"
 }
