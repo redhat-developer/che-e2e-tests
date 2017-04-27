@@ -15,6 +15,7 @@ public class Constants {
 	public static final String CHE_STARTER_PROPERTY_NAME = "cheStarterURL";
 	public static final String OPENSHIFT_MASTER_URL_PROPERTY_NAME = "openShiftMasterURL";
 	public static final String KEYCLOAK_TOKEN_PROPERTY_NAME = "keycloakToken";
+	public static final String OPENSHIFT_TOKEN_PROPERTY_NAME = "openShiftToken";
 	public static final String PRESERVE_WORKSPACE_PROPERTY_NAME = "preserveWorkspace";
 	public static final String OPENSHIFT_NAMESPACE_PROPERTY_NAME = "openShiftNamespace";
 	
@@ -23,13 +24,14 @@ public class Constants {
 	public static final String CHE_STARTER_URL = getProperty(CHE_STARTER_PROPERTY_NAME, null);
 	public static final String OPENSHIFT_MASTER_URL = getProperty(OPENSHIFT_MASTER_URL_PROPERTY_NAME, null);
 	public static final String KEYCLOAK_TOKEN = getProperty(KEYCLOAK_TOKEN_PROPERTY_NAME, null);
+	public static final String OPENSHIFT_TOKEN = getProperty(OPENSHIFT_TOKEN_PROPERTY_NAME, null);
 	public static final String OPENSHIFT_NAMESPACE = getProperty(OPENSHIFT_NAMESPACE_PROPERTY_NAME, "eclipse-che");
 	public static final String PROJECT_REPO = "https://github.com/openshiftio-vertx-boosters/vertx-http-booster";
 	public static final String PROJECT_REPO_BRANCH = "master";
 	public static final String PROJECT_NAME = "vertx-http-booster";
 	public static final String TEST_FILE = "HttpApplicationTest.java";
-	public static final String[] PATH_TO_TEST_FILE = new String[] { PROJECT_NAME, "src", "test", "java",
-	        "io/openshift/booster", TEST_FILE };
+	public static final String[] PATH_TO_TEST_FILE = new String[] { "src", "test", "java",
+	        "booster", TEST_FILE };
 
 	// Path to resources
 	public static final String CREATE_WORKSPACE_REQUEST_JSON = "src/main/resources/create-workspace-request.json";

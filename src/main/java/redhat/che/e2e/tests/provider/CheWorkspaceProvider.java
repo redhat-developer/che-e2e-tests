@@ -19,27 +19,62 @@ import redhat.che.e2e.tests.rest.RestClient;
 import redhat.che.e2e.tests.service.CheWorkspaceService;
 
 public class CheWorkspaceProvider {
-	
-	/**
-	 * Creates a new workspace via che-starter
-	 * 
-	 * @param cheStarterURL URL of Che starter
-	 * @param openShiftMasterURL URL of OpenShift server where Che server is running in users namespace
-	 * @param openShiftToken OpenShift auth token
-	 * @param pathToJson  path to a json file containing workspace definition for REST call of Che starter
-	 * @return Che workspace
-	 */
-	public static CheWorkspace createCheWorkspace(String cheStarterURL, String openShiftMasterURL, String keycloakToken,
-	            String pathToJson, String namespace) {
-	    
-			String json = Utils.getTextFromFile(pathToJson);
-			json = json.replaceAll("\\{ws.id\\}", "workspace" + System.currentTimeMillis());
-			RestClient client = new RestClient(cheStarterURL);
-			Response response = client.sentRequest("/workspace/oso", RequestType.POST, json, keycloakToken,
-					new QueryParam("masterUrl", openShiftMasterURL), new QueryParam("namespace", namespace));
-			Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
-			response.close();
-			client.close();
-			return CheWorkspaceService.getWorkspaceFromDocument(jsonDocument);
-	}
+
+    /**
+     * Creates a new workspace via che-starter
+     * 
+     * @param cheStarterURL
+     *            URL of Che starter
+     * @param openShiftMasterURL
+     *            URL of OpenShift server where Che server is running in user's
+     *            namespace
+     * @param openShiftToken
+     *            OpenShift auth token
+     * @param pathToJson
+     *            path to json of workspace create params
+     * @param namespace
+     *            namespace
+     * @return Che workspace
+     */
+    public static CheWorkspace createCheWorkspaceOSO(String cheStarterURL, String openShiftMasterURL,
+            String openshiftToken, String pathToJson, String namespace) {
+
+        return createWorkspace(cheStarterURL, openShiftMasterURL, openshiftToken, pathToJson, namespace, "/workspace/oso");
+    }
+
+    /**
+     * Creates Che workspace on a server in users namespace on OpenShift. Uses
+     * keycloak endpoint
+     * 
+     * @param cheStarterURL
+     *            URL of Che starter
+     * @param openShiftMasterURL
+     *            URL of OpenShift server where Che server is running in user's
+     *            namespace
+     * @param keyCloakToken
+     *            keycloak token
+     * @param pathToJson
+     *            path to json of workspace create params
+     * @param namespace
+     *            namespace
+     * @return Che workspace
+     */
+    public static CheWorkspace createCheWorkspace(String cheStarterURL, String openShiftMasterURL, String keyCloakToken,
+            String pathToJson, String namespace) {
+        
+        return createWorkspace(cheStarterURL, openShiftMasterURL, keyCloakToken, pathToJson, namespace, "/workspace");
+    }
+    
+    private static CheWorkspace createWorkspace(String cheStarterURL, String openShiftMasterURL, String token,
+            String pathToJson, String namespace, String path) {
+        
+        String json = Utils.getTextFromFile(pathToJson);
+        RestClient client = new RestClient(cheStarterURL);
+        Response response = client.sentRequest(path, RequestType.POST, json, token,
+                new QueryParam("masterUrl", openShiftMasterURL), new QueryParam("namespace", namespace));
+        Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
+        response.close();
+        client.close();
+        return CheWorkspaceService.getWorkspaceFromDocument(jsonDocument);
+    }
 }

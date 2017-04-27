@@ -1,6 +1,6 @@
 {
-  "branch": "master",
+  "branch": "test-branch",
   "description": "mycustomdescription",
-  "repo": "https://github.com/openshiftio-vertx-boosters/vertx-http-booster",
+  "repo": "https://github.com/dev-test-user/vertx-http-booster",
   "stackId": "vert.x"
 }
