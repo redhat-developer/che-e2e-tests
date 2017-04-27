@@ -12,9 +12,9 @@ package redhat.che.e2e.tests;
 
 import static redhat.che.e2e.tests.Constants.CHE_STARTER_URL;
 import static redhat.che.e2e.tests.Constants.CREATE_WORKSPACE_REQUEST_JSON;
+import static redhat.che.e2e.tests.Constants.KEYCLOAK_TOKEN;
 import static redhat.che.e2e.tests.Constants.OPENSHIFT_MASTER_URL;
 import static redhat.che.e2e.tests.Constants.OPENSHIFT_NAMESPACE;
-import static redhat.che.e2e.tests.Constants.KEYCLOAK_TOKEN;
 import static redhat.che.e2e.tests.Constants.PATH_TO_TEST_FILE;
 import static redhat.che.e2e.tests.Constants.PRESERVE_WORKSPACE_PROPERTY_NAME;
 import static redhat.che.e2e.tests.Constants.PROJECT_NAME;
@@ -34,7 +34,6 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 import redhat.che.e2e.tests.provider.CheWorkspaceProvider;
 import redhat.che.e2e.tests.resource.CheWorkspace;
-import redhat.che.e2e.tests.resource.CheWorkspaceLink;
 import redhat.che.e2e.tests.resource.CheWorkspaceStatus;
 import redhat.che.e2e.tests.selenium.SeleniumProvider;
 import redhat.che.e2e.tests.selenium.ide.Labels;
@@ -52,7 +51,6 @@ public class CheEndToEndTest {
 	private static WebDriver driver;
 	private static ChromeDriverService chromeService;
 	
-	private static CheWorkspaceLink workspaceLink;
 	private static CheWorkspace workspace;
 
 	@BeforeClass
@@ -65,17 +63,15 @@ public class CheEndToEndTest {
 	public void testCreateWorkspaceAndHandleProject() {
 		logger.info("Calling che starter to create a new workspace on OpenShift");
 		
-		workspaceLink = CheWorkspaceProvider.createCheWorkspace(CHE_STARTER_URL, OPENSHIFT_MASTER_URL, 
+		workspace = CheWorkspaceProvider.createCheWorkspace(CHE_STARTER_URL, OPENSHIFT_MASTER_URL, 
 				KEYCLOAK_TOKEN, CREATE_WORKSPACE_REQUEST_JSON, OPENSHIFT_NAMESPACE);
 		logger.info("Workspace successfully created.");
-		workspace = CheWorkspaceProvider.getWorkspaceByLink(CHE_STARTER_URL, OPENSHIFT_MASTER_URL,
-		        KEYCLOAK_TOKEN, OPENSHIFT_NAMESPACE, workspaceLink);
 		
 		logger.info("Waiting until workspace starts");
 		CheWorkspaceService.waitUntilWorkspaceGetsToState(workspace, CheWorkspaceStatus.RUNNING.getStatus());
 		
 		// Set web driver at the beginning of all Web UI tests
-		setWebDriver(workspaceLink.getURL());
+		setWebDriver(workspace.getIdeLink());
 		
 		// Running single JUnit Class
 		logger.info("Running JUnit test class on the project");

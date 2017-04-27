@@ -12,37 +12,49 @@ package redhat.che.e2e.tests.resource;
 
 public class CheWorkspace {
 
-	private String workspaceIDEURL;
-	private String workspaceURL;
-	private String workspaceRuntimeURL;
+	private String ideLink;
+	private String selfLink;
+	private String runtimeLink;
 	
 	/**
-	 * Creates a new Che workspace.
+	 * Creates a new Che workspace containing links to various endpoints.
 	 * 
-	 * @param workspaceIDEURL workspace IDE URL
-	 * @param workspaceURL self link
-	 * @param workspaceRuntimeURL workspace runtime URL (to operate states)
+	 * @param ideLink
+	 * @param selfLink
+	 * @param runtimeLink
 	 */
-	public CheWorkspace(String workspaceIDEURL, String workspaceURL, String workspaceRuntimeURL) {
-		this.workspaceIDEURL = workspaceIDEURL;
-		this.workspaceURL = workspaceURL;
-		this.workspaceRuntimeURL = workspaceRuntimeURL;
+	public CheWorkspace(String ideLink, String selfLink, String runtimeLink) {
+	   this.ideLink = ideLink;
+	   this.selfLink = selfLink;
+	   this.runtimeLink = runtimeLink;
 	}
+	
+	public String getIdeLink() {
+        return ideLink;
+    }
 
-	public String getWorkspaceURL() {
-	    return workspaceURL;
-	}
-	
-	public String getWorkspaceIDEURL() {
-		return workspaceIDEURL;
-	}
-	
-	public String getWorkspaceRuntimeURL() {
-		return workspaceRuntimeURL;
-	}
-	
-	@Override
+    public void setIdeLink(String ideLink) {
+        this.ideLink = ideLink;
+    }
+
+    public String getSelfLink() {
+        return selfLink;
+    }
+
+    public void setSelfLink(String selfLink) {
+        this.selfLink = selfLink;
+    }
+
+    public String getRuntimeLink() {
+        return runtimeLink;
+    }
+
+    public void setRuntimeLink(String runtimeLink) {
+        this.runtimeLink = runtimeLink;
+    }
+
+    @Override
 	public String toString() {
-		return "workspace accessible at " + workspaceIDEURL;
+		return "workspace accessible at " + ideLink;
 	}
 }

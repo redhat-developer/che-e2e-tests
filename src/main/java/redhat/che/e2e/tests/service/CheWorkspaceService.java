@@ -21,7 +21,6 @@ import com.jayway.jsonpath.JsonPath;
 import net.minidev.json.JSONArray;
 import okhttp3.Response;
 import redhat.che.e2e.tests.resource.CheWorkspace;
-import redhat.che.e2e.tests.resource.CheWorkspaceLink;
 import redhat.che.e2e.tests.resource.CheWorkspaceStatus;
 import redhat.che.e2e.tests.rest.RequestType;
 import redhat.che.e2e.tests.rest.RestClient;
@@ -49,8 +48,9 @@ public class CheWorkspaceService {
 		return Configuration.defaultConfiguration().jsonProvider().parse(responseString);
 	}
 
-	public static CheWorkspaceLink getWorkspaceURLFromDocument(Object document) {
-		return new CheWorkspaceLink(getWorkspaceIDEURL(document));
+	public static CheWorkspace getWorkspaceFromDocument(Object jsonDocument) {
+		return new CheWorkspace(getWorkspaceIDELink(jsonDocument), getWorkspaceSelfLink(jsonDocument),
+		        getWorkspaceRuntimeLink(jsonDocument));
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class CheWorkspaceService {
 	 */
 	public static void deleteWorkspace(CheWorkspace workspace) {
 		logger.info("Deleting " + workspace);
-		RestClient client = new RestClient(workspace.getWorkspaceURL());
+		RestClient client = new RestClient(workspace.getSelfLink());
 		client.sentRequest(null, RequestType.DELETE).close();
 
 		int counter = 0;
@@ -86,7 +86,7 @@ public class CheWorkspaceService {
 	}
 
 	private static boolean workspaceExists(RestClient client, CheWorkspace workspace) {
-		Response response = client.sentRequest(workspace.getWorkspaceURL(), RequestType.GET);
+		Response response = client.sentRequest(workspace.getSelfLink(), RequestType.GET);
 		boolean isSuccessful = response.isSuccessful();
 		response.close();
 		return isSuccessful;
@@ -123,7 +123,7 @@ public class CheWorkspaceService {
 	 */
 	public static String getWorkspaceStatus(CheWorkspace workspace) {
 		logger.info("Getting status of " + workspace);
-		RestClient client = new RestClient(workspace.getWorkspaceURL());
+		RestClient client = new RestClient(workspace.getSelfLink());
 		String status = getWorkspaceStatus(client, workspace);
 		client.close();
 		return status;
@@ -138,7 +138,7 @@ public class CheWorkspaceService {
 	}
 
 	private static void operateWorkspaceState(CheWorkspace workspace, RequestType requestType, String resultState) {
-		RestClient client = new RestClient(workspace.getWorkspaceRuntimeURL());
+		RestClient client = new RestClient(workspace.getRuntimeLink());
 		client.sentRequest(null, requestType).close();
 		client.close();
 
@@ -146,7 +146,7 @@ public class CheWorkspaceService {
 	}
 
 	public static void waitUntilWorkspaceGetsToState(CheWorkspace workspace, String resultState) {
-		RestClient client = new RestClient(workspace.getWorkspaceURL());
+		RestClient client = new RestClient(workspace.getSelfLink());
 		int counter = 0;
 		int maxCount = Math.round(WAIT_TIME / (SLEEP_TIME_TICK / 1000));
 		String currentState = getWorkspaceStatus(client, workspace);
@@ -168,28 +168,27 @@ public class CheWorkspaceService {
 					+ " not in state " + resultState);
 		}
 	}
-
-	public static String getWorkspaceRuntimeURL(CheWorkspaceLink workspaceIDELink, Object jsonDocument) {
-	    String workspacePath = "$[?(@.links[?(@.href=='" + workspaceIDELink.getURL() + "')])]";
-	    String linkPath = "$..links[?(@.rel=='start workspace')].href";
-	    List<String> wsLinks= JsonPath.read(jsonDocument, workspacePath);
-	    JSONArray jsonArray = (JSONArray) JsonPath.read(wsLinks.toString(), linkPath);
-	    return jsonArray.get(0).toString();
+	
+	public static String getWorkspaceRuntimeLink(Object jsonDocument) {
+	    return getLinkHref(jsonDocument, "start workspace");
 	}
 	
-	public static String getWorkspaceURL(CheWorkspaceLink workspaceIDELink, Object jsonDocument) {
-	    String workspacePath = "$[?(@.links[?(@.href=='" + workspaceIDELink.getURL() + "')])]";
-        String linkPath = "$..links[?(@.rel=='self link')].href";
-        List<String> wsLinks= JsonPath.read(jsonDocument, workspacePath);
-        JSONArray jsonArray = (JSONArray) JsonPath.read(wsLinks.toString(), linkPath);
-        return jsonArray.get(0).toString();
+	
+	public static String getWorkspaceSelfLink(Object jsonDocument) {
+	    return getLinkHref(jsonDocument, "self link");
 	}
 	
-	private static String getWorkspaceIDEURL(Object jsonDocument) {
-		return JsonPath.read(jsonDocument, "$.href");
+	public static String getWorkspaceIDELink(Object jsonDocument) {
+		return getLinkHref(jsonDocument, "ide url");
 	}
 
 	private static String getWorkspaceStatus(Object jsonDocument) {
 		return JsonPath.read(jsonDocument, "$.status");
 	}
+
+    private static String getLinkHref(Object workspaceDocument, String rel) {
+        String linkPath = "$..links[?(@.rel=='" + rel + "')].href";
+        List<String> wsLinks= JsonPath.read(workspaceDocument, linkPath);
+        return wsLinks.get(0).toString();
+    }
 }
