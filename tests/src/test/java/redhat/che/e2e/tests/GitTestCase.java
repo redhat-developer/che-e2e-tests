@@ -27,7 +27,6 @@ import static redhat.che.e2e.tests.fragments.BottomInfoPanel.TabNames.TAB_GIT_CO
 @RunWith(Arquillian.class)
 public class GitTestCase extends AbstractCheEndToEndTest {
 
-
     @Drone
     private WebDriver driver;
 

@@ -12,10 +12,10 @@ import redhat.che.e2e.tests.utils.ActionUtils;
 public class PopupMenu {
 
     @Drone
-    private WebDriver driver;
+    protected WebDriver driver;
 
     @Root
-    private WebElement menuLockLayerRoot;
+    protected WebElement menuLockLayerRoot;
 
     protected void click(WebElement element) {
         ActionUtils.click(driver, element);
