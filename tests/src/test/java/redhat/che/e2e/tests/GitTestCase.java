@@ -74,8 +74,7 @@ public class GitTestCase extends AbstractCheEndToEndTest {
     public void test_change_file_and_add_into_index() {
         //openBrowser(driver);
 
-        projectTree.expandProjectRoot();
-        projectTree.openReadme();
+        project.getResource("README.md").open();
         editorPart.tabsPanel().waitUntilFocusedTabHasName("README.md");
         editorPart.codeEditor().writeIntoTextViewContent("\n changes added on: " + new Date());
 

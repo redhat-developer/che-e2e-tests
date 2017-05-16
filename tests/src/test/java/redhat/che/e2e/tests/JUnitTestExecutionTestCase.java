@@ -1,6 +1,5 @@
 package redhat.che.e2e.tests;
 
-import static redhat.che.e2e.tests.utils.Constants.PROJECT_NAME;
 import static redhat.che.e2e.tests.utils.Constants.TEST_FILE;
 
 import org.jboss.arquillian.drone.api.annotation.Drone;
@@ -14,6 +13,7 @@ import org.openqa.selenium.support.FindBy;
 
 import redhat.che.e2e.tests.fragments.ContextMenu;
 import redhat.che.e2e.tests.fragments.Popup;
+import redhat.che.e2e.tests.fragments.ProjectItem;
 import redhat.che.e2e.tests.fragments.TestResultsView;
 
 @RunWith(Arquillian.class)
@@ -36,9 +36,9 @@ public class JUnitTestExecutionTestCase extends AbstractCheEndToEndTest {
     public void test_run_junit_test_and_verify_popup_window() {
         openBrowser(driver);
 
-        projectTree.openFolder(PROJECT_NAME).openFolder("src").openFolder("test").openFolder("java")
-                .openFolder("booster");
-        projectTree.openContextMenu(TEST_FILE);
+        ProjectItem testFile = project.getResource("src").getResource("test").getResource("java").getResource("io/openshift/booster")
+            .getResource(TEST_FILE);
+        testFile.openContextMenu();
 
         contextMenu.selectRunJUnitClassTest();
 

@@ -19,7 +19,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.e2e.tests.fragments.EditorPart;
-import redhat.che.e2e.tests.fragments.ProjectTree;
+import redhat.che.e2e.tests.fragments.Project;
 
 import static org.jboss.arquillian.graphene.Graphene.waitModel;
 import static redhat.che.e2e.tests.utils.Constants.OSIO_PASSWORD;
@@ -30,7 +30,7 @@ import static redhat.che.e2e.tests.utils.Constants.PROJECT_NAME;
 public abstract class AbstractCheEndToEndTest {
 
     @FindByJQuery("#gwt-debug-projectTree > div:contains('" + PROJECT_NAME + "'):first")
-    protected ProjectTree projectTree;
+    protected Project project;
 
     @FindBy(id = "gwt-debug-editorMultiPartStack-contentPanel")
     protected EditorPart editorPart;
