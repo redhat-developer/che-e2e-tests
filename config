@@ -1,0 +1,2 @@
+export OSO_MASTER_URL=https://api.starter-us-east-2.openshift.com:443
+export OSO_NAMESPACE=mlabuda-che
