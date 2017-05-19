@@ -3,27 +3,15 @@
 LOGFILE=$(pwd)/functional_tests.log
 echo Using logfile $LOGFILE
 
-# Start che starter
-set +x
-git clone https://github.com/redhat-developer/che-starter
-cd che-starter
-mvn clean install -DskipTests
-nohup java -jar target/che-starter-1.0-SNAPSHOT.jar &
-
 # Run tests
 echo Running tests...
-cat ~/payload/jenkins-env | grep KEYCLOAK > ~/.ee_test_params
+set +x
+cat ~/payload/jenkins-env | grep -E "KEYCLOAK|OSIO" > ~/.ee_test_params
 cat ~/che/config >> ~/.ee_test_params
 . ~/.ee_test_params
 cd ~/che
-mvn clean verify -DopenShiftMasterURL=$OSO_MASTER_URL -DkeycloakToken=$KEYCLOAK_TOKEN -DopenShiftNamespace=$OSO_NAMESPACE -DcheStarterURL=http://localhost:10000
+mvn clean verify -DopenShiftMasterURL=$OSO_MASTER_URL -DkeycloakToken=$KEYCLOAK_TOKEN -DopenShiftNamespace=$OSO_NAMESPACE -DosioUsername=$OSIO_USERNAME -DosioPassword=$OSIO_PASSWORD
 TEST_RESULT=$?
-
-# Kill che starter
-CHE_STARTER_PID=$(jps | grep che-starter-1.0-SNAPSHOT.jar | cut -d" " -f1)
-if [[ ! -z "${CHE_STARTER_PID}" ]]; then
-  kill -9 ${CHE_STARTER_PID}
-fi;
 set -x
 
 # Return test result
