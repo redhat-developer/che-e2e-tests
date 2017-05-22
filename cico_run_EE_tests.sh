@@ -25,10 +25,14 @@ yum -y install \
   git
 service docker start
 
+# Set scripts executable
+chmod +x run_EE_tests.sh
+chmod +x docker-entrypoint.sh
+
 # Build EE test image
 cp /tmp/jenkins-env .
 docker build -t che-selenium .
-mkdir -p dist && docker run --detach=true --name=che-selenium --user=root --cap-add=SYS_ADMIN -e "CI=true" -t -v $(pwd)/dist:/dist:Z che-selenium
+mkdir -p dist && docker run --detach=true --name=che-selenium -e "CI=true" -t -v $(pwd)/dist:/dist:Z che-selenium
 
 ## Exec EE tests
 docker exec che-selenium ./run_EE_tests.sh
