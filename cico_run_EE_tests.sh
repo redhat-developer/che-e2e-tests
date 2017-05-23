@@ -32,7 +32,7 @@ chmod +x docker-entrypoint.sh
 # Build EE test image
 cp /tmp/jenkins-env .
 docker build -t che-selenium .
-mkdir -p dist && docker run --detach=true --name=che-selenium -e "CI=true" -t -v $(pwd)/dist:/dist:Z che-selenium
+mkdir -p dist && docker run --detach=true --name=che-selenium --user=fabric8 -t -v $(pwd)/dist:/dist:Z che-selenium
 
 ## Exec EE tests
 docker exec che-selenium ./run_EE_tests.sh

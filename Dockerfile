@@ -26,7 +26,7 @@ RUN chown -R ${FABRIC8_USER_NAME}:${FABRIC8_USER_NAME} $HOME/*
 
 USER ${FABRIC8_USER_NAME}
 WORKDIR $WORKSPACE/
-RUN chmod +x /home/fabric8/che/docker-entrypoint.sh
+RUN chmod +rx /home/fabric8/che/docker-entrypoint.sh
 
 VOLUME /dist
 
