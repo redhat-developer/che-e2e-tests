@@ -6,7 +6,7 @@ set -x
 set -e
 
 cat jenkins-env \
-    | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId|OSIO|KEYCLOAK)=" \
+    | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId)=" \
     | sed 's/^/export /g' \
     > /tmp/jenkins-env
 source /tmp/jenkins-env
@@ -21,12 +21,24 @@ yum -y install \
   git
 service docker start
 
+# Fetch PR and rebase on master
+git fetch origin pull/${ghprbPullId}/head:${ghprbSourceBranch}
+git checkout ${ghprbSourceBranch}
+git rebase master
+
+# Set credentials
+set +x
+echo 'export OSIO_USERNAME='${OSIO_USERNAME} >> ./env-vars
+echo 'export OSIO_PASSWORD='${OSIO_PASSWORD} >> ./env-vars
+echo 'export KEYCLOAK_TOKEN='${KEYCLOAK_TOKEN} >> ./env-vars
+set -x
+
 # Set scripts executable
 chmod +x run_EE_tests.sh
 chmod +x docker-entrypoint.sh
 
 # Build EE test image
-cp /tmp/jenkins-env ./env-vars
+cat /tmp/jenkins-env >> ./env-vars
 docker build -t che-selenium .
 mkdir -p dist && docker run --detach=true --name=che-selenium --user=fabric8 -t -v $(pwd)/dist:/dist:Z che-selenium
 
