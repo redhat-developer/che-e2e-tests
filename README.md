@@ -3,7 +3,7 @@ Che end-to-end tests verify capabilities of che-starter and Che IDE.
 
 ## Prerequisites
 - Running Che server on an OpenShift with properly set up Che server. That means the Che server is running with configuration compatible with the runtime configuration of the running Che starter
-- Che starter - It is not necessary having it running - if you don't specify any URL where Che starter is available, then it will be automatically cloned from GH and started.
+- Che starter - It is not necessary having it running - if you don't specify any URL where Che starter is available, then it will be automatically cloned from GH and started. You just have to install and provide certificate file for kubernetes client via propperty _kubernetes.certs.ca.file_
 
 ## Test execution
 Run `mvn clean verify` with arguments listed below to run all tests.
