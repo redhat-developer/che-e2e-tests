@@ -24,7 +24,8 @@ service docker start
 # Fetch PR and rebase on master
 git fetch origin pull/${ghprbPullId}/head:${ghprbSourceBranch}
 git checkout ${ghprbSourceBranch}
-git rebase master
+git fetch origin master
+git rebase FETCH_HEAD
 
 # Set credentials
 set +x
