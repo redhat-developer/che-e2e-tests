@@ -34,8 +34,17 @@ cat jenkins-env \
     | sed 's/^/export /g' \
     > credential_file
 source credential_file
-if [[ -z ${OSIO_USERNAME} ]] || [[ -z ${OSIO_PASSWORD} ]] || [[ -z ${KEYCLOAK_TOKEN} ]]; then
-  echo 'OpenShift username or OpenShift password or Keycloak token variable is not set'
+if [[ -z "${OSIO_USERNAME}" ]]; then
+  empty_credentials="OSIO username is empty, "
+fi 
+if [[ -z "${OSIO_PASSWORD}" ]]; then
+  empty_credentials=${empty_credentials}"OSIO password is empty, "
+fi
+if [[ -z "${KEYCLOAK_TOKEN}" ]]; then
+  empty_credentials=${empty_credentials}"Keycloak token is empty"
+fi
+if [[ ! -z "${empty_credentials}" ]]; then
+  echo ${empty_credentials}
   exit 1
 else
   echo 'OpenShift username and password and Keycloak token are not empty. Proceeding with EE tests.'
