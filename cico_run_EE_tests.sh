@@ -6,7 +6,7 @@ set -x
 set -e
 
 cat jenkins-env \
-    | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId)=" \
+    | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId|OSIO_*|KEYCLOAK_TOKEN)=" \
     | sed 's/^/export /g' \
     > /tmp/jenkins-env
 source /tmp/jenkins-env
@@ -72,5 +72,3 @@ docker exec che-selenium cat ./functional_tests.log
 ## Test results to archive
 docker cp che-selenium:/home/fabric8/che/tests/target/ .
 docker cp che-selenium:/home/fabric8/che/functional_tests.log target
-
-
