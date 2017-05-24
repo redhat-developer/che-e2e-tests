@@ -84,7 +84,7 @@ public class CheExtensionConfiguration {
     }
 
     public String getKeycloakToken() {
-        return keycloakToken;
+        return "Bearer " + keycloakToken;
     }
 
     public void setKeycloakToken(String keycloakToken) {

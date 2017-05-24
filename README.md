@@ -12,7 +12,7 @@ Run `mvn clean verify` with arguments listed below to run all tests.
 - _cheStarterURL_ - **required**; URL of Che starter which is called to handle Che
 - _openShiftMasterURL_ - **required**; URL of OpenShift master which is passed to Che starter
 - _openShiftToken_ - **required if keycloakToken not present**; token to authenticate to OpenShift
-- _keycloakToken_ - **required if openShiftToken not present**; token to authenticate via keycloak
+- _keycloakToken_ - **required if openShiftToken not present**; token to authenticate via keycloak, without Bearer prefix
 - _openShiftNamespace_ - **optional**, default 'eclipse-che'; namespace on OpenShift where Che is running
 
 Alternatively, you can run tests against an existing Che workspace using its URL

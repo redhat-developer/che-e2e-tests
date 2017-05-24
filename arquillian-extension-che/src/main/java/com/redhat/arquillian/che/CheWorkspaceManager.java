@@ -6,6 +6,7 @@ import com.redhat.arquillian.che.resource.CheWorkspace;
 import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.service.CheWorkspaceService;
 import java.io.File;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.apache.log4j.Logger;
@@ -84,18 +85,25 @@ public class CheWorkspaceManager {
                 .call();
 
             logger.info("Running che starter.");
+            Properties props = new Properties();
+            props.setProperty("OPENSHIFT_TOKEN_URL", "https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token");
+            props.setProperty("GITHUB_TOKEN_URL", "https://sso.openshift.io/auth/realms/fabric8/broker/github/token");
+            props.setProperty("KUBERNETES_CERTS_CA_FILE", System.getProperty("kubernetes.certs.ca.file"));
+            props.setProperty("osio.domain.name", "api.starter-us-east-2.openshift.com");
+            props.setProperty("oso.address", "api.starter-us-east-2.openshift.com");
             EmbeddedMaven
                 .forProject(cheStarterDir.getAbsolutePath() + File.separator + "pom.xml")
                 .useMaven3Version("3.5.0")
                 .setGoals("spring-boot:run")
+                .setProperties(props)
                 .useAsDaemon()
-                .withWaitUntilOutputLineMathes(".*Started Application in.*", 50, TimeUnit.SECONDS)
+                .withWaitUntilOutputLineMathes(".*Started Application in.*", 300, TimeUnit.SECONDS)
                 .build();
 
         } catch (GitAPIException e) {
             throw new IllegalStateException("There was a problem with getting the git che-starter repository", e);
         } catch (TimeoutException e) {
-            throw new IllegalStateException("The che-starter haven't started within 50 seconds.", e);
+            throw new IllegalStateException("The che-starter haven't started within 300 seconds.", e);
         }
     }
 
