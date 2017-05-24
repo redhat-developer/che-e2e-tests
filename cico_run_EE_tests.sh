@@ -30,7 +30,7 @@ git rebase FETCH_HEAD
 # Set credentials
 set +x
 cat jenkins-env \
-    | grep -E "(OSIO|KEYCLOAK)=" \
+    | grep -E "(OSIO|KEYCLOAK)" \
     | sed 's/^/export /g' \
     > credential_file
 source credential_file
