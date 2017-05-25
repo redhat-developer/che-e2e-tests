@@ -124,7 +124,7 @@ public class CheExtensionConfiguration {
     }
 
     public String getAuthorizationToken() {
-        return isNotEmpty(keycloakToken) ? keycloakToken : openshiftToken;
+        return isNotEmpty(keycloakToken) ? getKeycloakToken() : openshiftToken;
     }
 
     public String getOsioUsername() {

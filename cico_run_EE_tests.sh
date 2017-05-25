@@ -73,11 +73,4 @@ mkdir -p dist && docker run --detach=true --name=che-selenium --user=fabric8 -t 
 ## Exec EE tests
 docker exec che-selenium ./run_EE_tests.sh
 
-## cat the test log to stdout
-docker exec che-selenium cat ./functional_tests.log
-
-## Test results to archive
-docker cp che-selenium:/home/fabric8/che/tests/target/ .
-docker cp che-selenium:/home/fabric8/che/functional_tests.log target
-
 

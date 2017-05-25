@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
 
-LOGFILE=$(pwd)/functional_tests.log
-echo Using logfile $LOGFILE
-
 # Run tests
 echo Running tests...
 set +x
 source ~/che/config
 source ~/che/env-vars
 source ~/che/init_certs.sh
-
 cd ~/che
+export DISPLAY=:99
 mvn clean verify -DopenShiftMasterURL=$OSO_MASTER_URL -DkeycloakToken=$KEYCLOAK_TOKEN -DopenShiftNamespace=$OSO_NAMESPACE -DosioUsername=$OSIO_USERNAME -DosioPassword=$OSIO_PASSWORD -Dkubernetes.certs.ca.file=$KUBERNETES_CERTS_CA_FILE
 TEST_RESULT=$?
 set -x
