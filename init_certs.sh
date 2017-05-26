@@ -2,7 +2,7 @@
 
 export OSO_ADDRESS=api.starter-us-east-2.openshift.com
 export OSO_DOMAIN_NAME=api.starter-us-east-2.openshift.com
-export KUBERNETES_CERTS_CA_FILE=$(cd ; pwd)"/api.starter-us-east-2.openshift.com.cer"
+export KUBERNETES_CERTS_CA_FILE="/home/fabric8/che/api.starter-us-east-2.openshift.com.cer"
 
 echo "Downloading and compiling certs installation"
 git clone https://github.com/almighty/InstallCert.git
