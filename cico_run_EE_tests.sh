@@ -6,7 +6,7 @@ set -x
 set -e
 
 cat jenkins-env \
-    | grep -E "(JENKINS_URL|GIT_BRANCH|GIT_COMMIT|BUILD_NUMBER|ghprbSourceBranch|ghprbActualCommit|BUILD_URL|ghprbPullId)=" \
+    | grep -E "(ghprbSourceBranch|ghprbPullId)=" \
     | sed 's/^/export /g' \
     > /tmp/jenkins-env
 source /tmp/jenkins-env

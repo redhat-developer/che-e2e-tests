@@ -13,7 +13,7 @@
   </extension>
 
   <extension qualifier="graphene">
-    <property name="waitGuiInterval">5</property>
+    <property name="waitGuiInterval">10</property>
     <property name="waitAjaxInterval">15</property>
     <property name="waitModelInterval">30</property>
   </extension>
