@@ -1,2 +1,6 @@
 export OSO_MASTER_URL=https://api.starter-us-east-2.openshift.com:443
 export OSO_NAMESPACE=mlabuda-che
+export OSO_USER=mlabuda
+export OSO_DOMAIN=8a09.starter-us-east-2.openshiftapps.com
+export OSO_HOSTNAME=mlabuda-che.8a09.starter-us-east-2.openshiftapps.com
+export CHE_SERVER_DOCKER_IMAGE_TAG=0ae26d7-fabric8-3a6c3dc

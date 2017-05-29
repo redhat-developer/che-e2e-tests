@@ -61,6 +61,9 @@ echo 'export OSIO_PASSWORD='${OSIO_PASSWORD} >> ./env-vars
 echo 'export KEYCLOAK_TOKEN='${KEYCLOAK_TOKEN} >> ./env-vars
 set -x
 
+# Update tenant
+source update_tenant.sh
+
 # Set scripts executable
 chmod +x run_EE_tests.sh
 chmod +x docker-entrypoint.sh
