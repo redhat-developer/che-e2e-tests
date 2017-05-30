@@ -97,7 +97,7 @@ public class CheWorkspaceManager {
                 .setGoals("spring-boot:run")
                 .setProperties(props)
                 .useAsDaemon()
-                .withWaitUntilOutputLineMathes(".*Started Application in.*", 300, TimeUnit.SECONDS)
+                .withWaitUntilOutputLineMathes(".*Started Application in.*", 10, TimeUnit.MINUTES)
                 .build();
 
         } catch (GitAPIException e) {
