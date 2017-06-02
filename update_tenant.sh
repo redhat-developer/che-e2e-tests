@@ -30,9 +30,9 @@ oc apply -f -
 ## Check status of deployment
 che_server_status=$(oc get pods | awk '{ if ($1 ~ /che-[0-9]+-.*/ && $1 !~ /che-[0-9]+-deploy/) print $3 }')
 counter=0
-timeout=360
+timeout=480
 echo "Checking state of Che server pod for ${timeout} seconds"
-# Wait up to 6 minutes for running Che pod
+# Wait up to 8 minutes for running Che pod
 set +x
 while [ "${che_server_status}" != "Running" ]; do
     che_server_status=$(oc get pods | awk '{ if ($1 ~ /che-[0-9]+-.*/ && $1 !~ /che-[0-9]+-deploy/) print $3 }')
