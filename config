@@ -3,4 +3,5 @@ export OSO_NAMESPACE=mlabuda-che
 export OSO_USER=mlabuda
 export OSO_DOMAIN=8a09.starter-us-east-2.openshiftapps.com
 export OSO_HOSTNAME=mlabuda-che.8a09.starter-us-east-2.openshiftapps.com
-export CHE_SERVER_DOCKER_IMAGE_TAG=0ae26d7-fabric8-3a6c3dc
+export CHE_SERVER_DOCKER_IMAGE_TAG=798ec38-fabric8-a65eae2
+export DOCKER_HUB_NAMESPACE=rhche/che-server
