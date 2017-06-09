@@ -22,25 +22,28 @@ set +x
 oc login ${OSO_MASTER_URL} --token=${OSO_TOKEN}
 set -x
 oc project ${OSO_NAMESPACE}
+CURRENT_DC_REVISION=$(oc get dc/che -o=custom-columns=NAME:.status.latestVersion --no-headers)
+NEXT_DC_REVISION=$((CURRENT_DC_REVISION+1))
+DOCKER_HUB_NAMESPACE_SANITIZED=${DOCKER_HUB_NAMESPACE/\//\\\/}
 current_tag=$(oc get dc/che -o yaml | grep 'image:' | cut -d: -f 3)
 if [[ "${current_tag}" != "${CHE_SERVER_DOCKER_IMAGE_TAG}" ]]; then
   echo "Updating Che server"
   echo "Getting version of OSIO and applying template"
   curl -sSL http://central.maven.org/maven2/io/fabric8/online/apps/che/${OSIO_VERSION}/che-${OSIO_VERSION}-openshift.yml | \
       sed "s/    hostname-http:.*/    hostname-http: ${OSO_HOSTNAME}/" | \
-      sed "s/          image:.*/          image: rhche\/che-server:${CHE_SERVER_DOCKER_IMAGE_TAG}/" | \
+      sed "s/          image:.*/          image: ${DOCKER_HUB_NAMESPACE_SANITIZED}:${CHE_SERVER_DOCKER_IMAGE_TAG}/" | \
   oc apply --force=true -f -
   sleep 10
 
   ## Check status of deployment
-  che_server_status=$(oc -n ${OSO_NAMESPACE} get pods | awk '{ if ($1 ~ /che-[0-9]+-.*/ && $1 !~ /che-[0-9]+-deploy/) print $3 }')
+  che_server_status=$(oc get pods | grep che-${NEXT_DC_REVISION} | grep -v che-${NEXT_DC_REVISION}-deploy | awk '{print $3}')
   counter=0
   timeout=360
   echo "Checking state of Che server pod for ${timeout} seconds"
   # Wait up to 6 minutes for running Che pod
   set +x
   while [ "${che_server_status}" != "Running" ]; do
-      che_server_status=$(oc -n ${OSO_NAMESPACE} get pods | awk '{ if ($1 ~ /che-[0-9]+-.*/ && $1 !~ /che-[0-9]+-deploy/) print $3 }')
+      che_server_status=$(oc get pods | grep che-${NEXT_DC_REVISION} | grep -v che-${NEXT_DC_REVISION}-deploy | awk '{print $3}')
       counter=$((counter+1))
       if [ $counter -gt $timeout ]; then
 	  set -x

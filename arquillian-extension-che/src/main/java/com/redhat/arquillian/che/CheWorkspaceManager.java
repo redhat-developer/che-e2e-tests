@@ -88,7 +88,6 @@ public class CheWorkspaceManager {
             Properties props = new Properties();
             props.setProperty("OPENSHIFT_TOKEN_URL", "https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token");
             props.setProperty("GITHUB_TOKEN_URL", "https://sso.openshift.io/auth/realms/fabric8/broker/github/token");
-            props.setProperty("KUBERNETES_CERTS_CA_FILE", System.getProperty("kubernetes.certs.ca.file"));
             props.setProperty("osio.domain.name", "api.starter-us-east-2.openshift.com");
             props.setProperty("oso.address", "api.starter-us-east-2.openshift.com");
             EmbeddedMaven
