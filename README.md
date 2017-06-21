@@ -37,5 +37,3 @@ All before-mentioned properties are possible to set using `arquillian.xml` file.
   ...
 </arquillian>
 ~~~
-
-
