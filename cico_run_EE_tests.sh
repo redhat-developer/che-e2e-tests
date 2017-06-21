@@ -21,10 +21,9 @@ source config
 # Update tenant
 source update_tenant.sh
 
-# Build tests image and run it
+# Run test image
 cat /tmp/jenkins-env >> ./env-vars
-docker build -t che-selenium .
-mkdir -p dist && docker run --detach=true --user=root --cap-add SYS_ADMIN --name=che-selenium -t -v $(pwd)/dist:/dist:Z che-selenium
+docker run --detach=true --user=root --cap-add SYS_ADMIN --name=che-selenium -t -v $(pwd):/home/fabric8/che mlabuda/che-selenium:170621
 
 ## Exec tests
 docker exec --user=fabric8 che-selenium ./run_EE_tests.sh
