@@ -21,14 +21,12 @@ ENV HOME=/home/${FABRIC8_USER_NAME}
 ENV WORKSPACE=$HOME/che
 RUN mkdir $WORKSPACE
 
-COPY . $WORKSPACE
+COPY ./docker-entrypoint.sh $WORKSPACE/
 RUN chown -R ${FABRIC8_USER_NAME}:${FABRIC8_USER_NAME} $HOME/*
 
 USER ${FABRIC8_USER_NAME}
 WORKDIR $WORKSPACE/
 
 RUN rm /home/fabric8/.pki -rf
-
-VOLUME /dist
 
 ENTRYPOINT ["/home/fabric8/che/docker-entrypoint.sh"]
