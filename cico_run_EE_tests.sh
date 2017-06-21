@@ -23,7 +23,7 @@ source update_tenant.sh
 
 # Run test image
 cat /tmp/jenkins-env >> ./env-vars
-docker run --detach=true --user=root --cap-add SYS_ADMIN --name=che-selenium -t -v $(pwd):/home/fabric8/che mlabuda/che-selenium:170621
+docker run --detach=true --user=fabric8 --cap-add SYS_ADMIN --name=che-selenium -t -v $(pwd):/home/fabric8/che mlabuda/che-selenium:170621
 
 ## Exec tests
 docker exec --user=fabric8 che-selenium ./run_EE_tests.sh
