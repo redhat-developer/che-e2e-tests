@@ -18,7 +18,7 @@ cat jenkins-env \
     | sed 's/^/export /g' \
     > /tmp/jenkins-env
 source /tmp/jenkins-env
-if [[ ! -z "${ghprbPullId}" ]] && [[ ! -z "${ghprbSourceBranch}" ]]; then
+if [[ ! -z "${ghprbPullId:-}" ]] && [[ ! -z "${ghprbSourceBranch:-}" ]]; then
   echo 'Checking out to Github PR branch'
   git fetch origin pull/${ghprbPullId}/head:${ghprbSourceBranch}
   git checkout ${ghprbSourceBranch}
