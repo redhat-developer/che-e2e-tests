@@ -127,10 +127,13 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
         select(okButton);
         waitModel().until().element(closeButton).is().visible();
 
-        //waiting for deleting command
+        //wait for deleting command
         try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
+            //if deleting last long time, deleting loader is shown
+            waitModel().until().element(deletingLoader).is().visible();
+            waitModel().until().element(deletingLoader).is().not().visible();
+        } catch(Exception e){
+            //if element is not found, deleting was quick and element was not shown
         }
 
     }
