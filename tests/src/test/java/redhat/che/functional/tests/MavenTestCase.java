@@ -5,6 +5,7 @@ import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
@@ -126,9 +127,11 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
         select(okButton);
         waitModel().until().element(closeButton).is().visible();
 
-        //wait for deleting command
-        waitModel().until().element(deletingLoader).is().visible();
-        waitModel().until().element(deletingLoader).is().not().visible();
+        //waiting for deleting command
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
 
     }
 
