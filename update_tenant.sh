@@ -1,5 +1,34 @@
 #!/bin/bash
 
+server_runs() {
+  server_log=$(oc -n ${OSO_NAMESPACE} logs dc/che 2> /dev/null)
+  if [[ $(echo "${server_log}" | grep -E 'Server startup in [0-9]*' | wc -l) -ne 1 ]]; then
+    echo "false" 
+  else
+    echo "true"
+  fi
+}
+
+# Wait up to 3 minute for running Che server in pod 
+wait_for_che_server_deployment() {
+  counter=0
+  timeout=180
+  echo "Waiting until Che server in Che pod is running."
+  set +x
+  while [[ $(server_runs) == "false" ]]; do
+      counter=$((counter+1))
+      if [ $counter -gt $timeout ]; then
+	  set -x
+          echo "Server log does not contain information about server startup. Timeouted after ${timeout} seconds."
+          exit 1
+      fi
+      sleep 1
+  done
+  set -x
+  echo "Che server is running."
+}
+
+
 yum install -y centos-release-openshift-origin epel-release
 yum install -y origin-clients jq
 
@@ -54,24 +83,14 @@ if [[ "${current_tag}" != "${CHE_SERVER_DOCKER_IMAGE_TAG}" ]]; then
   done
   set -x
   echo "Che pod is running."
-  server_log=$(oc -n ${OSO_NAMESPACE} logs dc/che)
-  counter=0
-  timeout=180
-  echo "Checking whether a Che server in Che pod has already started."
-  set +x
-  # Wait up to 3 minute for running Che server in pod 
-  while [[ $(echo "${server_log}" | grep "Server startup in" | wc -l) -ne 1 ]]; do
-      server_log=$(oc -n ${OSO_NAMESPACE} logs dc/che)
-      counter=$((counter+1))
-      if [ $counter -gt $timeout ]; then
-	  set -x
-          echo "Server log does not contain information about server startup. Timeouted after ${timeout} seconds."
-          exit 1
-      fi
-      sleep 1
-  done
-  set -x
-  echo "Che server is running."
+  
+  wait_for_che_server_deployment
 else
-  echo "Che server already has specified tag, skipping Che server update"
+  echo "Che server already has specified tag, skipping Che server update and checking whether Che server runs."
+  current_replicas=$(oc get dc/che | awk 'NR>1 { print $3 }')
+  if [[ "${current_replicas}" == "0" ]]; then
+    echo "Che server is not running, scaling Che server to 1 pod."
+    oc scale dc/che --replicas=1
+    wait_for_che_server_deployment
+  fi
 fi
