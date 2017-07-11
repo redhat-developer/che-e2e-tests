@@ -13,6 +13,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
+import redhat.che.functional.tests.fragments.CommandsManagerDialog;
+import redhat.che.functional.tests.fragments.ToolbarDebugPanel;
+import redhat.che.functional.tests.fragments.popup.DropDownMenu;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -26,26 +29,8 @@ import static org.jboss.arquillian.graphene.Graphene.waitModel;
 
 @RunWith(Arquillian.class)
 public class MavenTestCase extends AbstractCheFunctionalTest{
-    @Drone
-    private WebDriver driver;
-
-    @FindBy(id="CommandsGroup/build")
-    private WebElement build;
-
-    @FindBy(id = "CommandsGroup/Edit Commands...")
-    private WebElement editCommands;
-
-    @FindByJQuery("#gwt-debug-categoryHeader-custom > span > span > span:gt(1)")
-    private WebElement customPlus;
-
-    @FindBy(id = "gwt-debug-arbitraryPageView-cmdLine")
-    private WebElement commandInput;
-
-    @FindBy(id = "window-edit-commands-save")
-    private WebElement saveButton;
-
-    @FindBy(id = "window-edit-commands-close")
-    private WebElement closeButton;
+    @FindBy(id="gwt-debug-toolbarPanel")
+    private ToolbarDebugPanel debugPanel;
 
     @FindByJQuery(".GJHBXB5BHDB tr[id*='" + testName + "'] td:gt(0)")
     private WebElement buildOption;
@@ -53,93 +38,52 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     @FindBy(id="gwt-debug-ActionButton/executeSelectedCommand-true")
     private WebElement runCommand;
 
-    @FindByJQuery("input:text[class=gwt-TextBox]")
-    private WebElement nameInput;
-
-    @FindBy(id = "gwt-debug-projectTree")
-    private WebElement project;
-
-    @FindByJQuery("div[id='gwt-debug-categoryHeader-custom'] ~ div > div:contains('" + testName + "')")
-    private WebElement rowToDelete;
-
-    @FindByJQuery("div[id='gwt-debug-categoryHeader-custom'] ~ div > div:contains('" + testName + "') > span > span")
-    private WebElement rowToDeleteMinus;
-
-    @FindBy(id = "ask-dialog-ok")
-    private WebElement okButton;
-
     @FindByJQuery("pre:contains('Total time')")
     private WebElement consoleEnds;
 
     @FindByJQuery("pre:contains('BUILD SUCCESS')")
     private WebElement buildSuccess;
 
-    @FindByJQuery("div:contains('Deleting command')")
-    private WebElement deletingLoader;
+    //verified
+    @FindBy(id = "menu-lock-layer-id")
+    private DropDownMenu dropDownMenu;
+
+    @FindByJQuery("div#commandsManagerView")
+    private CommandsManagerDialog commandsManagerDialog;
 
     private final String testName = "buildTest";
+    private final String command = "cd ${current.project.path} && scl enable rh-maven33 'mvn clean install'";
 
+    /**
+     * Tries to build project.
+     */
     @Test
     @InSequence(1)
     public void test_maven_build() {
         openBrowser(driver);
-
-        //creating focus on project
-        select(project);
+        project.select();
 
         //creating build command in top menu bar
-        List<WebElement> dropdowns = driver.findElements(By.id("gwt-debug-dropDownHeader"));
-        select(dropdowns.get(1));
-        select(editCommands);
-        select(customPlus);
-        //setting variables
-        select(commandInput);
-        commandInput.clear();
-        commandInput.sendKeys("cd ${current.project.path} && scl enable rh-maven33 'mvn clean install'");
-        nameInput.clear();
-        nameInput.sendKeys(testName);
-
-        saveButton.click();
-        waitGui().until().element(saveButton).is().not().enabled();
-        closeButton.click();
-        waitGui().until().element(closeButton).is().not().visible();
+        debugPanel.expandCommandsDropDown();
+        dropDownMenu.selectEditCommand();
+        commandsManagerDialog.addCustomCommand(testName, command);
 
         //running command (created command is automatically selected)
-        select(runCommand);
+        debugPanel.executeCommand();
 
-        //wait for end - if build first time, it last longer - increasing timeout
-        waitModel().withTimeout(2, TimeUnit.MINUTES);
-        waitModel().until().element(consoleEnds).is().visible();
-        //set back to default value
-        waitModel().withTimeout(5, TimeUnit.SECONDS);
+        //wait for end - if build first time, it last longer -> increasing timeout
+        waitModel().withTimeout(2, TimeUnit.MINUTES).until().element(consoleEnds).is().visible();
 
+        //find out if build was successful
         try {
-            waitGui().until().element(buildSuccess).is().visible();
+            waitGui().withTimeout(1,TimeUnit.SECONDS).until().element(buildSuccess).is().visible();
         }catch(Exception e){
             Assert.fail("Project build failed!");
         }
+
         //delete command
-        select(dropdowns.get(1));
-
-        select(editCommands);
-        select(rowToDelete);
-        select(rowToDeleteMinus);
-        select(okButton);
-        waitModel().until().element(closeButton).is().visible();
-
-        //wait for deleting command
-        try {
-            //if deleting last long time, deleting loader is shown
-            waitModel().until().element(deletingLoader).is().visible();
-            waitModel().until().element(deletingLoader).is().not().visible();
-        } catch(Exception e){
-            //if element is not found, deleting was quick and element was not shown
-        }
-
-    }
-
-    private void select(WebElement element) {
-        waitModel().until().element(element).is().visible();
-        new Actions(driver).click(element).build().perform();
+        debugPanel.expandCommandsDropDown();
+        dropDownMenu.selectEditCommand();
+        commandsManagerDialog.deleteCommand(testName);
     }
 }

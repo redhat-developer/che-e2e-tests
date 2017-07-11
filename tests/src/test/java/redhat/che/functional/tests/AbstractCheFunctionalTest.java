@@ -12,6 +12,7 @@ package redhat.che.functional.tests;
 
 import com.redhat.arquillian.che.resource.CheWorkspace;
 
+import org.jboss.arquillian.drone.api.annotation.Drone;
 import redhat.che.functional.tests.fragments.EditorPart;
 import redhat.che.functional.tests.fragments.Project;
 
@@ -30,6 +31,8 @@ import static redhat.che.functional.tests.utils.Constants.PROJECT_NAME;
 
 @RunWith(Arquillian.class)
 public abstract class AbstractCheFunctionalTest {
+    @Drone
+    protected WebDriver driver;
 
     @FindByJQuery("#gwt-debug-projectTree > div:contains('" + PROJECT_NAME + "'):first")
     protected Project project;
