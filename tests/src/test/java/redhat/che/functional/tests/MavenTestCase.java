@@ -5,6 +5,7 @@ import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,19 +33,12 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     @FindBy(id="gwt-debug-toolbarPanel")
     private ToolbarDebugPanel debugPanel;
 
-    @FindByJQuery(".GJHBXB5BHDB tr[id*='" + testName + "'] td:gt(0)")
-    private WebElement buildOption;
-
-    @FindBy(id="gwt-debug-ActionButton/executeSelectedCommand-true")
-    private WebElement runCommand;
-
     @FindByJQuery("pre:contains('Total time')")
     private WebElement consoleEnds;
 
     @FindByJQuery("pre:contains('BUILD SUCCESS')")
     private WebElement buildSuccess;
 
-    //verified
     @FindBy(id = "menu-lock-layer-id")
     private DropDownMenu dropDownMenu;
 
@@ -54,21 +48,25 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     private final String testName = "buildTest";
     private final String command = "cd ${current.project.path} && scl enable rh-maven33 'mvn clean install'";
 
+    @Before
+    public void setup(){
+        openBrowser(driver);
+        project.select();
+    }
+
     /**
      * Tries to build project.
      */
     @Test
     @InSequence(1)
     public void test_maven_build() {
-        openBrowser(driver);
-        project.select();
-
         //creating build command in top menu bar
         debugPanel.expandCommandsDropDown();
         dropDownMenu.selectEditCommand();
         commandsManagerDialog.addCustomCommand(testName, command);
+        commandsManagerDialog.closeEditCommands();
 
-        //running command (created command is automatically selected)
+        //running command (created command is automatically selected - no need to search for it in dropdown)
         debugPanel.executeCommand();
 
         //wait for end - if build first time, it last longer -> increasing timeout
@@ -79,11 +77,12 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
             waitGui().withTimeout(1,TimeUnit.SECONDS).until().element(buildSuccess).is().visible();
         }catch(Exception e){
             Assert.fail("Project build failed!");
+        }finally {
+            //delete command
+            debugPanel.expandCommandsDropDown();
+            dropDownMenu.selectEditCommand();
+            commandsManagerDialog.deleteCommand(testName);
         }
 
-        //delete command
-        debugPanel.expandCommandsDropDown();
-        dropDownMenu.selectEditCommand();
-        commandsManagerDialog.deleteCommand(testName);
     }
 }

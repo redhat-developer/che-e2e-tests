@@ -14,21 +14,14 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
+import org.junit.Before;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NotFoundException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.FluentWait;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import static org.jboss.arquillian.graphene.Graphene.waitGui;
-import static org.jboss.arquillian.graphene.Graphene.waitModel;
+import static org.jboss.arquillian.graphene.Graphene.*;
 
 /*
  * div[id='commandsManagerView']
@@ -84,9 +77,13 @@ public class CommandsManagerDialog {
        Graphene.waitModel().until().element(saveButton).is().not().enabled();
     }
 
-
+    /**
+     * Create custom command named by "commandName" with instruction "command"
+     *
+     */
     public void addCustomCommand(String commandName, String command) {
         select(customPlus);
+
         //setting variables
         select(commandInput);
         commandInput.clear();
@@ -94,11 +91,13 @@ public class CommandsManagerDialog {
         nameInput.clear();
         nameInput.sendKeys(commandName);
 
-        saveButton.click();
-        waitModel().until().element(saveButton).is().not().enabled();
-        closeEditCommands();
+        guardAjax(saveButton).click();
     }
 
+    /**
+     * Deleting command named by "name". Name is unique - there should be only 1 command with that name through all categories.
+     *
+     */
     public void deleteCommand(String name){
         //creating focus on a row to delete
         waitModel().until().element(customPlus).is().visible();
@@ -112,23 +111,16 @@ public class CommandsManagerDialog {
 
         //confirm deleting
         WebElement ok = driver.findElement(By.id("ask-dialog-ok"));
-        ok.click();
-
-        //wait for execution of deleting command
-        try {
-            //if deleting last long time, deleting loader is shown
-            waitModel().withTimeout(1, TimeUnit.SECONDS).until().element(deletingLoader).is().visible();
-            waitModel().until().element(deletingLoader).is().not().visible();
-        } catch(Exception e){
-            //if element is not found, deleting was quick and element was not shown
-        }
-
+        guardAjax(ok).click();
     }
 
+    /**
+     * Closing command manage dialog.
+     *
+     */
     public void closeEditCommands(){
         WebElement close = driver.findElement(By.id("window-edit-commands-close"));
-        close.click();
-        waitModel().until().element(close).is().not().visible();
+        guardNoRequest(close).click();
     }
 
     private void select(WebElement element) {
