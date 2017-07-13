@@ -41,9 +41,9 @@ public class CheWorkspaceProvider {
      * @return Che workspace
      */
     public static CheWorkspace createCheWorkspaceOSO(String cheStarterURL, String openShiftMasterURL,
-            String openshiftToken, String pathToJson, String namespace) {
+            String openShiftToken, String pathToJson, String namespace) {
 
-        return createWorkspace(cheStarterURL, openShiftMasterURL, openshiftToken, pathToJson, namespace, "/workspace/oso");
+        return createWorkspace(cheStarterURL, openShiftMasterURL, openShiftToken, pathToJson, namespace, "/workspace/oso");
     }
 
     /**

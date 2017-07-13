@@ -7,13 +7,11 @@ import static redhat.che.functional.tests.fragments.BottomInfoPanel.TabNames.TAB
 
 import java.io.File;
 import java.util.Date;
-import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.FindBy;
 
 import redhat.che.functional.tests.fragments.BottomInfoPanel;
@@ -27,9 +25,6 @@ import redhat.che.functional.tests.fragments.window.UploadPrivateSshFormWindow;
 
 @RunWith(Arquillian.class)
 public class GitTestCase extends AbstractCheFunctionalTest {
-
-    @Drone
-    private WebDriver driver;
 
     @FindByJQuery("div:contains('Preferences'):contains('Java Compiler'):last")
     private PreferencesWindow preferencesWindow;
@@ -59,7 +54,7 @@ public class GitTestCase extends AbstractCheFunctionalTest {
     @InSequence(1)
     public void test_load_ssh_key_and_set_commiter_information(){
         // set commiter credentials
-        openBrowser(driver);
+        openBrowser();
 
         mainMenuPanel.clickProfile();
         profileTopMenu.openPreferences();
