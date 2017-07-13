@@ -141,7 +141,7 @@ public class CheWorkspaceManager {
                 CheWorkspaceService.stopWorkspace(workspace, authorizationToken);
             }
             logger.info("Deleting workspace");
-            CheWorkspaceService.deleteWorkspace(workspace);
+            CheWorkspaceService.deleteWorkspace(workspace, config.getKeycloakToken());
         } else {
             logger.info("Property to preserve workspace is set to true, skipping workspace deletion");
         }
