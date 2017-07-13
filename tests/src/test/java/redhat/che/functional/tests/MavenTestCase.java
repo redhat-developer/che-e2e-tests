@@ -1,27 +1,18 @@
 package redhat.che.functional.tests;
 
-import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.fragments.CommandsManagerDialog;
 import redhat.che.functional.tests.fragments.ToolbarDebugPanel;
 import redhat.che.functional.tests.fragments.popup.DropDownMenu;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.jboss.arquillian.graphene.Graphene.waitGui;
 import static org.jboss.arquillian.graphene.Graphene.waitModel;
 
 /**
@@ -50,8 +41,15 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
 
     @Before
     public void setup(){
-        openBrowser(driver);
+        openBrowser();
         project.select();
+    }
+
+    @After
+    public void deleteCommand(){
+        debugPanel.expandCommandsDropDown();
+        dropDownMenu.selectEditCommand();
+        commandsManagerDialog.deleteCommand(testName);
     }
 
     /**
@@ -72,17 +70,6 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
         //wait for end - if build first time, it last longer -> increasing timeout
         waitModel().withTimeout(2, TimeUnit.MINUTES).until().element(consoleEnds).is().visible();
 
-        //find out if build was successful
-        try {
-            waitGui().withTimeout(1,TimeUnit.SECONDS).until().element(buildSuccess).is().visible();
-        }catch(Exception e){
-            Assert.fail("Project build failed!");
-        }finally {
-            //delete command
-            debugPanel.expandCommandsDropDown();
-            dropDownMenu.selectEditCommand();
-            commandsManagerDialog.deleteCommand(testName);
-        }
-
+        Assert.assertTrue(buildSuccess.isDisplayed());
     }
 }
