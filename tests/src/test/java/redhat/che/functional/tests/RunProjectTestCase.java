@@ -14,7 +14,6 @@ import static org.junit.Assert.*;
 
 import java.util.concurrent.TimeUnit;
 
-import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
@@ -22,7 +21,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
@@ -36,10 +34,7 @@ import redhat.che.functional.tests.fragments.popup.DropDownMenu;
 public class RunProjectTestCase extends AbstractCheFunctionalTest {
 
     public static final String VERTX_JAR_FILE = "http-vertx-6-SNAPSHOT.jar";
-    
-    @Drone
-    private WebDriver browser;
-    
+
     @FindBy(id = "menu-lock-layer-id")
     private ContextMenu contextMenu;
     
@@ -69,7 +64,7 @@ public class RunProjectTestCase extends AbstractCheFunctionalTest {
     
     @Before
     public void setup() {
-        openBrowser(browser);
+        openBrowser();
         if (!isProjectBuilt()) {
             buildProject();
         }

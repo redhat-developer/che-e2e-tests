@@ -58,8 +58,8 @@ public abstract class AbstractCheFunctionalTest {
     @ArquillianResource
     private static CheWorkspace workspace;
 
-    protected void openBrowser(WebDriver browser) {
-        browser.get(workspace.getIdeLink());
+    protected void openBrowser() {
+        driver.get(workspace.getIdeLink());
         waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
         if ("username".equals(loginPageOrworkspaceIsRunningPopup.getAttribute("id"))) {
             login();
