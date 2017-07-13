@@ -23,9 +23,6 @@ import static org.jboss.arquillian.graphene.Graphene.waitModel;
 
 @RunWith(Arquillian.class)
 public class MavenTestCase extends AbstractCheFunctionalTest{
-    @Drone
-    protected WebDriver driver;
-
     @FindBy(id="gwt-debug-toolbarPanel")
     private ToolbarDebugPanel debugPanel;
 
@@ -46,7 +43,7 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
 
     @Before
     public void setup(){
-        openBrowser(driver);
+        openBrowser();
         project.select();
     }
 
