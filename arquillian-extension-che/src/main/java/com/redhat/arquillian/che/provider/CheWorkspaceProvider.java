@@ -17,6 +17,9 @@ import java.io.InputStream;
 import org.apache.log4j.Logger;
 
 import com.redhat.arquillian.che.config.CheExtensionConfiguration;
+import com.redhat.arquillian.che.config.CheExtensionConfiguration;
+import com.redhat.arquillian.che.util.Constants;
+import com.redhat.arquillian.che.util.Utils;
 import com.redhat.arquillian.che.resource.CheWorkspace;
 import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.rest.QueryParam;
