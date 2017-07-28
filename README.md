@@ -21,7 +21,6 @@ There are 2 ways how to run tests. Each of the following contains complete list 
 - _osioPassword_ - **required**; required if workspace use authentication in front of it (if you dont't have customized Che build)
 - _openShiftNamespace_ - **required**; project on OpenShift where Che is running; default is 'eclipse-che', but this is suitable only when running on minishift
 - _cheStarterURL_ - **optional**; URL of Che starter which is called to handle Che; if not provided, Che starter is started in set up step of these tests
-- _preserveWorkspace_ - **optional**, default false; set to true if you want to keep workspace after tests execution
 
 **Run tests against an existing workspace**
 - _cheWorkspaceUrl_ - **required**, URL of existing and running Che workspace
