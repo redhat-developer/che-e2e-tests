@@ -29,11 +29,13 @@ else
 fi
 
 # Set credentials
-set +x
+set -x
+cat jenkins-env
 cat jenkins-env \
     | grep -E "(OSIO|KEYCLOAK)" \
     | sed 's/^/export /g' \
     > credential_file
+cat credential_file
 source credential_file
 if [[ -z "${OSIO_USERNAME}" ]]; then
   empty_credentials="OSIO username is empty, "
