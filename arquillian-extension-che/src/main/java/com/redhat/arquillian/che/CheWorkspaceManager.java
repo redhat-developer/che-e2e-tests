@@ -12,6 +12,9 @@ import java.util.concurrent.TimeoutException;
 import org.apache.log4j.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.JGitInternalException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.jboss.arquillian.core.api.Instance;
 import org.jboss.arquillian.core.api.InstanceProducer;
 import org.jboss.arquillian.core.api.annotation.ApplicationScoped;
@@ -34,6 +37,10 @@ public class CheWorkspaceManager {
     private InstanceProducer<CheWorkspace> cheWorkspaceInstanceProducer;
 
     @Inject
+    @ApplicationScoped
+    private InstanceProducer<CheWorkspaceProvider> cheWorkspaceProviderInstanceProducer;
+
+    @Inject
     private Instance<CheExtensionConfiguration> configurationInstance;
 
     public void setupWorkspace(@Observes BeforeSuite event) {
@@ -45,6 +52,8 @@ public class CheWorkspaceManager {
             cheExtensionConfig.setCheStarterUrl("http://localhost:10000");
         }
 
+        cheWorkspaceProviderInstanceProducer.set(new CheWorkspaceProvider(cheExtensionConfig));
+
         if (isNotEmpty(cheExtensionConfig.getCheWorkspaceUrl())) {
             cheWorkspaceInstanceProducer.set(new CheWorkspace(cheExtensionConfig.getCheWorkspaceUrl(), null, null));
         }else {
@@ -54,15 +63,15 @@ public class CheWorkspaceManager {
 
     private CheWorkspace createWorkspace(CheExtensionConfiguration config) {
         CheWorkspace workspace;
+        CheWorkspaceProvider provider = cheWorkspaceProviderInstanceProducer.get();
+        //TODO: move to provider
         if (isEmpty(config.getKeycloakToken())) {
             logger.info("Creating Che workspace via Che-starter OpenShift endpoint");
             workspace =
-                CheWorkspaceProvider.createCheWorkspaceOSO(config.getCheStarterUrl(), config.getOpenshiftMasterUrl(),
-                    config.getOpenshiftToken(), null, config.getOpenshiftNamespace());
+                provider.createCheWorkspaceOSO(null);
         } else {
             logger.info("Creating Che workspace via Che-starter Keycloak endpoint");
-            workspace = CheWorkspaceProvider.createCheWorkspace(config.getCheStarterUrl(), config.getOpenshiftMasterUrl(),
-                config.getKeycloakToken(), null, config.getOpenshiftNamespace());
+            workspace = provider.createCheWorkspace(null);
         }
         logger.info("Workspace successfully created.");
 
@@ -77,12 +86,8 @@ public class CheWorkspaceManager {
     private void startCheStarter() {
         try {
             File cheStarterDir = new File(System.getProperty("user.dir"), "target" + File.separator + "che-starter");
-            logger.info("Cloning che-starter project.");
-            Git
-                .cloneRepository()
-                .setURI("https://github.com/redhat-developer/che-starter")
-                .setDirectory(cheStarterDir)
-                .call();
+            
+            cloneGitDirectory(cheStarterDir);
 
             logger.info("Running che starter.");
             Properties props = new Properties();
@@ -105,6 +110,19 @@ public class CheWorkspaceManager {
             throw new IllegalStateException("The che-starter haven't started within 300 seconds.", e);
         }
     }
+
+	private void cloneGitDirectory(File cheStarterDir) throws GitAPIException, InvalidRemoteException, TransportException {
+		logger.info("Cloning che-starter project.");
+		try {
+		Git
+		    .cloneRepository()
+		    .setURI("https://github.com/redhat-developer/che-starter")
+		    .setDirectory(cheStarterDir)
+		    .call();
+		}catch (JGitInternalException ex) {
+			//repository already cloned. Do nothing.
+		}
+	}
 
     private void checkRunParams(CheExtensionConfiguration configuration) {
         StringBuilder sb = new StringBuilder();

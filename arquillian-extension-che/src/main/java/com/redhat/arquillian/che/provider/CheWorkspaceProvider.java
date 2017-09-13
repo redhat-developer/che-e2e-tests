@@ -10,6 +10,8 @@
 */
 package com.redhat.arquillian.che.provider;
 
+import com.redhat.arquillian.che.config.CheExtensionConfiguration;
+import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.util.Constants;
 import com.redhat.arquillian.che.util.Utils;
 import com.redhat.arquillian.che.resource.CheWorkspace;
@@ -24,53 +26,45 @@ import static com.redhat.arquillian.che.util.Constants.CREATE_WORKSPACE_REQUEST_
 
 public class CheWorkspaceProvider {
 
+    private static String cheStarterURL;
+    private static String openShiftMasterURL;
+    private static String openshiftToken;
+    private static  String keycloakToken;
+    private static String namespace;
+
+    public CheWorkspaceProvider(CheExtensionConfiguration config){
+        cheStarterURL = config.getCheStarterUrl();
+        openShiftMasterURL = config.getOpenshiftMasterUrl();
+        openshiftToken = config.getOpenshiftToken();
+        keycloakToken = config.getKeycloakToken();
+        namespace = config.getOpenshiftNamespace();
+    }
+
     /**
      * Creates a new workspace via che-starter
      * 
-     * @param cheStarterURL
-     *            URL of Che starter
-     * @param openShiftMasterURL
-     *            URL of OpenShift server where Che server is running in user's
-     *            namespace
-     * @param openShiftToken
-     *            OpenShift auth token
      * @param pathToJson
      *            path to json of workspace create params
-     * @param namespace
-     *            namespace
-     * @return Che workspace
      */
-    public static CheWorkspace createCheWorkspaceOSO(String cheStarterURL, String openShiftMasterURL,
-            String openshiftToken, String pathToJson, String namespace) {
+    public CheWorkspace createCheWorkspaceOSO(String pathToJson) {
 
-        return createWorkspace(cheStarterURL, openShiftMasterURL, openshiftToken, pathToJson, namespace, "/workspace/oso");
+        return createWorkspace(pathToJson, "/workspace/oso");
     }
 
     /**
      * Creates Che workspace on a server in users namespace on OpenShift. Uses
      * keycloak endpoint
-     * 
-     * @param cheStarterURL
-     *            URL of Che starter
-     * @param openShiftMasterURL
-     *            URL of OpenShift server where Che server is running in user's
-     *            namespace
-     * @param keyCloakToken
-     *            keycloak token
+     *
      * @param pathToJson
      *            path to json of workspace create params
-     * @param namespace
-     *            namespace
      * @return Che workspace
      */
-    public static CheWorkspace createCheWorkspace(String cheStarterURL, String openShiftMasterURL, String keyCloakToken,
-            String pathToJson, String namespace) {
+    public CheWorkspace createCheWorkspace(String pathToJson) {
         
-        return createWorkspace(cheStarterURL, openShiftMasterURL, keyCloakToken, pathToJson, namespace, "/workspace");
+        return createWorkspace(pathToJson, "/workspace");
     }
     
-    private static CheWorkspace createWorkspace(String cheStarterURL, String openShiftMasterURL, String token,
-            String pathToJson, String namespace, String path) {
+    private CheWorkspace createWorkspace(String pathToJson, String path) {
 
         String json;
         if (pathToJson == null) {
@@ -80,11 +74,27 @@ public class CheWorkspaceProvider {
             json = Utils.getTextFromFile(pathToJson);
         }
         RestClient client = new RestClient(cheStarterURL);
-        Response response = client.sentRequest(path, RequestType.POST, json, token,
+        Response response = client.sentRequest(path, RequestType.POST, json, keycloakToken,
                 new QueryParam("masterUrl", openShiftMasterURL), new QueryParam("namespace", namespace));
         Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
         response.close();
         client.close();
         return CheWorkspaceService.getWorkspaceFromDocument(jsonDocument);
+    }
+
+    public boolean stopWorkspace(CheWorkspace workspace){
+        CheWorkspaceService.stopWorkspace(workspace, keycloakToken);
+        if(CheWorkspaceService.getWorkspaceStatus(workspace, keycloakToken).equals(CheWorkspaceStatus.STOPPED.getStatus())){
+            return true;
+        }
+        return  false;
+    }
+
+    public boolean startWorkspace(CheWorkspace workspace){
+        CheWorkspaceService.startWorkspace(workspace, keycloakToken);
+        if(CheWorkspaceService.getWorkspaceStatus(workspace, keycloakToken).equals(CheWorkspaceStatus.RUNNING.getStatus())){
+            return true;
+        }
+        return  false;
     }
 }

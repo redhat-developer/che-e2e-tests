@@ -11,5 +11,6 @@ public class ArquillianCheExtension implements LoadableExtension {
         extensionBuilder.observer(CheWorkspaceManager.class);
         extensionBuilder.observer(CheExtensionConfigurator.class);
         extensionBuilder.service(ResourceProvider.class, CheWorkspaceProducer.class);
+        extensionBuilder.service(ResourceProvider.class, CheWorkspaceProviderProducer.class);
     }
 }
