@@ -16,7 +16,7 @@ public class GitPopupTopMenu extends PopupMenu {
     @FindBy(id = "gwt-debug-topmenu/Git/Remotes.../gitPush")
     private WebElement pushItem;
 
-    @FindBy(id = "topmenu/Git/Commit selected...")
+    @FindBy(id = "topmenu/Git/Commit ...")
     private WebElement commitItem;
 
     public void addToIndex(){

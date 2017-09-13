@@ -12,6 +12,7 @@ package redhat.che.functional.tests;
 
 import com.redhat.arquillian.che.resource.CheWorkspace;
 
+import org.apache.log4j.Logger;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import redhat.che.functional.tests.fragments.EditorPart;
 import redhat.che.functional.tests.fragments.Project;
@@ -31,6 +32,8 @@ import static redhat.che.functional.tests.utils.Constants.PROJECT_NAME;
 
 @RunWith(Arquillian.class)
 public abstract class AbstractCheFunctionalTest {
+	private static final Logger LOG = Logger.getLogger(AbstractCheFunctionalTest.class);
+	
     @Drone
     protected WebDriver driver;
 
@@ -59,6 +62,7 @@ public abstract class AbstractCheFunctionalTest {
     private static CheWorkspace workspace;
 
     protected void openBrowser() {
+    	LOG.info("Opening browser");
         driver.get(workspace.getIdeLink());
         waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
         if ("username".equals(loginPageOrworkspaceIsRunningPopup.getAttribute("id"))) {
@@ -69,6 +73,7 @@ public abstract class AbstractCheFunctionalTest {
     }
 
     private void login() {
+    	LOG.info("Logging in");
         usernameField.sendKeys(OSIO_USERNAME);
         passwordField.sendKeys(OSIO_PASSWORD);
         loginButton.click();

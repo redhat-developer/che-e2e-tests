@@ -7,6 +7,8 @@ import static redhat.che.functional.tests.fragments.BottomInfoPanel.TabNames.TAB
 
 import java.io.File;
 import java.util.Date;
+
+import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
@@ -25,6 +27,8 @@ import redhat.che.functional.tests.fragments.window.UploadPrivateSshFormWindow;
 
 @RunWith(Arquillian.class)
 public class GitTestCase extends AbstractCheFunctionalTest {
+	
+	private static final Logger LOG = Logger.getLogger(GitTestCase.class);
 
     @FindByJQuery("div:contains('Preferences'):contains('Java Compiler'):last")
     private PreferencesWindow preferencesWindow;
@@ -55,7 +59,7 @@ public class GitTestCase extends AbstractCheFunctionalTest {
     public void test_load_ssh_key_and_set_commiter_information(){
         // set commiter credentials
         openBrowser();
-
+        LOG.info("Test: test_load_ssh_key_and_set_commiter_information");
         mainMenuPanel.clickProfile();
         profileTopMenu.openPreferences();
         preferencesWindow.writeCommiterInformation("dev-test-user", "mlabuda@redhat.com");
