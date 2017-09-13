@@ -18,5 +18,9 @@
     <property name="waitAjaxInterval">15</property>
     <property name="waitModelInterval">30</property>
   </extension>
-
+  
+  <extension qualifier="screenshooter">
+  	<property name="takeOnEveryAction">true</property>
+  </extension>
+	
 </arquillian>
