@@ -9,8 +9,15 @@ set -e
 yum -y install \
   docker \
   make \
-  git
+  git \
+   jq
 service docker start
+
+#test
+curl -LO https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+mv jq-linux64 /usr/bin/jq
+chmod +x /usr/bin/jq
+
 
 # Fetch PR and rebase on master, if job runs from PR
 cat jenkins-env \
@@ -35,13 +42,15 @@ cat jenkins-env \
     | sed 's/^/export /g' \
     > credential_file
 source credential_file
+CURL_OUTPUT=$(curl -H "Content-Type: application/json" -X POST -d '{"refresh_token":"'$KEYCLOAK_TOKEN'"}' https://auth.openshift.io/api/token/refresh)
+ACTIVE_TOKEN=$(echo $CURL_OUTPUT | jq --raw-output ".token | .access_token")
 if [[ -z "${OSIO_USERNAME}" ]]; then
   empty_credentials="OSIO username is empty, "
 fi 
 if [[ -z "${OSIO_PASSWORD}" ]]; then
   empty_credentials=${empty_credentials}"OSIO password is empty, "
 fi
-if [[ -z "${KEYCLOAK_TOKEN}" ]]; then
+if [[ -z "${ACTIVE_TOKEN}" ]]; then
   empty_credentials=${empty_credentials}"Keycloak token is empty"
 fi
 if [[ ! -z "${empty_credentials}" ]]; then
@@ -50,7 +59,7 @@ if [[ ! -z "${empty_credentials}" ]]; then
 else
   echo 'OpenShift username and password and Keycloak token are not empty.'
 fi
-if [[ $(curl -X GET -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token \
+if [[ $(curl -X GET -H "Authorization: Bearer ${ACTIVE_TOKEN}" https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token \
    |  grep access_token | wc -l) -ne 1 ]]; then
   echo "Keycloak token is expired"
   exit 1
@@ -59,5 +68,5 @@ else
 fi
 echo 'export OSIO_USERNAME='${OSIO_USERNAME} >> ./env-vars
 echo 'export OSIO_PASSWORD='${OSIO_PASSWORD} >> ./env-vars
-echo 'export KEYCLOAK_TOKEN='${KEYCLOAK_TOKEN} >> ./env-vars
+echo 'export KEYCLOAK_TOKEN='${ACTIVE_TOKEN} >> ./env-vars
 set -x

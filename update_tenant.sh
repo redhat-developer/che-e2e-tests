@@ -2,6 +2,7 @@
 
 server_runs() {
   server_log=$(oc -n ${OSO_NAMESPACE} logs dc/che 2> /dev/null)
+  echo $server_log
   if [[ $(echo "${server_log}" | grep -E 'Server startup in [0-9]*' | wc -l) -ne 1 ]]; then
     echo "false" 
   else
@@ -30,12 +31,13 @@ wait_for_che_server_deployment() {
 
 
 yum install -y centos-release-openshift-origin epel-release
-yum install -y origin-clients jq
+yum install -y origin-clients
 
 source config
 
 set +x
-OSO_TOKEN=$(curl -X GET -H "Authorization: Bearer ${KEYCLOAK_TOKEN}" \
+
+OSO_TOKEN=$(curl -X GET -H "Authorization: Bearer ${ACTIVE_TOKEN}" \
 	https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token  | jq .access_token | cut -d\" -f2)
 if [[ "null" == "${OSO_TOKEN}" ]]; then
     set -x	

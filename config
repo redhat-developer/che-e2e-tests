@@ -1,7 +1,7 @@
 export OSO_MASTER_URL=https://api.starter-us-east-2.openshift.com:443
-export OSO_NAMESPACE=mlabuda-che
-export OSO_USER=mlabuda
+export OSO_NAMESPACE=kkanova-osiotest1-che
+export OSO_USER=kkanova-osiotest1
 export OSO_DOMAIN=8a09.starter-us-east-2.openshiftapps.com
-export OSO_HOSTNAME=mlabuda-che.8a09.starter-us-east-2.openshiftapps.com
-export CHE_SERVER_DOCKER_IMAGE_TAG=60b561a-fabric8-d39d4e9
+export OSO_HOSTNAME=kkanova-osiotest1-che.8a09.starter-us-east-2.openshiftapps.com
+export CHE_SERVER_DOCKER_IMAGE_TAG=7aaa377-fabric8-a165962
 export DOCKER_HUB_NAMESPACE=rhche/che-server
