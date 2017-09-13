@@ -36,11 +36,13 @@ else
 fi
 
 # Set credentials
-set +x
+set -x
+cat jenkins-env
 cat jenkins-env \
     | grep -E "(OSIO|KEYCLOAK)" \
     | sed 's/^/export /g' \
     > credential_file
+cat credential_file
 source credential_file
 CURL_OUTPUT=$(curl -H "Content-Type: application/json" -X POST -d '{"refresh_token":"'$KEYCLOAK_TOKEN'"}' https://auth.openshift.io/api/token/refresh)
 ACTIVE_TOKEN=$(echo $CURL_OUTPUT | jq --raw-output ".token | .access_token")
