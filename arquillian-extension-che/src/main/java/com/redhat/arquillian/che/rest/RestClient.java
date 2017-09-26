@@ -12,6 +12,8 @@ package com.redhat.arquillian.che.rest;
 
 import java.io.IOException;
 
+import org.apache.log4j.Logger;
+
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -21,6 +23,8 @@ import okhttp3.Response;
 
 public class RestClient {
 
+	private static final Logger logger = Logger.getLogger(RestClient.class);
+	
 	public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
 	private OkHttpClient client = new OkHttpClient();
@@ -92,8 +96,13 @@ public class RestClient {
 			throw new RuntimeException("Request is null. It was not possible to process specified request");
 		}
 		try {
-			return client.newCall(request).execute();
+			logger.info("Sending request: "+request.toString());
+			Response response = client.newCall(request).execute();
+			logger.info("Recieved response: "+response.toString());
+			return response;
 		} catch (IOException e) {
+			logger.error("Error sending request.");
+			logger.error(e.getMessage());
 			return null;
 		}
 	}

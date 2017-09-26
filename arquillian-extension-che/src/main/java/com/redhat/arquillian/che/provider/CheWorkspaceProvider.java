@@ -10,21 +10,27 @@
 */
 package com.redhat.arquillian.che.provider;
 
+import static com.redhat.arquillian.che.util.Constants.CREATE_WORKSPACE_REQUEST_JSON;
+
+import java.io.InputStream;
+
+import org.apache.log4j.Logger;
+
 import com.redhat.arquillian.che.config.CheExtensionConfiguration;
-import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
-import com.redhat.arquillian.che.util.Constants;
-import com.redhat.arquillian.che.util.Utils;
 import com.redhat.arquillian.che.resource.CheWorkspace;
+import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.rest.QueryParam;
 import com.redhat.arquillian.che.rest.RequestType;
 import com.redhat.arquillian.che.rest.RestClient;
 import com.redhat.arquillian.che.service.CheWorkspaceService;
-import java.io.InputStream;
+import com.redhat.arquillian.che.util.Constants;
+import com.redhat.arquillian.che.util.Utils;
+
 import okhttp3.Response;
 
-import static com.redhat.arquillian.che.util.Constants.CREATE_WORKSPACE_REQUEST_JSON;
-
 public class CheWorkspaceProvider {
+	
+	private static final Logger logger = Logger.getLogger(CheWorkspaceProvider.class);
 
     private static String cheStarterURL;
     private static String openShiftMasterURL;
