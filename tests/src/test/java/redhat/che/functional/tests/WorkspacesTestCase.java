@@ -42,6 +42,7 @@ public class WorkspacesTestCase {
         token = "Bearer " + System.getProperty(CheExtensionConfiguration.KEYCLOAK_TOKEN_PROPERTY_NAME);
     }
 
+    @After
     public void resetWorkspaces(){
         Assert.assertTrue(provider.stopWorkspace(secondWorkspace));
         logger.info("Second workspace stopped");
