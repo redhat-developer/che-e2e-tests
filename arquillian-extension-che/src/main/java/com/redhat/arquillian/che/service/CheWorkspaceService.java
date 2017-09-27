@@ -56,10 +56,10 @@ public class CheWorkspaceService {
 	 * @param workspace
 	 *            workspace to delete
 	 */
-	public static void deleteWorkspace(CheWorkspace workspace) {
+	public static void deleteWorkspace(CheWorkspace workspace, String token) {
 		logger.info("Deleting " + workspace);
 		RestClient client = new RestClient(workspace.getSelfLink());
-		client.sentRequest(null, RequestType.DELETE).close();
+		client.sentRequest(null, RequestType.DELETE, null, token).close();
 
 		int counter = 0;
 		int maxCount = Math.round(WAIT_TIME / (SLEEP_TIME_TICK / 1000));
@@ -107,7 +107,6 @@ public class CheWorkspaceService {
 	 *            workspace to stop
 	 */
 	public static void stopWorkspace(CheWorkspace workspace, String authorizationToken) {
-		logger.info("Stopping " + workspace);
 		operateWorkspaceState(workspace, RequestType.DELETE, CheWorkspaceStatus.STOPPED.getStatus(), authorizationToken);
 	}
 

@@ -73,7 +73,8 @@ public class CheWorkspaceManager {
             logger.info("Creating Che workspace via Che-starter Keycloak endpoint");
             workspace = provider.createCheWorkspace(null);
         }
-        logger.info("Workspace successfully created.");
+        String link = workspace.getIdeLink();
+        logger.info("Workspace " + link.substring(link.length()-5, link.length()) + " successfully created.");
 
         logger.info("Waiting until workspace starts");
         String authorizationToken = config.getAuthorizationToken();
@@ -155,11 +156,11 @@ public class CheWorkspaceManager {
         if (workspace != null && !config.getPreserveWorkspace()) {
             String workspaceStatus = CheWorkspaceService.getWorkspaceStatus(workspace, authorizationToken);
             if (workspaceStatus.equals(CheWorkspaceStatus.RUNNING.getStatus())) {
-                logger.info("Stopping workspace");
+                logger.info("Stopping " + workspace);
                 CheWorkspaceService.stopWorkspace(workspace, authorizationToken);
             }
             logger.info("Deleting workspace");
-            CheWorkspaceService.deleteWorkspace(workspace);
+            CheWorkspaceService.deleteWorkspace(workspace, authorizationToken);
         } else {
             logger.info("Property to preserve workspace is set to true, skipping workspace deletion");
         }
