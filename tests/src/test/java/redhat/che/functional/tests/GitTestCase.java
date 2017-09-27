@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.support.FindBy;
@@ -25,6 +26,7 @@ import redhat.che.functional.tests.fragments.window.GitPushWindow;
 import redhat.che.functional.tests.fragments.window.PreferencesWindow;
 import redhat.che.functional.tests.fragments.window.UploadPrivateSshFormWindow;
 
+@Ignore
 @RunWith(Arquillian.class)
 public class GitTestCase extends AbstractCheFunctionalTest {
 	
