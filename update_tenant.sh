@@ -55,7 +55,7 @@ set -x
 oc project ${OSO_NAMESPACE}
 CURRENT_DC_REVISION=$(oc get dc/che -o=custom-columns=NAME:.status.latestVersion --no-headers)
 NEXT_DC_REVISION=$((CURRENT_DC_REVISION+1))
-DOCKER_HUB_NAMESPACE_SANITIZED=${DOCKER_HUB_NAMESPACE/\//\\\/}
+DOCKER_HUB_NAMESPACE_SANITIZED=${DOCKER_HUB_NAMESPACE//\//\\\/}
 current_tag=$(oc get dc/che -o yaml | grep 'image:' | cut -d: -f 3)
 if [[ "${current_tag}" != "${CHE_SERVER_DOCKER_IMAGE_TAG}" ]]; then
   echo "Updating Che server"

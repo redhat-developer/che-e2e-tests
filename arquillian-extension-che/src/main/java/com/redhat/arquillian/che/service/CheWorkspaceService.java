@@ -10,16 +10,20 @@
 */
 package com.redhat.arquillian.che.service;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.apache.log4j.Logger;
+
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.redhat.arquillian.che.resource.CheWorkspace;
 import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.rest.RequestType;
 import com.redhat.arquillian.che.rest.RestClient;
-import java.io.IOException;
-import java.util.List;
+import com.redhat.arquillian.che.util.OpenShiftHelper;
+
 import okhttp3.Response;
-import org.apache.log4j.Logger;
 
 public class CheWorkspaceService {
 
@@ -31,6 +35,10 @@ public class CheWorkspaceService {
 	private static int WAIT_TIME = 300;
 	
 	public static Object getDocumentFromResponse(Response response) {
+		if (response == null) {
+			logger.error(OpenShiftHelper.getCheLogs());
+			throw new NullPointerException("Response was null");
+		}
 		String responseString = null;
 		if (response.isSuccessful()) {
 			try {

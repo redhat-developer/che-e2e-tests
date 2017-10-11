@@ -1,20 +1,24 @@
 package redhat.che.functional.tests;
 
 
-import com.redhat.arquillian.che.CheWorkspaceManager;
-import com.redhat.arquillian.che.config.CheExtensionConfiguration;
-import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
-import com.redhat.arquillian.che.resource.CheWorkspace;
-import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
-import com.redhat.arquillian.che.service.CheWorkspaceService;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.redhat.arquillian.che.CheWorkspaceManager;
+import com.redhat.arquillian.che.config.CheExtensionConfiguration;
+import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
+import com.redhat.arquillian.che.resource.CheWorkspace;
+import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
+import com.redhat.arquillian.che.service.CheWorkspaceService;
+
+import redhat.che.functional.tests.utils.GetCheLogsOnFailRule;
 
 /**
  * Created by katka on 03/07/17.
@@ -34,6 +38,10 @@ public class WorkspacesTestCase {
     String stoppedState;
     CheWorkspace secondWorkspace;
     String token;
+    
+    @Rule
+    public final GetCheLogsOnFailRule cheLogsRule = new GetCheLogsOnFailRule(); 
+    
 
     @Before
     public void settingAttributes(){
@@ -51,7 +59,7 @@ public class WorkspacesTestCase {
         CheWorkspaceService.deleteWorkspace(secondWorkspace, token);
     }
 
-    @Test
+	@Test
     public void startSecondWorkspace() {
         Assert.assertNotNull(firstWorkspace);
         String status = CheWorkspaceService.getWorkspaceStatus(firstWorkspace, token);

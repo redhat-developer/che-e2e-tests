@@ -49,6 +49,12 @@
       <artifactId>shrinkwrap-resolver-impl-maven-embedded</artifactId>
       <version>3.0.0-beta-2</version>
     </dependency>
+    
+   	<dependency>
+		<groupId>io.fabric8</groupId>
+		<artifactId>openshift-client</artifactId>
+		<version>2.6.3</version>
+	</dependency>
   </dependencies>
 
 </project>
