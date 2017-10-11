@@ -43,23 +43,20 @@ public class OpenShiftHelper {
 		String output = "";
 		Config config = new ConfigBuilder().withMasterUrl(openshiftMasterURL).withUsername(username)
 				.withPassword(password).build();
-		OpenShiftClient client = new DefaultOpenShiftClient(config);
-		PodList list = null;
-		try {
-			list = client.pods().inNamespace(namespace)
+		try (OpenShiftClient client = new DefaultOpenShiftClient(config)) {
+			PodList list = client.pods().inNamespace(namespace)
 					.withLabelSelector(new LabelSelectorBuilder().addToMatchLabels("deploymentconfig", "che").build())
 					.list();
-		} catch (Throwable t) {
-			System.out.println(t.getMessage());
+			List<Pod> items = list.getItems();
+			for (Pod pod : items) {
+				String name = pod.getMetadata().getName();
+				String log = client.pods().inNamespace(namespace).withName(name).getLog();
+				output += "Log for pod: " + name + "\n";
+				output += log + "\n";
+			}
+		} catch (Exception e) {
+			output += "Unable to retrieve error due to exception: " + e.getMessage();
 		}
-		List<Pod> items = list.getItems();
-		for (Pod pod : items) {
-			String name = pod.getMetadata().getName();
-			String log = client.pods().inNamespace(namespace).withName(name).getLog();
-			output += "Log for pod: " + name + "\n";
-			output += log + "\n";
-		}
-		client.close();
 		return output;
 	}
 
