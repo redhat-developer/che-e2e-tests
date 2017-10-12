@@ -1,4 +1,14 @@
 #!/bin/bash
+
+archive_artifacts(){
+	echo "Archiving artifacts"
+	DATE=$(date +%Y%m%d-%H%M%S)
+	echo "With date $DATE"
+	ls -la ./artifacts.key
+	chmod 600 ./artifacts.key
+	rsync --password-file=./artifacts.key -PHva  /home/fabric8/che/tests/target/* devtools@artifacts.ci.centos.org::devtools/che-functional-tests/$DATE
+}
+
 set -x
 set -e
 set +o nounset
@@ -27,5 +37,7 @@ chown -R 1000:1000 ./*
 docker run -d --user=fabric8 --cap-add SYS_ADMIN --name=che-selenium -t -v $(pwd):/home/fabric8/che:Z rhopp/che-selenium:latest
 
 ## Exec tests
-docker exec --user=fabric8 che-selenium /home/fabric8/che/run_EE_tests.sh
+docker exec --user=fabric8 che-selenium /home/fabric8/che/run_EE_tests.sh || RETURN_CODE=$? && true
+archive_artifacts
 
+exit $RETURN_CODE
