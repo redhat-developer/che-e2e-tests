@@ -1,10 +1,17 @@
 package redhat.che.functional.tests.fragments;
 
+import com.redhat.arquillian.che.CheWorkspaceManager;
+import org.apache.log4j.Logger;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.FindBy;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.jboss.arquillian.graphene.Graphene.waitGui;
 import static redhat.che.functional.tests.utils.ActionUtils.writeIntoElement;
@@ -13,43 +20,53 @@ import static redhat.che.functional.tests.utils.ActionUtils.writeIntoElement;
  * id = "gwt-debug-editorPartStack-contentPanel"
  */
 public class CodeEditorFragment {
+    private static final Logger logger = Logger.getLogger(CheWorkspaceManager.class);
 
     @Root
     private WebElement rootElement;
 
-    @FindByJQuery("div:contains('vertx-core') > span:last")
-    private WebElement emptyElementAfterVertxDep;
-
     @FindByJQuery("div.annotation.error > div.annotationHTML.error:last")
     private WebElement annotationError;
 
-    private String dependencyToAdd =
-        "\n</dependency> \n"
-            + "<dependency>\n"
-            + "<groupId>ch.qos.logback</groupId>\n"
-            + "<artifactId>logback-core</artifactId>\n"
-            + "<version>1.1.10</version>";
+    @FindBy(className = "tooltipTitle")
+    private WebElement annotationErrorSpan;
 
     @FindByJQuery("span:last")
     private WebElement lastSpan;
 
     @Drone
-    private WebDriver browser;
+    private WebDriver driver;
+
+    private static int WAIT_TIME= 15;
+
+    private String dependencyToAdd =
+        "<dependency>\n"
+            + "<groupId>ch.qos.logback</groupId>\n"
+            + "<artifactId>logback-core</artifactId>\n"
+            + "<version>1.1.10</version>\n"
+            + "</dependency>\n";
+
 
     public void writeDependencyIntoPom() {
-        writeIntoElement(browser, emptyElementAfterVertxDep, dependencyToAdd);
+        new Actions(driver).moveToElement(rootElement).sendKeys(dependencyToAdd).perform();
     }
 
-    public void verifyAnnotationErrorIsPresent(){
-        waitGui()
-            .withMessage("The annotation error should be visible")
-            .until()
-            .element(annotationError)
-            .is()
-            .present();
+    public boolean verifyAnnotationErrorIsPresent(){
+        logger.info("Waiting for " + WAIT_TIME + " seconds until annotation error should be visible");
+        waitGui().withTimeout(WAIT_TIME, TimeUnit.SECONDS).until(driver -> {
+            if(annotationError == null) return false;
+            annotationError.click();
+            WebElement label = driver.findElement(By.className("tooltipTitle"));
+            if (label.getText().contains("Package ch.qos.logback:logback-core-1.1.10 is vulnerable: CVE-2017-5929. Recommendation: use version ")) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+        return true;
     }
 
     public void writeIntoTextViewContent(String text) {
-        writeIntoElement(browser, lastSpan, text);
+        writeIntoElement(driver, lastSpan, text);
     }
 }
