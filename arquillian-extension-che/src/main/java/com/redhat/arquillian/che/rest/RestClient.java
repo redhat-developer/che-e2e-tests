@@ -11,6 +11,7 @@
 package com.redhat.arquillian.che.rest;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -32,6 +33,11 @@ public class RestClient {
 
 	public RestClient(String serverURL) {
 		this.client = new OkHttpClient();
+		this.serverURL = serverURL;
+	}
+	
+	public RestClient(String serverURL, long timeout, TimeUnit unit) {
+		this.client = new OkHttpClient().newBuilder().readTimeout(timeout, unit).build();
 		this.serverURL = serverURL;
 	}
 

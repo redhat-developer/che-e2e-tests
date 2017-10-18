@@ -13,6 +13,7 @@ package com.redhat.arquillian.che.provider;
 import static com.redhat.arquillian.che.util.Constants.CREATE_WORKSPACE_REQUEST_JSON;
 
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
@@ -70,23 +71,24 @@ public class CheWorkspaceProvider {
         return createWorkspace(pathToJson, "/workspace");
     }
     
-    private CheWorkspace createWorkspace(String pathToJson, String path) {
+	private CheWorkspace createWorkspace(String pathToJson, String path) {
 
-        String json;
-        if (pathToJson == null) {
-            InputStream jsonStream = Constants.class.getClassLoader().getResourceAsStream(CREATE_WORKSPACE_REQUEST_JSON);
-            json = Utils.getTextFromFile(jsonStream);
-        }else {
-            json = Utils.getTextFromFile(pathToJson);
-        }
-        RestClient client = new RestClient(cheStarterURL);
-        Response response = client.sentRequest(path, RequestType.POST, json, keycloakToken,
-                new QueryParam("masterUrl", openShiftMasterURL), new QueryParam("namespace", namespace));
-        Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
-        response.close();
-        client.close();
-        return CheWorkspaceService.getWorkspaceFromDocument(jsonDocument);
-    }
+		String json;
+		if (pathToJson == null) {
+			InputStream jsonStream = Constants.class.getClassLoader()
+					.getResourceAsStream(CREATE_WORKSPACE_REQUEST_JSON);
+			json = Utils.getTextFromFile(jsonStream);
+		} else {
+			json = Utils.getTextFromFile(pathToJson);
+		}
+		RestClient client = new RestClient(cheStarterURL, 5, TimeUnit.MINUTES);
+		Response response = client.sentRequest(path, RequestType.POST, json, keycloakToken,
+				new QueryParam("masterUrl", openShiftMasterURL), new QueryParam("namespace", namespace));
+		Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
+		response.close();
+		client.close();
+		return CheWorkspaceService.getWorkspaceFromDocument(jsonDocument);
+	}
 
     public boolean stopWorkspace(CheWorkspace workspace){
         CheWorkspaceService.stopWorkspace(workspace, keycloakToken);
