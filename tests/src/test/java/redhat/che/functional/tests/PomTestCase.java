@@ -43,6 +43,13 @@ public class PomTestCase extends AbstractCheFunctionalTest {
         openBrowser();
     }
 
+    @After
+    public void deleteDependency(){
+        codeEditor.hideErrors();
+        setCursorToLine(37);
+        codeEditor.deleteNextLines(5);
+    }
+
     @Test
     @InSequence(1)
     public void testPomXmlReference() {
@@ -64,4 +71,5 @@ public class PomTestCase extends AbstractCheFunctionalTest {
         project.getResource("pom.xml").open();
         Graphene.waitGui().until().element(currentLine).is().visible();
     }
+
 }

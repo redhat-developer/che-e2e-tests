@@ -11,6 +11,7 @@ package redhat.che.functional.tests.fragments.window;
  */
 
 
+import com.sun.jna.platform.win32.Guid;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.fragment.Root;
@@ -115,7 +116,8 @@ public class AskForValueDialog {
 
     /** click ok button */
     public void clickOkBtn() {
-        Graphene.guardNoRequest(okBtn).click();
+        Graphene.waitGui().until().element(okBtn).is().enabled();
+        okBtn.click();
         waitFormToClose();
     }
 

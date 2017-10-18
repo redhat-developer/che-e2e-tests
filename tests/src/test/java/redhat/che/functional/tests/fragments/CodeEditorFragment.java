@@ -10,6 +10,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
+import redhat.che.functional.tests.utils.ActionUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -38,6 +39,7 @@ public class CodeEditorFragment {
     private WebDriver driver;
 
     private static int WAIT_TIME= 15;
+    private WebElement label;
 
     private String dependencyToAdd =
         "<dependency>\n"
@@ -56,7 +58,7 @@ public class CodeEditorFragment {
         waitGui().withTimeout(WAIT_TIME, TimeUnit.SECONDS).until(driver -> {
             if(annotationError == null) return false;
             annotationError.click();
-            WebElement label = driver.findElement(By.className("tooltipTitle"));
+            label = driver.findElement(By.className("tooltipTitle"));
             if (label.getText().contains("Package ch.qos.logback:logback-core-1.1.10 is vulnerable: CVE-2017-5929. Recommendation: use version ")) {
                 return true;
             } else {
@@ -68,5 +70,14 @@ public class CodeEditorFragment {
 
     public void writeIntoTextViewContent(String text) {
         writeIntoElement(driver, lastSpan, text);
+    }
+
+    public void hideErrors() {
+        rootElement.click();
+        waitGui().until().element(label).is().not().visible();
+    }
+
+    public void deleteNextLines(int linesCount) {
+        ActionUtils.markNextLines(linesCount, driver);
     }
 }

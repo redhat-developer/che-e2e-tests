@@ -28,4 +28,13 @@ public class ActionUtils {
                 .sendKeys(Keys.chord(Keys.CONTROL, "l"))
                 .perform();
     }
+
+    public static void markNextLines(int linesCount, WebDriver driver){
+        for (int i=0; i < linesCount; i++){
+            new Actions(driver)
+                    .sendKeys(Keys.chord(Keys.SHIFT, Keys.ARROW_DOWN))
+                    .perform();
+        }
+        new Actions(driver).sendKeys(Keys.DELETE);
+    }
 }
