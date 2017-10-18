@@ -5,22 +5,24 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.*;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+
+import redhat.che.functional.tests.customExceptions.MarkerNotPresentException;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
 import redhat.che.functional.tests.utils.ActionUtils;
 
 @RunWith(Arquillian.class)
-public class PomTestCase extends AbstractCheFunctionalTest {
-    private static final Logger logger = Logger.getLogger(PomTestCase.class);
+public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
+
+    private static final Logger logger = Logger.getLogger(AnalyticsErrorMarkersTestCase.class);
 
     @FindBy(id = "gwt-debug-askValueDialog-window")
     private AskForValueDialog askForValueDialog;
 
     @FindBy(className = "currentLine")
     private WebElement currentLine;
-
-    private int line = 37;
 
     @Before
     public void importProject(){
@@ -36,13 +38,23 @@ public class PomTestCase extends AbstractCheFunctionalTest {
         editorPart.tabsPanel().waintUntilFocusedTabSaves();
     }
 
-    @Test
-    public void testPomXmlReference() {
+    @Test(expected = MarkerNotPresentException.class)
+    public void bayesianErrorShownOnOpenFile() throws MarkerNotPresentException {
+        //creating errorneous dependency
         openPomXml();
         setCursorToLine(37);
         editorPart.codeEditor().writeDependencyIntoPom();
-        logger.info("Dependency successfully written into pom.xml on line " + line + ".");
         Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent());
+
+        //checking if error markes is visible after re-opening the file
+        editorPart.tabsPanel().closeActiveTab();
+        openPomXml();
+        setCursorToLine(37);
+        try {
+            Assert.assertTrue("Annotation error is not visible when reopening file.", editorPart.codeEditor().verifyAnnotationErrorIsPresent());
+        } catch (TimeoutException e){
+            throw new MarkerNotPresentException(e.getMessage());
+        }
     }
 
     private void setCursorToLine(int line) {

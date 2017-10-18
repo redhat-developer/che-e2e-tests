@@ -6,6 +6,7 @@ import org.jboss.arquillian.graphene.fragment.Root;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import static org.jboss.arquillian.graphene.Graphene.waitGui;
 import static org.jboss.arquillian.graphene.Graphene.waitModel;
 
 public class TabsPanel {
@@ -13,11 +14,25 @@ public class TabsPanel {
     @Root
     private WebElement rootElement;
 
+    @FindByJQuery("div[focused] > div:last-child")
+    private WebElement focusedTabClose;
+
     @FindByJQuery("div[focused]")
     private WebElement focusedTab;
+
+    @FindByJQuery("div[unsaved]")
+    private WebElement unsavedTab;
 
     public void waitUntilFocusedTabHasName(String tabName) {
         waitModel().until().element(rootElement).is().visible();
         waitModel().until((Function<WebDriver, Boolean>) webDriver -> focusedTab.getText().equals(tabName));
+    }
+
+    public void closeActiveTab() {
+        focusedTabClose.click();
+    }
+
+    public void waintUntilFocusedTabSaves() {
+        waitGui().until().element(unsavedTab).is().not().visible();
     }
 }

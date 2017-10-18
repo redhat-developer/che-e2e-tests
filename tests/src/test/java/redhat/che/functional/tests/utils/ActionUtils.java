@@ -35,6 +35,9 @@ public class ActionUtils {
                     .sendKeys(Keys.chord(Keys.SHIFT, Keys.ARROW_DOWN))
                     .perform();
         }
-        new Actions(driver).sendKeys(Keys.DELETE);
+    }
+
+    public static void deleteMarkedLines(WebDriver driver) {
+        new Actions(driver).sendKeys(Keys.DELETE).perform();
     }
 }

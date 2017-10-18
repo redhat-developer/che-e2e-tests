@@ -35,6 +35,9 @@ public class CodeEditorFragment {
     @FindByJQuery("span:last")
     private WebElement lastSpan;
 
+    @FindByJQuery("div:contains('ch.qos.logback')")
+    private WebElement dependency;
+
     @Drone
     private WebDriver driver;
 
@@ -60,6 +63,7 @@ public class CodeEditorFragment {
             annotationError.click();
             label = driver.findElement(By.className("tooltipTitle"));
             if (label.getText().contains("Package ch.qos.logback:logback-core-1.1.10 is vulnerable: CVE-2017-5929. Recommendation: use version ")) {
+                logger.info("Annotation error is present.");
                 return true;
             } else {
                 return false;
@@ -79,5 +83,10 @@ public class CodeEditorFragment {
 
     public void deleteNextLines(int linesCount) {
         ActionUtils.markNextLines(linesCount, driver);
+        ActionUtils.deleteMarkedLines(driver);
+    }
+
+    public void waitUnitlPomDependencyIsNotVisible() {
+        waitGui().until().element(dependency).is().not().visible();
     }
 }
