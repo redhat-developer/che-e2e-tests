@@ -59,7 +59,7 @@ if [[ ! -z "${empty_credentials}" ]]; then
 else
   echo 'OpenShift username and password and Keycloak token are not empty.'
 fi
-if [[ $(curl -X GET -H "Authorization: Bearer ${ACTIVE_TOKEN}" https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token \
+if [[ $(curl -X GET -H "Authorization: Bearer ${ACTIVE_TOKEN}" https://auth.openshift.io/api/token?for=${OSO_MASTER_URL} \
    |  grep access_token | wc -l) -ne 1 ]]; then
   echo "Keycloak token is expired"
   exit 1

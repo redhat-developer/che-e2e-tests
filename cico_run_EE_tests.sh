@@ -3,9 +3,6 @@ set -x
 set -e
 set +o nounset
 
-# Prepare environment - git repo, credentials, token validation
-source prepare_environment.sh
-
 # Load configuration
 if [[ $# -gt 0 ]]; then
   if [[ ! -f $1 ]]; then
@@ -17,6 +14,9 @@ if [[ $# -gt 0 ]]; then
 fi
 echo "Sourcing configuration."
 source config
+
+# Prepare environment - git repo, credentials, token validation
+source prepare_environment.sh
 
 # Update tenant
 source update_tenant.sh
