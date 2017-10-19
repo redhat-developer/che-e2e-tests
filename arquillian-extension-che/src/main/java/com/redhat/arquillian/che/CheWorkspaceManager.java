@@ -92,8 +92,8 @@ public class CheWorkspaceManager {
 
             logger.info("Running che starter.");
             Properties props = new Properties();
-            props.setProperty("OPENSHIFT_TOKEN_URL", "https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token");
-            props.setProperty("GITHUB_TOKEN_URL", "https://sso.openshift.io/auth/realms/fabric8/broker/github/token");
+            props.setProperty("OPENSHIFT_TOKEN_URL", "https://auth.openshift.io/api/token?for=https://api.starter-us-east-2.openshift.com");
+            props.setProperty("GITHUB_TOKEN_URL", "https://auth.openshift.io/api/token?for=https://github.com");
             props.setProperty("osio.domain.name", "api.starter-us-east-2.openshift.com");
             props.setProperty("oso.address", "api.starter-us-east-2.openshift.com");
             EmbeddedMaven
