@@ -10,6 +10,13 @@ server_runs() {
   fi
 }
 
+get_che_image_tag() {
+	set -e #fail is something goes wrong
+	CHE_TENANT_XML_URL=https://raw.githubusercontent.com/fabric8-services/fabric8-tenant-che/master/pom.xml
+	curl -s $CHE_TENANT_XML_URL | xmlstarlet sel -N my=http://maven.apache.org/POM/4.0.0 -t -v "/my:project/my:properties/my:che-server.version"
+	set +e
+}
+
 # Wait up to 3 minute for running Che server in pod 
 wait_for_che_server_deployment() {
   counter=0
@@ -32,6 +39,7 @@ wait_for_che_server_deployment() {
 
 yum install -y centos-release-openshift-origin epel-release
 yum install -y origin-clients
+yum install -y xmlstarlet
 
 source config
 
@@ -46,7 +54,7 @@ if [[ "null" == "${OSO_TOKEN}" ]]; then
 fi
 
 set -x
-OSIO_VERSION=$(curl -sSL http://central.maven.org/maven2/io/fabric8/online/apps/che/maven-metadata.xml | grep latest | sed -e 's,.*<latest>\([^<]*\)</latest>.*,\1,g')
+OSIO_VERSION=$(curl -sSL http://central.maven.org/maven2/io/fabric8/tenant/apps/che/maven-metadata.xml | grep latest | sed -e 's,.*<latest>\([^<]*\)</latest>.*,\1,g')
 
 echo "Logging in to OpenShift ${OSO_MASTER_URL}"
 set +x
@@ -57,12 +65,21 @@ CURRENT_DC_REVISION=$(oc get dc/che -o=custom-columns=NAME:.status.latestVersion
 NEXT_DC_REVISION=$((CURRENT_DC_REVISION+1))
 DOCKER_HUB_NAMESPACE_SANITIZED=${DOCKER_HUB_NAMESPACE//\//\\\/}
 current_tag=$(oc get dc/che -o yaml | grep 'image:' | cut -d: -f 3)
+
+if [ -z "$CHE_SERVER_DOCKER_IMAGE_TAG" ]; then
+	echo "Che server docker image tag variable is empty. Trying to obtain one"
+	CHE_SERVER_DOCKER_IMAGE_TAG=$(get_che_image_tag)
+	echo "Che server docker image tag set to $CHE_SERVER_DOCKER_IMAGE_TAG"
+fi
+
 if [[ "${current_tag}" != "${CHE_SERVER_DOCKER_IMAGE_TAG}" ]]; then
   echo "Updating Che server"
   echo "Getting version of OSIO and applying template"
-  curl -sSL http://central.maven.org/maven2/io/fabric8/online/apps/che/${OSIO_VERSION}/che-${OSIO_VERSION}-openshift.yml | \
+  curl -sSL http://central.maven.org/maven2/io/fabric8/tenant/apps/che/${OSIO_VERSION}/che-${OSIO_VERSION}-openshift.yml | \
       sed "s/    hostname-http:.*/    hostname-http: ${OSO_HOSTNAME}/" | \
       sed "s/          image:.*/          image: ${DOCKER_HUB_NAMESPACE_SANITIZED}:${CHE_SERVER_DOCKER_IMAGE_TAG}/" | \
+      sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token|" | \
+      sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: https://auth.openshift.io/api/token?for=https://github.com|" | \
   oc apply --force=true -f -
   sleep 10
 
