@@ -26,9 +26,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
 import static org.jboss.arquillian.graphene.Graphene.waitModel;
-import static redhat.che.functional.tests.utils.Constants.OSIO_PASSWORD;
-import static redhat.che.functional.tests.utils.Constants.OSIO_USERNAME;
-import static redhat.che.functional.tests.utils.Constants.PROJECT_NAME;
+import static redhat.che.functional.tests.utils.Constants.*;
 
 @RunWith(Arquillian.class)
 public abstract class AbstractCheFunctionalTest {
@@ -37,8 +35,11 @@ public abstract class AbstractCheFunctionalTest {
     @Drone
     protected WebDriver driver;
 
-    @FindByJQuery("#gwt-debug-projectTree > div:contains('" + PROJECT_NAME + "'):first")
-    protected Project project;
+    @FindByJQuery("#gwt-debug-projectTree > div:contains('" + VERTX_PROJECT_NAME + "'):first")
+    protected Project vertxProject;
+
+    @FindByJQuery("#gwt-debug-projectTree > div:contains('" + NODEJS_PROJECT_NAME + "'):first")
+    protected Project nodejsProject;
 
     @FindBy(id = "gwt-debug-editorMultiPartStack-contentPanel")
     protected EditorPart editorPart;
@@ -62,8 +63,12 @@ public abstract class AbstractCheFunctionalTest {
     private static CheWorkspace workspace;
 
     protected void openBrowser() {
-    	LOG.info("Opening browser");
-        driver.get(workspace.getIdeLink());
+        openBrowser(workspace);
+    }
+
+    protected void openBrowser(CheWorkspace wkspc) {
+        LOG.info("Opening browser");
+        driver.get(wkspc.getIdeLink());
         waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
         if ("username".equals(loginPageOrworkspaceIsRunningPopup.getAttribute("id"))) {
             login();

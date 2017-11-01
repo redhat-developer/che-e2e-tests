@@ -10,6 +10,8 @@ import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
 import redhat.che.functional.tests.utils.ActionUtils;
 
+import static redhat.che.functional.tests.utils.Constants.XML;
+
 @RunWith(Arquillian.class)
 public class PomTestCase extends AbstractCheFunctionalTest {
     private static final Logger logger = Logger.getLogger(PomTestCase.class);
@@ -40,9 +42,8 @@ public class PomTestCase extends AbstractCheFunctionalTest {
     public void testPomXmlReference() {
         openPomXml();
         setCursorToLine(37);
-        editorPart.codeEditor().writeDependencyIntoPom();
-        logger.info("Dependency successfully written into pom.xml on line " + line + ".");
-        Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent());
+        codeEditor.writeDependency(XML);
+        Assert.assertTrue("Annotation error is not visible.", codeEditor.verifyAnnotationErrorIsPresent(XML));
     }
 
     private void setCursorToLine(int line) {
@@ -54,7 +55,7 @@ public class PomTestCase extends AbstractCheFunctionalTest {
     }
 
     private void openPomXml() {
-        project.getResource("pom.xml").open();
+        vertxProject.getResource("pom.xml").open();
         Graphene.waitGui().until().element(currentLine).is().visible();
     }
 

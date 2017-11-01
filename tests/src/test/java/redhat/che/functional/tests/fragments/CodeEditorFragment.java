@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.jboss.arquillian.graphene.Graphene.waitGui;
 import static redhat.che.functional.tests.utils.ActionUtils.writeIntoElement;
+import static redhat.che.functional.tests.utils.Constants.JSON;
+import static redhat.che.functional.tests.utils.Constants.XML;
 
 /**
  * id = "gwt-debug-editorPartStack-contentPanel"
@@ -41,25 +43,32 @@ public class CodeEditorFragment {
     @Drone
     private WebDriver driver;
 
-    private static int WAIT_TIME= 15;
+    private static int WAIT_TIME = 15;
     private WebElement label;
 
-    private String dependencyToAdd =
-        "<dependency>\n"
-            + "<groupId>ch.qos.logback</groupId>\n"
-            + "<artifactId>logback-core</artifactId>\n"
-            + "<version>1.1.10</version>\n"
-            + "</dependency>\n";
+    private String pomDependency =
+            "<dependency>\n"
+                    + "<groupId>ch.qos.logback</groupId>\n"
+                    + "<artifactId>logback-core</artifactId>\n"
+                    + "<version>1.1.10</version>\n"
+                    + "</dependency>\n";
 
+    private String jsonDependency = "\"serve-static\": \"1.7.1\" \n,";
 
-    public void writeDependencyIntoPom() {
-        new Actions(driver).moveToElement(rootElement).sendKeys(dependencyToAdd).perform();
+    public void writeDependency(String type) {
+        switch (type) {
+            case XML:
+                new Actions(driver).moveToElement(rootElement).sendKeys(pomDependency).perform();
+                break;
+            case JSON:
+                new Actions(driver).moveToElement(rootElement).sendKeys(jsonDependency).perform();
+        }
     }
 
-    public boolean verifyAnnotationErrorIsPresent(){
+    public boolean verifyAnnotationErrorIsPresent(String type) {
         logger.info("Waiting for " + WAIT_TIME + " seconds until annotation error should be visible");
         waitGui().withTimeout(WAIT_TIME, TimeUnit.SECONDS).until(driver -> {
-            if(annotationError == null) return false;
+            if (annotationError == null) return false;
             annotationError.click();
             label = driver.findElement(By.className("tooltipTitle"));
             if (label.getText().contains("Package ch.qos.logback:logback-core-1.1.10 is vulnerable: CVE-2017-5929. Recommendation: use version ")) {

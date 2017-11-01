@@ -14,4 +14,5 @@ public class Constants {
 
     // Path to resources
     public static final String CREATE_WORKSPACE_REQUEST_JSON = "create-workspace-request.json";
+    public static final String CREATE_WORKSPACE_REQUEST_NODEJS_JSON = "create-workspace-request-nodejs.json";
 }

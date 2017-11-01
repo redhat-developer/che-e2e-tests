@@ -35,7 +35,7 @@ public class ContextMenu extends PopupMenu {
     @FindByJQuery("nobr[id='contextMenu/Run Test/JUnit Class']")
     private WebElement runTestClassMenuItem;
     
-    @FindByJQuery("nobr[id='contextMenu/Refresh \'" + Constants.PROJECT_NAME + "\'']")
+    @FindByJQuery("nobr[id='contextMenu/Refresh \'" + Constants.VERTX_PROJECT_NAME + "\'']")
     private WebElement refreshProjectContextMenuItem;
     
     public void selectRunJUnitClassTest() {

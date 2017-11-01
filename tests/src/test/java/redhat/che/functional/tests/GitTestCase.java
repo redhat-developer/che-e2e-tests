@@ -76,7 +76,7 @@ public class GitTestCase extends AbstractCheFunctionalTest {
     public void test_change_file_and_add_into_index() {
         //openBrowser(driver);
 
-        project.getResource("README.md").open();
+        vertxProject.getResource("README.md").open();
         editorPart.tabsPanel().waitUntilFocusedTabHasName("README.md");
         editorPart.codeEditor().writeIntoTextViewContent("\n changes added on: " + new Date());
 

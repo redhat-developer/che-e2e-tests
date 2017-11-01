@@ -7,7 +7,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 /**
- * jquery = "#gwt-debug-projectTree > div[path='/" + PROJECT_NAME + "']"
+ * jquery = "#gwt-debug-projectTree > div[path='/" + VERTX_PROJECT_NAME + "']"
+ * jquery = "#gwt-debug-projectTree > div[path='/" + NODEJS_PROJECT_NAME + "']"
  */
 public class Project extends AbstractResource {
 

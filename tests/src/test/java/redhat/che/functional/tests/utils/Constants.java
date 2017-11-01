@@ -18,8 +18,11 @@ public class Constants {
 	// Current values
 	public static final String OSIO_USERNAME = System.getProperty(OSIO_USERNAME_PROPERTY_NAME);
 	public static final String OSIO_PASSWORD = System.getProperty(OSIO_PASSWORD_PROPERTY_NAME);
-	public static final String PROJECT_NAME = "vertx-http-booster";
+	public static final String VERTX_PROJECT_NAME = "vertx-http-booster";
+	public static final String NODEJS_PROJECT_NAME = "web-nodejs-sample";
 	public static final String TEST_FILE = "HttpApplicationTest.java";
 	public static final String[] PATH_TO_TEST_FILE = new String[] { "src", "test", "java",
 		"booster", TEST_FILE };
+	public static final String XML = "pom";
+	public static final String JSON = "json";
 }
