@@ -146,8 +146,12 @@ public class CheWorkspaceService {
 		RestClient client = new RestClient(workspace.getRuntimeLink());
 		client.sentRequest(null, requestType, null, authorizationToken).close();
 		client.close();
-
-		waitUntilWorkspaceGetsToState(workspace, resultState, authorizationToken);
+		try {
+			waitUntilWorkspaceGetsToState(workspace, resultState, authorizationToken);
+		} catch (Throwable throwable){
+			logger.error(OpenShiftHelper.getCheLogs());
+			throw throwable;
+		}
 	}
 
 	public static void waitUntilWorkspaceGetsToState(CheWorkspace workspace, String resultState,
@@ -168,7 +172,7 @@ public class CheWorkspaceService {
 		}
 
 		if (counter == maxCount && !resultState.equals(currentState)) {
-			logger.error("Workspace has not successfuly changed its state in required time period of" + WAIT_TIME
+			logger.error("Workspace has not successfuly changed its state in required time period of " + WAIT_TIME
 					+ " seconds");
 			throw new RuntimeException("After waiting for " + WAIT_TIME + " seconds the workspace is still"
 					+ " not in state " + resultState);
