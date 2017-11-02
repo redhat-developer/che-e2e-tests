@@ -46,7 +46,7 @@ source config
 set +x
 
 OSO_TOKEN=$(curl -X GET -H "Authorization: Bearer ${ACTIVE_TOKEN}" \
-	https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token  | jq .access_token | cut -d\" -f2)
+	https://sso.${URL_PART}/auth/realms/fabric8/broker/openshift-v3/token  | jq .access_token | cut -d\" -f2)
 if [[ "null" == "${OSO_TOKEN}" ]]; then
     set -x	
     echo "OSO token is empty, cannot proceed with verification. Something went wrong when obtaining it via keycloak."
@@ -78,11 +78,12 @@ if [[ "${current_tag}" != "${CHE_SERVER_DOCKER_IMAGE_TAG}" ]]; then
   curl -sSL http://central.maven.org/maven2/io/fabric8/tenant/apps/che/${OSIO_VERSION}/che-${OSIO_VERSION}-openshift.yml | \
       sed "s/    hostname-http:.*/    hostname-http: ${OSO_HOSTNAME}/" | \
       sed "s/          image:.*/          image: ${DOCKER_HUB_NAMESPACE_SANITIZED}:${CHE_SERVER_DOCKER_IMAGE_TAG}/" | \
-      sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token|" | \
-      sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: https://auth.openshift.io/api/token?for=https://github.com|" | \
       sed "s|    che-keycloak-auth-server-url:.*|    che-keycloak-auth-server-url: https://sso.openshift.io/auth|" | \
       sed "s|    che-keycloak-client-id:.*|    che-keycloak-client-id: openshiftio-public|" | \
       sed "s|    che-keycloak-realm:.*|    che-keycloak-realm: fabric8|" | \
+      sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: https://sso.${URL_PART}/auth/realms/fabric8/broker/openshift-v3/token|" | \
+      sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: https://auth.${URL_PART}/api/token?for=https://github.com|" | \
+
   oc apply --force=true -f -
   sleep 10
 
