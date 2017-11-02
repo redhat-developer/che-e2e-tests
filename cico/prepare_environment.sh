@@ -48,7 +48,7 @@ set +x
 
 #prepend "export " and remove space after "="
 cat jenkins-env \
-    | grep -E "(OSIO|KEYCLOAK)" \
+    | grep -E "(OSIO|KEYCLOAK|BUILD_NUMBER|JOB_NAME)" \
     | sed 's/^/export /g' \
     | sed 's/= /=/g' \
     > credential_file

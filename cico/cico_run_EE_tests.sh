@@ -1,4 +1,21 @@
 #!/bin/bash
+archive_artifacts(){
+  echo "Archiving artifacts"
+  DATE=$(date +%Y%m%d-%H%M%S)
+  echo "With date $DATE"
+  ls -la ./artifacts.key
+  chmod 600 ./artifacts.key
+  chown root ./artifacts.key
+  ls -lR ./tests/target/surefire-reports
+  ls -lR ./tests/target/screenshots
+  mkdir -p ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/surefire-reports
+  cp -R ./tests/target/surefire-reports/* ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/surefire-reports
+  mkdir -p ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/screenshots
+  cp -R ./tests/target/screenshots/* ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/screenshots
+  rsync --password-file=./artifacts.key -PHva --relative ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/surefire-reports devtools@artifacts.ci.centos.org::devtools/
+  rsync --password-file=./artifacts.key -PHva --relative ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/screenshots devtools@artifacts.ci.centos.org::devtools/
+ }
+
 set -x
 set -e
 set +o nounset
@@ -29,5 +46,8 @@ chown -R 1000:1000 ./*
 docker run -d --user=fabric8 --cap-add SYS_ADMIN --name=che-selenium -t -v $(pwd):/home/fabric8/che:Z kkanova/che-selenium:latest
 
 ## Exec tests
-docker exec --user=fabric8 che-selenium /home/fabric8/che/cico/run_EE_tests.sh $CONFIG_FILE
+docker exec --user=fabric8 che-selenium /home/fabric8/che/cico/run_EE_tests.sh $CONFIG_FILE || RETURN_CODE=$? && true
+echo "Tests ended, now executing archiving artifacts."
+archive_artifacts
 
+exit $RETURN_CODE

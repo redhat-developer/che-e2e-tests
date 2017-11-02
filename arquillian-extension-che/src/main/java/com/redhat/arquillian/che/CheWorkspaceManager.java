@@ -69,7 +69,6 @@ public class CheWorkspaceManager {
             cheExtensionConfig.setCheStarterUrl("http://localhost:10000");
         }
 
-
         cheWorkspaceProviderInstanceProducer.set(new CheWorkspaceProvider(cheExtensionConfig));
         if (isNotEmpty(cheExtensionConfig.getCheWorkspaceUrl())) {
             cheWorkspaceInstanceProducer.set(cheWorkspaceProviderInstanceProducer.get().getCreatedWorkspace());
@@ -80,7 +79,7 @@ public class CheWorkspaceManager {
     public void beforeClass(@Observes BeforeClass event) {
         //get setting from annotation
         Workspace workspaceAnnotation = event.getTestClass().getAnnotation(Workspace.class);
-        if(workspaceAnnotation == null){
+        if (workspaceAnnotation == null) {
             throw new RuntimeException("Annotation @Workspace wasn't find in class " + event.getTestClass().getName() + ".");
         }
         CheWorkspace createdWkspc = cheWorkspaceInstanceProducer.get();
