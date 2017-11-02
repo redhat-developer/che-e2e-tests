@@ -8,7 +8,7 @@ archive_artifacts(){
 	chmod 600 ./artifacts.key
 	chown root ./artifacts.key
 	ls -lR
-	rsync --password-file=./artifacts.key -PHva  /home/fabric8/che/tests/target/* devtools@artifacts.ci.centos.org::devtools/che-functional-tests/$DATE
+	rsync --password-file=./artifacts.key -PHva  ./tests/target/* devtools@artifacts.ci.centos.org::devtools/che-functional-tests/$DATE
 }
 
 set -x
