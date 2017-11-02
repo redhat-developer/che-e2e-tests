@@ -13,16 +13,16 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.junit.*;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import redhat.che.functional.tests.fragments.CodeEditorFragment;
+import redhat.che.functional.tests.customExceptions.MarkerNotPresentException;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
 import redhat.che.functional.tests.utils.ActionUtils;
 
 import java.util.concurrent.TimeUnit;
 
 import static com.redhat.arquillian.che.util.Constants.CREATE_WORKSPACE_REQUEST_NODEJS_JSON;
-import static redhat.che.functional.tests.utils.Constants.JSON;
 
 @RunWith(Arquillian.class)
 public class PackageJsonTestCase extends AbstractCheFunctionalTest {
@@ -34,23 +34,18 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
     @ArquillianResource
     private static CheWorkspaceProvider provider;
 
-    @FindBy(id = "gwt-debug-editorPartStack-contentPanel")
-    private CodeEditorFragment codeEditor;
-
     @FindBy(id = "gwt-debug-askValueDialog-window")
     private AskForValueDialog askForValueDialog;
 
-    @FindBy(id = "gwt-debug-askValueDialog-window")
-    private WebElement valueDialog;
-
-    @FindByJQuery("div:contains('Initializing')")
-    private WebElement initializingDialog;
-
-    CheWorkspace nodejsWorkspace;
-    String token;
-
     @FindBy(className = "currentLine")
     private WebElement currentLine;
+
+    private CheWorkspace nodejsWorkspace;
+    private String token;
+
+    private String jsonDependency = "\"serve-static\": \"1.7.1\" \n,";
+
+    private String jsonExpectedError = "use version";
 
     @Before
     public void setEnvironment(){
@@ -70,12 +65,17 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
         CheWorkspaceService.deleteWorkspace(nodejsWorkspace, token);
     }
 
-    @Test(expected = org.openqa.selenium.TimeoutException.class)
-    public void testPackageJsonBayesian(){
+    @Test(expected = MarkerNotPresentException.class)
+    public void testPackageJsonBayesian() throws MarkerNotPresentException{
         openPackageJson();
         setCursorToLine(12);
-        codeEditor.writeDependency(JSON);
-        Assert.assertTrue("Annotation error is not visible.", codeEditor.verifyAnnotationErrorIsPresent(JSON));
+        editorPart.codeEditor().writeDependency(jsonDependency);
+
+        try {
+            Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(jsonExpectedError));
+        } catch (TimeoutException e){
+            throw new MarkerNotPresentException(e.getMessage());
+        }
     }
 
     private void openPackageJson() {

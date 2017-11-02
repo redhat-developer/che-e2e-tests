@@ -23,6 +23,4 @@ public class Constants {
 	public static final String TEST_FILE = "HttpApplicationTest.java";
 	public static final String[] PATH_TO_TEST_FILE = new String[] { "src", "test", "java",
 		"booster", TEST_FILE };
-	public static final String XML = "pom";
-	public static final String JSON = "json";
 }

@@ -10,8 +10,6 @@ import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
 import redhat.che.functional.tests.utils.ActionUtils;
 
-import static redhat.che.functional.tests.utils.Constants.XML;
-
 @RunWith(Arquillian.class)
 public class PomTestCase extends AbstractCheFunctionalTest {
     private static final Logger logger = Logger.getLogger(PomTestCase.class);
@@ -23,6 +21,15 @@ public class PomTestCase extends AbstractCheFunctionalTest {
     private WebElement currentLine;
 
     private int line = 37;
+
+    private String pomDependency =
+            "<dependency>\n"
+                    + "<groupId>ch.qos.logback</groupId>\n"
+                    + "<artifactId>logback-core</artifactId>\n"
+                    + "<version>1.1.10</version>\n"
+                    + "</dependency>\n";
+
+    private String pomExpectedError = "Package ch.qos.logback:logback-core-1.1.10 is vulnerable: CVE-2017-5929. Recommendation: use version ";
 
     @Before
     public void importProject(){
@@ -42,8 +49,8 @@ public class PomTestCase extends AbstractCheFunctionalTest {
     public void testPomXmlReference() {
         openPomXml();
         setCursorToLine(37);
-        codeEditor.writeDependency(XML);
-        Assert.assertTrue("Annotation error is not visible.", codeEditor.verifyAnnotationErrorIsPresent(XML));
+        editorPart.codeEditor().writeDependency(pomDependency);
+        Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError));
     }
 
     private void setCursorToLine(int line) {
