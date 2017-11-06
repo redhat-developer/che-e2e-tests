@@ -10,7 +10,6 @@
   
   <extension qualifier="webdriver">
     <property name="browser">chrome</property>
-    <property name="chromeDriverVersion">2.29</property>
   </extension>
 
   <extension qualifier="graphene">
