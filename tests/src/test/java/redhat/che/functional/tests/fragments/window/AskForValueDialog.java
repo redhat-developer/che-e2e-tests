@@ -11,7 +11,7 @@ package redhat.che.functional.tests.fragments.window;
  */
 
 
-import com.sun.jna.platform.win32.Guid;
+
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.fragment.Root;
