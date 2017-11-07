@@ -45,7 +45,7 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
 
     private String jsonDependency = "\"serve-static\": \"1.7.1\" \n,";
 
-    private String jsonExpectedError = "use version";
+    private String jsonExpectedError = "Package serve-static-1.7.1 is vulnerable: CVE-2015-1164 Open redirect vulnerability. Recommendation: use version";
 
     @Before
     public void setEnvironment(){
@@ -65,7 +65,7 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
         CheWorkspaceService.deleteWorkspace(nodejsWorkspace, token);
     }
 
-    @Test(expected = MarkerNotPresentException.class)
+    @Test
     public void testPackageJsonBayesian() throws MarkerNotPresentException{
         openPackageJson();
         setCursorToLine(12);
