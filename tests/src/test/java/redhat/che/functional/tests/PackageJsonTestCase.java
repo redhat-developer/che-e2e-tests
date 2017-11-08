@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
+ */
 package redhat.che.functional.tests;
 
 import com.redhat.arquillian.che.CheWorkspaceManager;
@@ -8,17 +18,13 @@ import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.service.CheWorkspaceService;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
-import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.junit.*;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.customExceptions.MarkerNotPresentException;
-import redhat.che.functional.tests.fragments.window.AskForValueDialog;
-import redhat.che.functional.tests.utils.ActionUtils;
 
 import java.util.concurrent.TimeUnit;
 
@@ -33,9 +39,6 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
 
     @ArquillianResource
     private static CheWorkspaceProvider provider;
-
-    @FindBy(id = "gwt-debug-askValueDialog-window")
-    private AskForValueDialog askForValueDialog;
 
     @FindBy(className = "currentLine")
     private WebElement currentLine;
@@ -70,12 +73,7 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
         openPackageJson();
         setCursorToLine(12);
         editorPart.codeEditor().writeDependency(jsonDependency);
-
-        try {
-            Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(jsonExpectedError));
-        } catch (TimeoutException e){
-            throw new MarkerNotPresentException(e.getMessage());
-        }
+        Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(jsonExpectedError));
     }
 
     private void openPackageJson() {
@@ -83,11 +81,4 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
         Graphene.waitGui().withTimeout(90, TimeUnit.SECONDS).until().element(currentLine).is().visible();
     }
 
-    private void setCursorToLine(int line) {
-        ActionUtils.openMoveCursorDialog(driver);
-        askForValueDialog.waitFormToOpen();
-        askForValueDialog.typeAndWaitText(line);
-        askForValueDialog.clickOkBtn();
-        askForValueDialog.waitFormToClose();
-    }
 }

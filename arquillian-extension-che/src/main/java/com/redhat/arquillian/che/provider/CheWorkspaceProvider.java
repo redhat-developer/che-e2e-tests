@@ -26,10 +26,6 @@ import com.redhat.arquillian.che.rest.RequestType;
 import com.redhat.arquillian.che.rest.RestClient;
 import com.redhat.arquillian.che.service.CheWorkspaceService;
 import okhttp3.Response;
-import static com.redhat.arquillian.che.util.Constants.CREATE_WORKSPACE_REQUEST_NODEJS_JSON;
-
-
-import okhttp3.Response;
 
 public class CheWorkspaceProvider {
 	

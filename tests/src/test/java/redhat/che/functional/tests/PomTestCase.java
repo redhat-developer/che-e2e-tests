@@ -53,14 +53,6 @@ public class PomTestCase extends AbstractCheFunctionalTest {
         Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError));
     }
 
-    private void setCursorToLine(int line) {
-        ActionUtils.openMoveCursorDialog(driver);
-        askForValueDialog.waitFormToOpen();
-        askForValueDialog.typeAndWaitText(line);
-        askForValueDialog.clickOkBtn();
-        askForValueDialog.waitFormToClose();
-    }
-
     private void openPomXml() {
         vertxProject.getResource("pom.xml").open();
         Graphene.waitGui().until().element(currentLine).is().visible();

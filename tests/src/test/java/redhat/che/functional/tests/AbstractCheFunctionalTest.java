@@ -24,6 +24,10 @@ import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import redhat.che.functional.tests.fragments.window.AskForValueDialog;
+import redhat.che.functional.tests.utils.ActionUtils;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.jboss.arquillian.graphene.Graphene.waitModel;
 import static redhat.che.functional.tests.utils.Constants.*;
@@ -31,7 +35,7 @@ import static redhat.che.functional.tests.utils.Constants.*;
 @RunWith(Arquillian.class)
 public abstract class AbstractCheFunctionalTest {
 	private static final Logger LOG = Logger.getLogger(AbstractCheFunctionalTest.class);
-	
+
     @Drone
     protected WebDriver driver;
 
@@ -59,6 +63,9 @@ public abstract class AbstractCheFunctionalTest {
     @FindBy(id = "kc-login")
     private WebElement loginButton;
 
+    @FindBy(id = "gwt-debug-askValueDialog-window")
+    private AskForValueDialog askForValueDialog;
+
     @ArquillianResource
     private static CheWorkspace workspace;
 
@@ -85,5 +92,13 @@ public abstract class AbstractCheFunctionalTest {
         //ByJQuery collapse = ByJQuery.selector("div:has(path[id='collapse-expand'])");
         //waitModel().withTimeout(40, SECONDS).until().element(collapse).is().visible();
         //driver.findElement(collapse).click();
+    }
+
+    protected void setCursorToLine(int line) {
+        ActionUtils.openMoveCursorDialog(driver);
+        askForValueDialog.waitFormToOpen();
+        askForValueDialog.typeAndWaitText(line);
+        askForValueDialog.clickOkBtn();
+        askForValueDialog.waitFormToClose();
     }
 }

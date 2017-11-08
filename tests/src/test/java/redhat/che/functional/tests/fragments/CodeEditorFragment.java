@@ -6,6 +6,7 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -50,17 +51,20 @@ public class CodeEditorFragment {
 
     public boolean verifyAnnotationErrorIsPresent(String expectedError) {
         logger.info("Waiting for " + WAIT_TIME + " seconds until annotation error should be visible");
-        waitGui().withTimeout(WAIT_TIME, TimeUnit.SECONDS).until(driver -> {
-            if (annotationError == null) return false;
-            annotationError.click();
-            label = driver.findElement(By.className("tooltipTitle"));
-            if (label.getText().contains(expectedError)) {
-                logger.info("Annotation error is present.");
-                return true;
-            } else {
+        try {
+            waitGui().withTimeout(WAIT_TIME, TimeUnit.SECONDS).until(driver -> {
+                if (annotationError == null) return false;
+                annotationError.click();
+                label = driver.findElement(By.className("tooltipTitle"));
+                if (label.getText().contains(expectedError)) {
+                    logger.info("Annotation error is present.");
+                    return true;
+                }
                 return false;
-            }
-        });
+            });
+        } catch (TimeoutException e){
+            return false;
+        }
         return true;
     }
 

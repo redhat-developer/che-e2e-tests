@@ -57,7 +57,7 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
         editorPart.tabsPanel().waintUntilFocusedTabSaves();
     }
 
-    @Test(expected = MarkerNotPresentException.class)
+    @Test(expected = AssertionError.class)
     public void bayesianErrorShownOnOpenFile() throws MarkerNotPresentException {
         //creating errorneous dependency
         openPomXml();
@@ -69,19 +69,8 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
         editorPart.tabsPanel().closeActiveTab();
         openPomXml();
         setCursorToLine(37);
-        try {
-            Assert.assertTrue("Annotation error is not visible when reopening file.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError));
-        } catch (TimeoutException e){
-            throw new MarkerNotPresentException(e.getMessage());
-        }
-    }
 
-    private void setCursorToLine(int line) {
-        ActionUtils.openMoveCursorDialog(driver);
-        askForValueDialog.waitFormToOpen();
-        askForValueDialog.typeAndWaitText(line);
-        askForValueDialog.clickOkBtn();
-        askForValueDialog.waitFormToClose();
+        Assert.assertTrue("Annotation error is not visible when reopening file.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError));
     }
 
     private void openPomXml() {
