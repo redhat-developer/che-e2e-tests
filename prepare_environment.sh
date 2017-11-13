@@ -19,20 +19,28 @@ mv jq-linux64 /usr/bin/jq
 chmod +x /usr/bin/jq
 
 
-# Fetch PR and rebase on master, if job runs from PR
-cat jenkins-env \
-    | grep -E "(ghprbSourceBranch|ghprbPullId)=" \
-    | sed 's/^/export /g' \
-    > /tmp/jenkins-env
-source /tmp/jenkins-env
-if [[ ! -z "${ghprbPullId:-}" ]] && [[ ! -z "${ghprbSourceBranch:-}" ]]; then
-  echo 'Checking out to Github PR branch'
-  git fetch origin pull/${ghprbPullId}/head:${ghprbSourceBranch}
-  git checkout ${ghprbSourceBranch}
-  git fetch origin master
-  git rebase FETCH_HEAD
+function rebaseIfPR(){
+	# Fetch PR and rebase on master, if job runs from PR
+	cat jenkins-env \
+	    | grep -E "(ghprbSourceBranch|ghprbPullId)=" \
+	    | sed 's/^/export /g' \
+	    > /tmp/jenkins-env
+	source /tmp/jenkins-env
+	if [[ ! -z "${ghprbPullId:-}" ]] && [[ ! -z "${ghprbSourceBranch:-}" ]]; then
+	  echo 'Checking out to Github PR branch'
+	  git fetch origin pull/${ghprbPullId}/head:${ghprbSourceBranch}
+	  git checkout ${ghprbSourceBranch}
+	  git fetch origin master
+	  git rebase FETCH_HEAD
+	else
+	  echo 'Working on current branch of EE tests repo'
+	fi
+}
+
+if [ "$DO_NOT_REBASE" = "true" ]; then
+	echo "Rebasing denied by variable DO_NOT_REBASE"
 else
-  echo 'Working on current branch of EE tests repo'
+	rebaseIfPR
 fi
 
 # Set credentials

@@ -80,6 +80,9 @@ if [[ "${current_tag}" != "${CHE_SERVER_DOCKER_IMAGE_TAG}" ]]; then
       sed "s/          image:.*/          image: ${DOCKER_HUB_NAMESPACE_SANITIZED}:${CHE_SERVER_DOCKER_IMAGE_TAG}/" | \
       sed "s|    keycloak-oso-endpoint:.*|    keycloak-oso-endpoint: https://sso.openshift.io/auth/realms/fabric8/broker/openshift-v3/token|" | \
       sed "s|    keycloak-github-endpoint:.*|    keycloak-github-endpoint: https://auth.openshift.io/api/token?for=https://github.com|" | \
+      sed "s|    che-keycloak-auth-server-url:.*|    che-keycloak-auth-server-url: https://sso.openshift.io/auth|" | \
+      sed "s|    che-keycloak-client-id:.*|    che-keycloak-client-id: openshiftio-public|" | \
+      sed "s|    che-keycloak-realm:.*|    che-keycloak-realm: fabric8|" | \
   oc apply --force=true -f -
   sleep 10
 

@@ -21,6 +21,7 @@ import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -79,7 +80,20 @@ public abstract class AbstractCheFunctionalTest {
         waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
         if ("username".equals(loginPageOrworkspaceIsRunningPopup.getAttribute("id"))) {
             login();
-            waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
+			try {
+				waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
+			} catch (Exception ex) {
+				// Sometimes workspace is not started correctly
+				// (https://github.com/openshiftio/openshift.io/issues/1304). Simple refresh
+				// should resolve this.
+				try {
+					driver.switchTo().alert().accept();
+				}catch(NoAlertPresentException e) {
+					// Alert didn't come up. Do nothing.
+				}
+				driver.navigate().refresh();
+				waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
+			}
         }
         waitModel().until().element(workspaceIsRunningPopup).is().not().visible();
     }

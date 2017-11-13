@@ -75,6 +75,13 @@ public class CodeEditorFragment {
     public void hideErrors() {
         rootElement.click();
         waitGui().until().element(label).is().not().visible();
+        try {
+        	// Sometimes, the tooltip pops up once again. Get rid of it again.
+        	waitGui().withTimeout(1, TimeUnit.SECONDS).until().element(By.className("tooltipTitle")).is().visible();
+        	rootElement.click();
+        }catch (TimeoutException e) {
+        	// Tooltip was successfully hidden. Do nothing.
+        }
     }
 
     public void deleteNextLines(int linesCount) {
