@@ -22,7 +22,9 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
@@ -80,25 +82,34 @@ public abstract class AbstractCheFunctionalTest {
         waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
         if ("username".equals(loginPageOrworkspaceIsRunningPopup.getAttribute("id"))) {
             login();
-			try {
-				waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
-			} catch (Exception ex) {
-				// Sometimes workspace is not started correctly
-				// (https://github.com/openshiftio/openshift.io/issues/1304). Simple refresh
-				// should resolve this.
-				try {
-					driver.switchTo().alert().accept();
-				}catch(NoAlertPresentException e) {
-					// Alert didn't come up. Do nothing.
-				}
-				driver.navigate().refresh();
-				waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
-			}
+            waitUntilWorkspaceIsRunningElseRefresh();
         }
         waitModel().until().element(workspaceIsRunningPopup).is().not().visible();
     }
 
-    private void login() {
+    /**
+	 * Workarnound for https://github.com/openshiftio/openshift.io/issues/1304.
+	 * Should be removed once resolved.
+	 */
+	private void waitUntilWorkspaceIsRunningElseRefresh() {
+		waitModel().withTimeout(3, TimeUnit.MINUTES).until(driver -> {
+			try {
+				waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
+				return true;
+			}catch(WebDriverException e) {
+				try {
+					driver.switchTo().alert().accept();
+				}catch (NoAlertPresentException ex) {
+					// Alert didn't come up. Do nothing.
+				}
+				driver.navigate().refresh();
+				return false;
+			}
+		});
+		
+	}
+
+	private void login() {
     	LOG.info("Logging in");
         usernameField.sendKeys(OSIO_USERNAME);
         passwordField.sendKeys(OSIO_PASSWORD);
