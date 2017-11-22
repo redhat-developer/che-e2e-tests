@@ -26,7 +26,7 @@
 //
 //import redhat.che.functional.tests.fragments.CommandsManagerDialog;
 //import redhat.che.functional.tests.fragments.Terminal;
-//import redhat.che.functional.tests.fragments.ToolbarDebugPanel;
+//import redhat.che.functional.tests.fragments.DebugLeftPanel;
 //import redhat.che.functional.tests.fragments.popup.ContextMenu;
 //import redhat.che.functional.tests.fragments.popup.DropDownMenu;
 //
@@ -39,7 +39,7 @@
 //    private ContextMenu contextMenu;
 //    
 //    @FindBy(id="gwt-debug-toolbarPanel")
-//    private ToolbarDebugPanel debugPanel;
+//    private DebugLeftPanel debugPanel;
 //    
 //    @FindByJQuery("div[id=\"gwt-debug-commandConsoleLines\"]:last pre:contains('[INFO] BUILD SUCCESS')")
 //    private WebElement successfulBuildPreElement;

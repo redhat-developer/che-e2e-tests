@@ -40,4 +40,8 @@ public class ActionUtils {
     public static void deleteMarkedLines(WebDriver driver) {
         new Actions(driver).sendKeys(Keys.DELETE).perform();
     }
+
+    public static void doubleClick(WebDriver driver, WebElement element){
+        new Actions(driver).doubleClick(element).perform();
+    }
 }
