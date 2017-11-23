@@ -57,7 +57,7 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
         editorPart.tabsPanel().waintUntilFocusedTabSaves();
     }
 
-    @Test(expected = AssertionError.class)
+    @Test
     public void bayesianErrorShownOnOpenFile() throws MarkerNotPresentException {
         //creating errorneous dependency
         openPomXml();
