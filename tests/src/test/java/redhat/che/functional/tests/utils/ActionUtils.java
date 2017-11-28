@@ -44,4 +44,15 @@ public class ActionUtils {
     public static void doubleClick(WebDriver driver, WebElement element){
         new Actions(driver).doubleClick(element).perform();
     }
+
+    public static void selectAll(WebDriver driver){
+        new Actions(driver)
+                .sendKeys(Keys.chord(Keys.CONTROL, "a"))
+                .perform();
+
+    }
+
+    public static void moveCursorToElement(WebDriver driver, WebElement element){
+        new Actions(driver).moveToElement(element).perform();
+    }
 }

@@ -16,14 +16,11 @@ import org.junit.*;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import redhat.che.functional.tests.fragments.CommandsEditor;
-import redhat.che.functional.tests.fragments.CommandsManagerDialog;
-import redhat.che.functional.tests.fragments.DebugLeftPanel;
+import redhat.che.functional.tests.fragments.*;
 import redhat.che.functional.tests.fragments.popup.DropDownMenu;
 
 import java.util.concurrent.TimeUnit;
-
-import static org.jboss.arquillian.graphene.Graphene.waitModel;
+import static org.jboss.arquillian.graphene.Graphene.*;
 
 /**
  * Created by katka on 22/06/17.
@@ -32,7 +29,10 @@ import static org.jboss.arquillian.graphene.Graphene.waitModel;
 @RunWith(Arquillian.class)
 public class MavenTestCase extends AbstractCheFunctionalTest{
     @FindBy(id="gwt-debug-leftPanel")
-    private DebugLeftPanel leftPanel;
+    private LeftBar leftBar;
+
+    @FindBy(id="gwt-debug-navPanel")
+    private CommandsManager commandsManager;
 
     @FindByJQuery("pre:contains('Total time')")
     private WebElement consoleEnds;
@@ -40,14 +40,11 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     @FindByJQuery("pre:contains('BUILD SUCCESS')")
     private WebElement buildSuccess;
 
-    @FindBy(id = "menu-lock-layer-id")
-    private DropDownMenu dropDownMenu;
-
-    @FindByJQuery("div#commandsManagerView")
-    private CommandsManagerDialog commandsManagerDialog;
-
-    @FindBy(id = "gwt-debug-editorPartStack-contentPanel")
+    @FindBy(id = "gwt-debug-editorMultiPartStack-contentPanel")
     private CommandsEditor commandsEditor;
+
+    @FindBy(id = "ask-dialog-ok")
+    private WebElement okButton;
 
     private final String testName = "buildTest";
     private final String command = "cd ${current.project.path} && scl enable rh-maven33 'mvn clean install'";
@@ -55,14 +52,12 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     @Before
     public void setup(){
         openBrowser();
-        vertxProject.select();
     }
 
     @After
     public void deleteCommand(){
-        //leftPanel.openCommandsPart();
-        dropDownMenu.selectEditCommand();
-        commandsManagerDialog.deleteCommand(testName);
+        commandsManager.removeCommand(testName);
+        guardAjax(okButton).click();
     }
 
     /**
@@ -71,19 +66,14 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     @Test
     public void test_maven_build() {
         //creating build command in left commands panel
-        leftPanel.openEditPanelForAddingBuildCommand(testName, command);
+        leftBar.openCommandsPart();
+        commandsManager.openEditPanelForAddingBuildCommand();
         commandsEditor.addNewCommand(testName, command);
-        /*
-        dropDownMenu.selectEditCommand();
-        commandsManagerDialog.addCustomCommand(testName, command);
-        commandsManagerDialog.closeEditCommands();
-
-        //running command (created command is automatically selected - no need to search for it in dropdown)
-        leftPanel.executeCommand();
+        commandsEditor.runOpenedCommand();
 
         //wait for end - if build first time, it last longer -> increasing timeout
         waitModel().withTimeout(2, TimeUnit.MINUTES).until().element(consoleEnds).is().visible();
 
-        Assert.assertTrue(buildSuccess.isDisplayed());*/
+        Assert.assertTrue(buildSuccess.isDisplayed());
     }
 }

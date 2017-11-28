@@ -25,7 +25,7 @@ import static org.jboss.arquillian.graphene.Graphene.guardNoRequest;
 /*
  * root div[id="gwt-debug-toolbarPanel"]
  */
-public class DebugLeftPanel {
+public class LeftBar {
 
     @Drone
     private WebDriver driver;
@@ -36,39 +36,13 @@ public class DebugLeftPanel {
     @FindBy(id = "gwt-debug-partButton-Commands")
     private WebElement commandsPart;
 
-    @FindBy(id = "commands_tree-button-add")
-    private WebElement buildPlus;
-
-    @FindBy(id = "gwt-debug-ActionButton/executeSelectedCommand-true")
-    private WebElement executeCommandButton;
-
-    @FindByJQuery("div[id='gwt-debug-dropDownHeader']:last")
-    private WebElement commandsDropDownButton;
 
     /**
      * Clicks button to execute selected command.
      */
 
 
-
-    public void executeCommand() {
-        executeCommandButton.click();
-    }
-
-    private void openCommandsPart(){
-        commandsPart.click();
-    }
-
-    private void addMvnBuild(){
-        buildPlus = driver.findElement(By.id("commands_tree-button-add"));
-        guardNoRequest(buildPlus).click();
-        WebElement mvn = driver.findElement(By.xpath("//option[@value='mvn']"));
-        ActionUtils.doubleClick(driver, mvn);
-    }
-
-    public void openEditPanelForAddingBuildCommand(String testName, String command) {
-        openCommandsPart();
-        addMvnBuild();
-
+    public void openCommandsPart() {
+        guardAjax(commandsPart).click();
     }
 }
