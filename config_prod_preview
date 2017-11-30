@@ -5,3 +5,4 @@ export OSO_DOMAIN=8a09.starter-us-east-2.openshiftapps.com
 export OSO_HOSTNAME=kkanova-osiotest1-che.8a09.starter-us-east-2.openshiftapps.com
 export DOCKER_HUB_NAMESPACE=registry.devshift.net/che/che
 export URL_PART=prod-preview.openshift.io
+export MULTITENANCY=true
