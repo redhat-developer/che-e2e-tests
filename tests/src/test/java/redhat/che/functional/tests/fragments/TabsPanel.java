@@ -3,6 +3,7 @@ package redhat.che.functional.tests.fragments;
 import com.google.common.base.Function;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -28,8 +29,13 @@ public class TabsPanel {
         waitModel().until((Function<WebDriver, Boolean>) webDriver -> focusedTab.getText().equals(tabName));
     }
 
-    public void closeActiveTab() {
+    public void closeActiveTab(WebDriver driver) {
         focusedTabClose.click();
+        try {
+            driver.findElement(By.id("ask-dialog-ok")).click();
+        } catch(Exception e){
+            //if exception arise, changes were saved automatically
+        }
     }
 
     public void waintUntilFocusedTabSaves() {

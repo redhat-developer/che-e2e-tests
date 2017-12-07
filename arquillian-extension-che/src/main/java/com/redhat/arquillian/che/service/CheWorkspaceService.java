@@ -12,9 +12,9 @@ package com.redhat.arquillian.che.service;
 
 import java.io.IOException;
 import java.util.List;
-
+import com.redhat.arquillian.che.resource.Stack;
+import com.redhat.arquillian.che.resource.StackService;
 import org.apache.log4j.Logger;
-
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.redhat.arquillian.che.resource.CheWorkspace;
@@ -58,6 +58,25 @@ public class CheWorkspaceService {
 		        getWorkspaceRuntimeLink(jsonDocument));
 	}
 
+	public static CheWorkspace getWorkspaceFromDocument(Object jsonDocument, String cheWorkspaceUrl) {
+		return new CheWorkspace(getWorkspaceIDELink(jsonDocument), getWorkspaceSelfLink(jsonDocument),
+			getWorkspaceRuntimeLink(jsonDocument), getWorkspaceStack(jsonDocument, cheWorkspaceUrl));
+	}
+
+	private static Stack getWorkspaceStack(Object jsonDocument, String cheWorkspaceUrl) {
+		String wkspcName = cheWorkspaceUrl.substring(cheWorkspaceUrl.length()-5);
+		List<String> wkspcNames = JsonPath.read(jsonDocument, "$..config.name");
+		List<String> projectTypes = JsonPath.read(jsonDocument, "$..config.projects[0].type");
+
+		for(int i = 0; i < wkspcNames.size(); i++){
+			if(wkspcNames.get(i).equals(wkspcName)){
+				return StackService.getStackType(projectTypes.get(i));
+			}
+		}
+
+		return null;
+	}
+
 	/**
 	 * Sent a delete request and wait while workspace is existing.
 	 * 
@@ -90,7 +109,7 @@ public class CheWorkspaceService {
 		client.close();
 	}
 
-	private static boolean workspaceExists(RestClient client, CheWorkspace workspace) {
+	public static boolean workspaceExists(RestClient client, CheWorkspace workspace) {
 		Response response = client.sentRequest(workspace.getSelfLink(), RequestType.GET);
 		boolean isSuccessful = response.isSuccessful();
 		response.close();
@@ -160,7 +179,7 @@ public class CheWorkspaceService {
 		int counter = 0;
 		int maxCount = Math.round(WAIT_TIME / (SLEEP_TIME_TICK / 1000));
 		String currentState = getWorkspaceStatus(client, workspace, authorizationToken);
-		logger.info("Waiting for " + WAIT_TIME + " seconds until workspace gets from state " + currentState
+		logger.info("Waiting for " + WAIT_TIME + " seconds until workspace " + workspace.getIdeName() +" gets from state " + currentState
 				+ " to state " + resultState);
 		while (counter < maxCount && !resultState.equals(currentState)) {
 			counter++;
@@ -201,4 +220,6 @@ public class CheWorkspaceService {
         List<String> wsLinks= JsonPath.read(workspaceDocument, linkPath);
         return wsLinks.get(0).toString();
     }
+
+
 }

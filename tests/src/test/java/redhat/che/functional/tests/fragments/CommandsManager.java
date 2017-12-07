@@ -17,7 +17,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.utils.ActionUtils;
-
 import static org.jboss.arquillian.graphene.Graphene.waitGui;
 
 public class CommandsManager {
@@ -41,16 +40,12 @@ public class CommandsManager {
         executeCommandButton.click();
     }
 
-    private void addMvnBuild(){
+    public void openEditPanelForAddingBuildCommand() {
         waitGui().until().element(buildPlus).is().visible();
         buildPlus.click();
         waitGui().until().element(By.xpath("//option[@value='mvn']")).is().visible();
         WebElement mvn = driver.findElement(By.xpath("//option[@value='mvn']"));
         ActionUtils.doubleClick(driver, mvn);
-    }
-
-    public void openEditPanelForAddingBuildCommand() {
-        addMvnBuild();
     }
 
     public void removeCommand(String testName) {

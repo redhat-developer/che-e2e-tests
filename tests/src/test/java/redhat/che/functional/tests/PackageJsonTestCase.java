@@ -11,11 +11,10 @@
 package redhat.che.functional.tests;
 
 import com.redhat.arquillian.che.CheWorkspaceManager;
-import com.redhat.arquillian.che.config.CheExtensionConfiguration;
+import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import com.redhat.arquillian.che.resource.CheWorkspace;
-import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
-import com.redhat.arquillian.che.service.CheWorkspaceService;
+import com.redhat.arquillian.che.resource.Stack;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
@@ -25,12 +24,10 @@ import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.customExceptions.MarkerNotPresentException;
-
 import java.util.concurrent.TimeUnit;
 
-import static com.redhat.arquillian.che.util.Constants.CREATE_WORKSPACE_REQUEST_NODEJS_JSON;
-
 @RunWith(Arquillian.class)
+@Workspace(removeAfterTest = false, stackID = Stack.NODEJS)
 public class PackageJsonTestCase extends AbstractCheFunctionalTest {
     private static final Logger logger = Logger.getLogger(CheWorkspaceManager.class);
 
@@ -46,26 +43,19 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
     private CheWorkspace nodejsWorkspace;
     private String token;
 
-    private String jsonDependency = "\"serve-static\": \"1.7.1\" \n,";
+    private String jsonDependency = "\"serve-static\": \"1.7.1\" ,\n";
 
     private String jsonExpectedError = "Package serve-static-1.7.1 is vulnerable: CVE-2015-1164 Open redirect vulnerability. Recommendation: use version";
 
     @Before
     public void setEnvironment(){
-        nodejsWorkspace = provider.createCheWorkspace(CREATE_WORKSPACE_REQUEST_NODEJS_JSON);
-        logger.info("Workspace with node.js project created.");
-        token = "Bearer " + System.getProperty(CheExtensionConfiguration.KEYCLOAK_TOKEN_PROPERTY_NAME);
-        String runningState = CheWorkspaceStatus.RUNNING.getStatus();
-        CheWorkspaceService.waitUntilWorkspaceGetsToState(nodejsWorkspace, runningState, token);
-
-        openBrowser(nodejsWorkspace);
+        openBrowser();
     }
 
     @After
     public void resetEnvironment(){
-        Assert.assertTrue(provider.stopWorkspace(nodejsWorkspace));
-        Assert.assertTrue(provider.startWorkspace(firstWorkspace));
-        CheWorkspaceService.deleteWorkspace(nodejsWorkspace, token);
+        setCursorToLine(12);
+        editorPart.codeEditor().deleteNextLines(1);
     }
 
     @Test

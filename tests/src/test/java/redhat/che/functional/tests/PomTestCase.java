@@ -1,5 +1,7 @@
 package redhat.che.functional.tests;
 
+import com.redhat.arquillian.che.annotations.Workspace;
+import com.redhat.arquillian.che.resource.Stack;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
@@ -13,6 +15,7 @@ import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
 
 @RunWith(Arquillian.class)
+@Workspace(stackID = Stack.VERTX, removeAfterTest = false)
 public class PomTestCase extends AbstractCheFunctionalTest {
     private static final Logger logger = Logger.getLogger(PomTestCase.class);
 

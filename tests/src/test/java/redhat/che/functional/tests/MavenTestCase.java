@@ -10,6 +10,8 @@
  ******************************************************************************/
 package redhat.che.functional.tests;
 
+import com.redhat.arquillian.che.annotations.Workspace;
+import com.redhat.arquillian.che.resource.Stack;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.After;
@@ -19,6 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+
 import redhat.che.functional.tests.fragments.CommandsEditor;
 import redhat.che.functional.tests.fragments.CommandsManager;
 import redhat.che.functional.tests.fragments.LeftBar;
@@ -33,6 +36,7 @@ import static org.jboss.arquillian.graphene.Graphene.waitModel;
  */
 
 @RunWith(Arquillian.class)
+@Workspace(stackID = Stack.VERTX, removeAfterTest = false)
 public class MavenTestCase extends AbstractCheFunctionalTest{
     @FindBy(id="gwt-debug-leftPanel")
     private LeftBar leftBar;

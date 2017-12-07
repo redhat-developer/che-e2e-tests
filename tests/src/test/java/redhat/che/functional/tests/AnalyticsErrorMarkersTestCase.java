@@ -10,6 +10,8 @@
  */
 package redhat.che.functional.tests;
 
+import com.redhat.arquillian.che.annotations.Workspace;
+import com.redhat.arquillian.che.resource.Stack;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
@@ -22,8 +24,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.customExceptions.MarkerNotPresentException;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
+@Workspace(stackID = Stack.VERTX, removeAfterTest = false)
 public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
 
     private static final Logger logger = Logger.getLogger(AnalyticsErrorMarkersTestCase.class);
@@ -44,12 +48,12 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
     private String pomExpectedError = "Package ch.qos.logback:logback-core-1.1.10 is vulnerable: CVE-2017-5929. Recommendation: use version ";
 
     @Before
-    public void importProject(){
+    public void importProject() {
         openBrowser();
     }
 
     @After
-    public void deleteDependency(){
+    public void deleteDependency() {
         editorPart.codeEditor().hideErrors();
         setCursorToLine(37);
         editorPart.codeEditor().deleteNextLines(5);
@@ -66,7 +70,8 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
         Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError));
 
         //checking if error markes is visible after re-opening the file
-        editorPart.tabsPanel().closeActiveTab();
+        editorPart.tabsPanel().closeActiveTab(driver);
+
         openPomXml();
         setCursorToLine(37);
 
@@ -75,7 +80,7 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
 
     private void openPomXml() {
         vertxProject.getResource("pom.xml").open();
-        Graphene.waitGui().until().element(currentLine).is().visible();
+        Graphene.waitGui().withTimeout(5, TimeUnit.SECONDS).until().element(currentLine).is().visible();
     }
 
 }

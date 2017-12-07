@@ -1,6 +1,8 @@
 package redhat.che.functional.tests;
 
 
+import com.redhat.arquillian.che.annotations.Workspace;
+import com.redhat.arquillian.che.resource.Stack;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -25,6 +27,7 @@ import redhat.che.functional.tests.utils.GetCheLogsOnFailRule;
  */
 
 @RunWith(Arquillian.class)
+@Workspace(removeAfterTest = false, stackID = Stack.VERTX)
 public class WorkspacesTestCase {
     private static final Logger logger = Logger.getLogger(CheWorkspaceManager.class);
 

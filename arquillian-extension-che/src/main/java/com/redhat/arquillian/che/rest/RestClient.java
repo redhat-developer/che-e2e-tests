@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
-
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -78,7 +77,8 @@ public class RestClient {
 		}
 		Builder requestBuilder = new Request.Builder().url(sb.toString());
 		requestBuilder.addHeader("Content-Type", "application/json");
-		if (authorization != null && authorization.length() > 0) {
+		//TODO: is ever authorization.length() == 0? if keycloak not set, it looks like "Bearer null" => length=11
+		if (authorization != null && authorization.length() > 11) {
 			requestBuilder.addHeader("Authorization", authorization);
 		}
 		Request request = null;

@@ -11,6 +11,7 @@
 package redhat.che.functional.tests.fragments;
 
 import org.jboss.arquillian.drone.api.annotation.Drone;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
 import org.openqa.selenium.WebDriver;
@@ -53,6 +54,7 @@ public class CommandsEditor {
         waitGui().until(webDriver -> webDriver.switchTo().activeElement().equals(cmdInput) || webDriver.switchTo().activeElement().equals(previewURL));
         nameInput.clear();
         nameInput.sendKeys(testName);
+
         cmdInput.click();
         ActionUtils.selectAll(driver);
         ActionUtils.deleteMarkedLines(driver);

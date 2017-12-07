@@ -5,16 +5,12 @@ import org.apache.log4j.Logger;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
-import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.utils.ActionUtils;
-
+import java.util.List;
 import java.util.concurrent.TimeUnit;
-
 import static org.jboss.arquillian.graphene.Graphene.waitGui;
 import static redhat.che.functional.tests.utils.ActionUtils.writeIntoElement;
 
@@ -27,8 +23,8 @@ public class CodeEditorFragment {
     @Root
     private WebElement rootElement;
 
-    @FindByJQuery("div.annotation.error > div.annotationHTML.error:last")
-    private WebElement annotationError;
+    @FindByJQuery("div.annotation.error > div.annotationHTML.error")
+    private List<WebElement> annotationErrors;
 
     @FindBy(className = "tooltipTitle")
     private WebElement annotationErrorSpan;
@@ -53,16 +49,19 @@ public class CodeEditorFragment {
         logger.info("Waiting for " + WAIT_TIME + " seconds until annotation error should be visible");
         try {
             waitGui().withTimeout(WAIT_TIME, TimeUnit.SECONDS).until(driver -> {
-                if (annotationError == null) return false;
-                annotationError.click();
-                label = driver.findElement(By.className("tooltipTitle"));
-                if (label.getText().contains(expectedError)) {
-                    logger.info("Annotation error is present.");
-                    return true;
+
+                for(WebElement error : annotationErrors){
+                    error.click();
+
+                    label = driver.findElement(By.className("tooltipTitle"));
+                    if (label.getText().contains(expectedError)) {
+                        logger.info("Annotation error is present.");
+                        return true;
+                    }
                 }
                 return false;
-            });
-        } catch (TimeoutException e){
+                });
+        } catch (IndexOutOfBoundsException | WebDriverException i){
             return false;
         }
         return true;

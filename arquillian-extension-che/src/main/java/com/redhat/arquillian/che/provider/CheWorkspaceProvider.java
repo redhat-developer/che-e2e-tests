@@ -10,12 +10,11 @@
 */
 package com.redhat.arquillian.che.provider;
 
-import static com.redhat.arquillian.che.util.Constants.CREATE_WORKSPACE_REQUEST_JSON;
+import static com.redhat.arquillian.che.util.Constants.CREATE_WORKSPACE_REQUEST_VERTX_JSON;
 
 import java.io.InputStream;
-
+import com.redhat.arquillian.che.resource.StackService;
 import org.apache.log4j.Logger;
-
 import com.redhat.arquillian.che.config.CheExtensionConfiguration;
 import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.util.Constants;
@@ -36,6 +35,7 @@ public class CheWorkspaceProvider {
     private static String openshiftToken;
     private static  String keycloakToken;
     private static String namespace;
+    private static String cheWorkspaceUrl;
 
     public CheWorkspaceProvider(CheExtensionConfiguration config){
         cheStarterURL = config.getCheStarterUrl();
@@ -43,6 +43,8 @@ public class CheWorkspaceProvider {
         openshiftToken = config.getOpenshiftToken();
         keycloakToken = config.getKeycloakToken();
         namespace = config.getOpenshiftNamespace();
+        cheWorkspaceUrl = config.getCheWorkspaceUrl();
+
     }
 
     /**
@@ -73,7 +75,7 @@ public class CheWorkspaceProvider {
 
         String json;
         if (pathToJson == null) {
-            InputStream jsonStream = Constants.class.getClassLoader().getResourceAsStream(CREATE_WORKSPACE_REQUEST_JSON);
+            InputStream jsonStream = Constants.class.getClassLoader().getResourceAsStream(CREATE_WORKSPACE_REQUEST_VERTX_JSON);
             json = Utils.getTextFromFile(jsonStream);
         }else {
             InputStream jsonStream = Constants.class.getClassLoader().getResourceAsStream(pathToJson);
@@ -85,7 +87,23 @@ public class CheWorkspaceProvider {
         Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
         response.close();
         client.close();
-        return CheWorkspaceService.getWorkspaceFromDocument(jsonDocument);
+
+        CheWorkspace w = CheWorkspaceService.getWorkspaceFromDocument(jsonDocument);
+        w.setStack(StackService.getStackTypeFromJson(json));
+
+        return w;
+    }
+
+    public CheWorkspace getCreatedWorkspace() {
+        String path = "/workspace";
+        RestClient client = new RestClient(cheStarterURL);
+
+        Response response = client.sentRequest(path, RequestType.GET, null, keycloakToken,
+                new QueryParam("masterUrl", openShiftMasterURL), new QueryParam("namespace", namespace));
+        Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
+        response.close();
+        client.close();
+        return CheWorkspaceService.getWorkspaceFromDocument(jsonDocument, cheWorkspaceUrl);
     }
 
     public boolean stopWorkspace(CheWorkspace workspace){
