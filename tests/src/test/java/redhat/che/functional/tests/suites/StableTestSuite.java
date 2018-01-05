@@ -15,6 +15,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import redhat.che.functional.tests.GitTestCase;
+import redhat.che.functional.tests.PackageJsonTestCase;
 import redhat.che.functional.tests.PomTestCase;
 
 /**
@@ -25,7 +26,8 @@ import redhat.che.functional.tests.PomTestCase;
 @RunWith(Suite.class)
 @SuiteClasses({
 	GitTestCase.class,
-	PomTestCase.class
+	PomTestCase.class,
+	PackageJsonTestCase.class,
 })
 public class StableTestSuite {
 
