@@ -12,15 +12,21 @@ package redhat.che.functional.tests;
 
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import redhat.che.functional.tests.fragments.*;
-import redhat.che.functional.tests.fragments.popup.DropDownMenu;
+import redhat.che.functional.tests.fragments.CommandsEditor;
+import redhat.che.functional.tests.fragments.CommandsManager;
+import redhat.che.functional.tests.fragments.LeftBar;
 
 import java.util.concurrent.TimeUnit;
-import static org.jboss.arquillian.graphene.Graphene.*;
+
+import static org.jboss.arquillian.graphene.Graphene.guardAjax;
+import static org.jboss.arquillian.graphene.Graphene.waitModel;
 
 /**
  * Created by katka on 22/06/17.
@@ -66,8 +72,9 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     @Test
     public void test_maven_build() {
         //creating build command in left commands panel
-        leftBar.openCommandsPart();
+        if (!commandsManager.isCommandsExplorerOpen()) leftBar.openCommandsPart();
         commandsManager.openEditPanelForAddingBuildCommand();
+        commandsEditor.waitTillEditorVisible();
         commandsEditor.addNewCommand(testName, command);
         commandsEditor.runOpenedCommand();
 

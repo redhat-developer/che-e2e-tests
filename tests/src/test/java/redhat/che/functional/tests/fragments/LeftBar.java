@@ -11,16 +11,12 @@
 package redhat.che.functional.tests.fragments;
 
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import redhat.che.functional.tests.utils.ActionUtils;
 
 import static org.jboss.arquillian.graphene.Graphene.guardAjax;
-import static org.jboss.arquillian.graphene.Graphene.guardNoRequest;
 
 /*
  * root div[id="gwt-debug-toolbarPanel"]
@@ -36,11 +32,9 @@ public class LeftBar {
     @FindBy(id = "gwt-debug-partButton-Commands")
     private WebElement commandsPart;
 
-
     /**
      * Clicks button to execute selected command.
      */
-
 
     public void openCommandsPart() {
         guardAjax(commandsPart).click();

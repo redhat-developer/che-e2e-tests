@@ -3,9 +3,12 @@
     xsi:schemaLocation="http://jboss.org/schema/arquillian http://jboss.org/schema/arquillian/arquillian_1_0.xsd">
 
   <extension qualifier="che">
-    <property name="cheStarterURL"></property>
-    <property name="openShiftMasterURL"></property>
-    <property name="openShiftNamespace"></property>
+      <property name="cheStarterURL">http://localhost:10000</property>
+      <property name="openShiftMasterURL">https://che.openshift.io</property>
+      <property name="openShiftNamespace">Eclipse_Che</property>
+      <property name="osioUsername">[e-mail]</property>
+      <property name="osioPassword">[passwd]</property>
+      <property name="keycloakToken">[token]</property>
   </extension>
   
   <extension qualifier="webdriver">

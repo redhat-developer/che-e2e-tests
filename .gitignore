@@ -3,3 +3,9 @@
 .project
 .settings
 env-vars
+.idea
+che-functional-tests-parent.iml
+tests/che-functional-tests.iml
+tests/scr/tests/resources/arquillian_old.xml
+arquillian-extension-che/arquillian-extension-che.iml
+tests/src/test/resources/arquillian_old.xml
