@@ -17,6 +17,7 @@ public class CheExtensionConfiguration {
     public static final String CHE_WORKSPACE_URL_PROPERTY_NAME = "cheWorkspaceUrl";
     public static final String OSIO_USERNAME_PROPERTY_NAME = "osioUsername";
     public static final String OSIO_PASSWORD_PROPERTY_NAME = "osioPassword";
+    public static final String OSIO_URL_PART = "osioUrlPart";
 
     private String cheStarterUrl;
     private String openshiftMasterUrl;
@@ -25,6 +26,7 @@ public class CheExtensionConfiguration {
     private String openshiftNamespace;
     private String cheWorkspaceUrl;
     private Boolean preserveWorkspace;
+    private String osioUrlPart;
 
     private String osioUsername;
     private String osioPassword;
@@ -38,6 +40,7 @@ public class CheExtensionConfiguration {
         config.openshiftNamespace = loadProperty(reporterProps, OPENSHIFT_NAMESPACE_PROPERTY_NAME, "eclipse-che");
         config.cheWorkspaceUrl = loadProperty(reporterProps, CHE_WORKSPACE_URL_PROPERTY_NAME);
         config.preserveWorkspace = Boolean.valueOf(loadProperty(reporterProps, PRESERVE_WORKSPACE_PROPERTY_NAME));
+        config.osioUrlPart = loadProperty(reporterProps, OSIO_URL_PART, "openshift.io");
 
         config.osioUsername = loadPropertyAndSetAsSystemProperty(reporterProps, OSIO_USERNAME_PROPERTY_NAME);
         config.osioPassword = loadPropertyAndSetAsSystemProperty(reporterProps, OSIO_PASSWORD_PROPERTY_NAME);
@@ -142,4 +145,12 @@ public class CheExtensionConfiguration {
     public void setOsioPassword(String osioPassword) {
         this.osioPassword = osioPassword;
     }
+    
+	public String getOsioUrlPart() {
+		return osioUrlPart;
+	}
+	
+	public void setOsioUrlPart(String osioUrlPart) {
+		this.osioUrlPart = osioUrlPart;
+	}
 }

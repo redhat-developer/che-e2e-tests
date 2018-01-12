@@ -45,12 +45,17 @@ fi
 
 # Set credentials
 set +x
+
+#prepend "export " and remove space after "="
 cat jenkins-env \
     | grep -E "(OSIO|KEYCLOAK)" \
     | sed 's/^/export /g' \
+    | sed 's/= /=/g' \
     > credential_file
+
 source credential_file
-CURL_OUTPUT=$(curl -H "Content-Type: application/json" -X POST -d '{"refresh_token":"'$KEYCLOAK_TOKEN'"}' https://auth.openshift.io/api/token/refresh)
+
+CURL_OUTPUT=$(curl -H "Content-Type: application/json" -X POST -d '{"refresh_token":"'$KEYCLOAK_TOKEN'"}' https://auth.${OSIO_URL_PART}/api/token/refresh)
 ACTIVE_TOKEN=$(echo $CURL_OUTPUT | jq --raw-output ".token | .access_token")
 if [[ -z "${OSIO_USERNAME}" ]]; then
   empty_credentials="OSIO username is empty, "
@@ -67,7 +72,7 @@ if [[ ! -z "${empty_credentials}" ]]; then
 else
   echo 'OpenShift username and password and Keycloak token are not empty.'
 fi
-if [[ $(curl -X GET -H "Authorization: Bearer ${ACTIVE_TOKEN}" https://auth.openshift.io/api/token?for=${OSO_MASTER_URL} \
+if [[ $(curl -X GET -H "Authorization: Bearer ${ACTIVE_TOKEN}" https://auth.${OSIO_URL_PART}/api/token?for=${OSO_MASTER_URL} \
    |  grep access_token | wc -l) -ne 1 ]]; then
   echo "Keycloak token is expired"
   exit 1
