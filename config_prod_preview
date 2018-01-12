@@ -1,8 +1,9 @@
-export OSO_MASTER_URL=https://api.free-int.openshift.com/
-export OSO_NAMESPACE=kkanova-osiotest1-che
+export OSO_MASTER_URL=https://api.free-stg.openshift.com/
+export OSO_NAMESPACE=Testing_prod_preview
 export OSO_USER=kkanova-osiotest1
 export OSO_DOMAIN=8a09.starter-us-east-2.openshiftapps.com
 export OSO_HOSTNAME=kkanova-osiotest1-che.8a09.starter-us-east-2.openshiftapps.com
+export TEST_SUITE=StableTestSuite # Default test suite
 export DOCKER_HUB_NAMESPACE=registry.devshift.net/che/che
 export URL_PART=prod-preview.openshift.io
 export MULTITENANCY=true

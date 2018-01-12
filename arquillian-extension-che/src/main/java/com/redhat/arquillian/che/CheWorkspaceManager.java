@@ -92,10 +92,18 @@ public class CheWorkspaceManager {
 
             logger.info("Running che starter.");
             Properties props = new Properties();
-            props.setProperty("OPENSHIFT_TOKEN_URL", "https://auth." + configurationInstance.get().getUrlPart() + "/api/token?for=https://api.starter-us-east-2.openshift.com");
+            if(configurationInstance.get().getUrlPart().equals("openshift.io")){
+                props.setProperty("OPENSHIFT_TOKEN_URL", "https://auth." + configurationInstance.get().getUrlPart()
+                        + "/api/token?for=https://api.starter-us-east-2.openshift.com");
+            } else {
+                props.setProperty("OPENSHIFT_TOKEN_URL",  "https://sso." + configurationInstance.get().getUrlPart()
+                        + "/auth/realms/fabric8/broker/openshift-v3/token");
+            }
             props.setProperty("GITHUB_TOKEN_URL", "https://auth." + configurationInstance.get().getUrlPart() + "/api/token?for=https://github.com");
             props.setProperty("osio.domain.name", "api.starter-us-east-2.openshift.com");
             props.setProperty("oso.address", "api.starter-us-east-2.openshift.com");
+            props.setProperty("MULTI_TENANT_CHE_SERVER_URL", "https://che." + configurationInstance.get().getUrlPart());
+
             EmbeddedMaven
                 .forProject(cheStarterDir.getAbsolutePath() + File.separator + "pom.xml")
                 .useMaven3Version("3.5.0")
@@ -103,6 +111,7 @@ public class CheWorkspaceManager {
                 .setProperties(props)
                 .useAsDaemon()
                 .withWaitUntilOutputLineMathes(".*Started Application in.*", 10, TimeUnit.MINUTES)
+
                 .build();
 
         } catch (GitAPIException e) {
@@ -117,7 +126,8 @@ public class CheWorkspaceManager {
 		try {
 		Git
 		    .cloneRepository()
-		    .setURI("https://github.com/redhat-developer/che-starter")
+		    .setURI("https://github.com/Katka92/che-starter")
+            .setBranch("version_for_tests")
 		    .setDirectory(cheStarterDir)
 		    .call();
 		}catch (JGitInternalException ex) {
