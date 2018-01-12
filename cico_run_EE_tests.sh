@@ -15,11 +15,13 @@ fi
 echo "Sourcing configuration."
 source config
 
+if ! $MULTITENANCY  ; then
+    # Update tenant
+    source update_tenant.sh
+fi
+
 # Prepare environment - git repo, credentials, token validation
 source prepare_environment.sh
-
-# Update tenant
-source update_tenant.sh
 
 # Run test image
 cat /tmp/jenkins-env >> ./env-vars
