@@ -85,7 +85,7 @@ public abstract class AbstractCheFunctionalTest {
     protected void openBrowser(CheWorkspace wkspc) {
         LOG.info("Opening browser");
         driver.get(wkspc.getIdeLink());
-        driver.manage().window().maximize();
+//        driver.manage().window().maximize(); // Causes crash with Selenium on Xvfb - no window manager present
         screenshooter.setScreenshotTargetDir("target/screenshots");
         waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
         if ("username".equals(loginPageOrworkspaceIsRunningPopup.getAttribute("id"))) {
