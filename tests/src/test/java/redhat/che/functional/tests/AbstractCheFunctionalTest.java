@@ -13,6 +13,7 @@ package redhat.che.functional.tests;
 import com.redhat.arquillian.che.resource.CheWorkspace;
 
 import org.apache.log4j.Logger;
+import org.arquillian.extension.recorder.screenshooter.Screenshooter;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import redhat.che.functional.tests.fragments.EditorPart;
 import redhat.che.functional.tests.fragments.Project;
@@ -72,6 +73,11 @@ public abstract class AbstractCheFunctionalTest {
     @ArquillianResource
     private static CheWorkspace workspace;
 
+    @ArquillianResource
+    private static Screenshooter screenshooter;
+
+    private static short screenshotsTaken = 0;
+
     protected void openBrowser() {
         openBrowser(workspace);
     }
@@ -79,6 +85,8 @@ public abstract class AbstractCheFunctionalTest {
     protected void openBrowser(CheWorkspace wkspc) {
         LOG.info("Opening browser");
         driver.get(wkspc.getIdeLink());
+        driver.manage().window().maximize();
+        screenshooter.setScreenshotTargetDir("target/screenshots");
         waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
         if ("username".equals(loginPageOrworkspaceIsRunningPopup.getAttribute("id"))) {
             login();
@@ -126,4 +134,10 @@ public abstract class AbstractCheFunctionalTest {
         askForValueDialog.clickOkBtn();
         askForValueDialog.waitFormToClose();
     }
+
+    protected static void takeScreenshot(String fileName) {
+	    screenshotsTaken++;
+	    screenshooter.takeScreenshot(fileName+"_"+screenshotsTaken+".png");
+    }
+
 }

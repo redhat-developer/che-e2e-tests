@@ -72,15 +72,19 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     @Test
     public void test_maven_build() {
         //creating build command in left commands panel
-        if (!commandsManager.isCommandsExplorerOpen()) leftBar.openCommandsPart();
+        if (!commandsManager.isCommandsExplorerOpen()) {
+            leftBar.openCommandsPart();
+        }
         commandsManager.openEditPanelForAddingBuildCommand();
         commandsEditor.waitTillEditorVisible();
         commandsEditor.addNewCommand(testName, command);
         commandsEditor.runOpenedCommand();
 
         //wait for end - if build first time, it last longer -> increasing timeout
-        waitModel().withTimeout(2, TimeUnit.MINUTES).until().element(consoleEnds).is().visible();
+        //further increased timeout. test failed just because build took longer.
+        waitModel().withTimeout(3, TimeUnit.MINUTES).until().element(consoleEnds).is().visible();
 
         Assert.assertTrue(buildSuccess.isDisplayed());
     }
+    
 }
