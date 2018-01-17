@@ -6,7 +6,6 @@ archive_artifacts(){
 	echo "With date $DATE"
 	ls -la ./artifacts.key
 	chmod 600 ./artifacts.key
-	cat ./artifacts.key
 	chown root ./artifacts.key
 	ls -lR
 	rsync --password-file=./artifacts.key -PHva  ./tests/target/* devtools@artifacts.ci.centos.org::devtools/che-functional-tests/$DATE
