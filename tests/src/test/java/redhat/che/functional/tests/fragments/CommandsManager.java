@@ -18,8 +18,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.utils.ActionUtils;
 
-import java.util.concurrent.TimeUnit;
-
 import static org.jboss.arquillian.graphene.Graphene.waitGui;
 
 public class CommandsManager {
@@ -29,6 +27,9 @@ public class CommandsManager {
 
     @Root
     private WebElement rootElement;
+
+    @FindBy(id = "gwt-debug-commands-explorer")
+    private WebElement commandExplorer;
 
     @FindBy(id = "commands_tree-button-add")
     private WebElement buildPlus;
@@ -56,4 +57,9 @@ public class CommandsManager {
         CommandsManagerRow row = new CommandsManagerRow(testName, driver);
         row.removeCommand();
     }
+
+    public boolean isCommandsExplorerOpen() {
+        return commandExplorer.isDisplayed();
+    }
+
 }

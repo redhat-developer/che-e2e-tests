@@ -13,15 +13,15 @@ package redhat.che.functional.tests;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-
 import redhat.che.functional.tests.customExceptions.MarkerNotPresentException;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
-import redhat.che.functional.tests.utils.ActionUtils;
 
 @RunWith(Arquillian.class)
 public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {

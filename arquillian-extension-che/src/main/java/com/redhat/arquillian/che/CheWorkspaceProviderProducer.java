@@ -1,8 +1,6 @@
 package com.redhat.arquillian.che;
 
-import com.redhat.arquillian.che.config.CheExtensionConfiguration;
 import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
-import com.redhat.arquillian.che.resource.CheWorkspace;
 import org.jboss.arquillian.core.api.Instance;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.test.api.ArquillianResource;
