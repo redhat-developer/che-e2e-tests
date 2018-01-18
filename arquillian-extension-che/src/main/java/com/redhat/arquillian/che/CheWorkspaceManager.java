@@ -69,9 +69,8 @@ public class CheWorkspaceManager {
             cheExtensionConfig.setCheStarterUrl("http://localhost:10000");
         }
 
-
         cheWorkspaceProviderInstanceProducer.set(new CheWorkspaceProvider(cheExtensionConfig));
-        if (isNotEmpty(cheExtensionConfig.getCheWorkspaceUrl())) {
+        if (isNotEmpty(cheExtensionConfig.getCheWorkspaceName())) {
             cheWorkspaceInstanceProducer.set(cheWorkspaceProviderInstanceProducer.get().getCreatedWorkspace());
         }
         bearerToken = cheExtensionConfig.getKeycloakToken();
@@ -91,11 +90,10 @@ public class CheWorkspaceManager {
             CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
             CheWorkspaceService.deleteWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
             createWorkspace(workspaceAnnotation);
-
-            logger.info("Workspace " + createdWkspc.getIdeName() + " created and started.");
+            logger.info("Workspace " + createdWkspc.getName() + " created and started.");
         } else if (!CheWorkspaceService.getWorkspaceStatus(createdWkspc, bearerToken).equals(CheWorkspaceStatus.RUNNING.toString())) {
             cheWorkspaceProviderInstanceProducer.get().startWorkspace(createdWkspc);
-            logger.info("Workspace " + createdWkspc.getIdeName() + " started.");
+            logger.info("Workspace " + createdWkspc.getName() + " started.");
         }
     }
 

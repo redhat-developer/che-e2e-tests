@@ -14,7 +14,10 @@ public class CheExtensionConfiguration {
     public static final String OPENSHIFT_TOKEN_PROPERTY_NAME = "openShiftToken";
     public static final String PRESERVE_WORKSPACE_PROPERTY_NAME = "preserveWorkspace";
     public static final String OPENSHIFT_NAMESPACE_PROPERTY_NAME = "openShiftNamespace";
+    @Deprecated
     public static final String CHE_WORKSPACE_URL_PROPERTY_NAME = "cheWorkspaceUrl";
+    //When user wants to use created workspace, he needs to provide workspace name shown in GUI
+    public static final String CHE_WORKSPACE_NAME = "cheWorkspaceName";
     public static final String OSIO_USERNAME_PROPERTY_NAME = "osioUsername";
     public static final String OSIO_PASSWORD_PROPERTY_NAME = "osioPassword";
     public static final String OSIO_URL_PART = "osioUrlPart";
@@ -27,6 +30,7 @@ public class CheExtensionConfiguration {
     private String cheWorkspaceUrl;
     private Boolean preserveWorkspace;
     private String osioUrlPart;
+    private String cheWorkspaceName;
 
     private String osioUsername;
     private String osioPassword;
@@ -44,6 +48,8 @@ public class CheExtensionConfiguration {
 
         config.osioUsername = loadPropertyAndSetAsSystemProperty(reporterProps, OSIO_USERNAME_PROPERTY_NAME);
         config.osioPassword = loadPropertyAndSetAsSystemProperty(reporterProps, OSIO_PASSWORD_PROPERTY_NAME);
+
+        config.cheWorkspaceName = loadProperty(reporterProps, CHE_WORKSPACE_NAME);
 
         return config;
     }
@@ -110,6 +116,7 @@ public class CheExtensionConfiguration {
         this.openshiftNamespace = openshiftNamespace;
     }
 
+    @Deprecated //use che name instead
     public String getCheWorkspaceUrl() {
         return cheWorkspaceUrl;
     }
@@ -153,4 +160,8 @@ public class CheExtensionConfiguration {
 	public void setOsioUrlPart(String osioUrlPart) {
 		this.osioUrlPart = osioUrlPart;
 	}
+
+	public void setCheWorkspaceName(String cheWorkspacename) { this.cheWorkspaceName = cheWorkspacename; }
+
+	public String getCheWorkspaceName(){ return this.cheWorkspaceName; }
 }
