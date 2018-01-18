@@ -11,6 +11,7 @@
 package com.redhat.arquillian.che.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import com.redhat.arquillian.che.resource.Stack;
 import com.redhat.arquillian.che.resource.StackService;
@@ -55,13 +56,31 @@ public class CheWorkspaceService {
 
 	public static CheWorkspace getWorkspaceFromDocument(Object jsonDocument) {
 		return new CheWorkspace(getWorkspaceIDELink(jsonDocument), getWorkspaceSelfLink(jsonDocument),
-		        getWorkspaceRuntimeLink(jsonDocument));
+		        getWorkspaceRuntimeLink(jsonDocument), getWorkspaceName(jsonDocument));
 	}
 
+	public static CheWorkspace getWorkspaceFromDocument(Object jsonDocument, String cheWorkspaceName) {
+		List<Object> workspaces = JsonPath.read(jsonDocument, "$.*");
+		for(Object w : workspaces){
+			String wName =(String) (new ArrayList<>(JsonPath.read(w, "$.*.name"))).get(0);
+			if(wName.equals(cheWorkspaceName)){
+				return new CheWorkspace(getWorkspaceIDELink(w), getWorkspaceSelfLink(w),
+						getWorkspaceRuntimeLink(w), getWorkspaceStack(w), cheWorkspaceName);
+			}
+		}
+		return null;
+	}
+
+	private static Stack getWorkspaceStack(Object jsonDocument) {
+		List<String> wkspcNames = JsonPath.read(jsonDocument, "$..projects[0].type");
+		return StackService.getStackType(wkspcNames.get(0));
+	}
+/*
 	public static CheWorkspace getWorkspaceFromDocument(Object jsonDocument, String cheWorkspaceUrl) {
 		return new CheWorkspace(getWorkspaceIDELink(jsonDocument), getWorkspaceSelfLink(jsonDocument),
 			getWorkspaceRuntimeLink(jsonDocument), getWorkspaceStack(jsonDocument, cheWorkspaceUrl));
 	}
+*/
 
 	private static Stack getWorkspaceStack(Object jsonDocument, String cheWorkspaceUrl) {
 		String wkspcName = cheWorkspaceUrl.substring(cheWorkspaceUrl.length()-5);
@@ -179,7 +198,7 @@ public class CheWorkspaceService {
 		int counter = 0;
 		int maxCount = Math.round(WAIT_TIME / (SLEEP_TIME_TICK / 1000));
 		String currentState = getWorkspaceStatus(client, workspace, authorizationToken);
-		logger.info("Waiting for " + WAIT_TIME + " seconds until workspace " + workspace.getIdeName() +" gets from state " + currentState
+		logger.info("Waiting for " + WAIT_TIME + " seconds until workspace " + workspace.getName() +" gets from state " + currentState
 				+ " to state " + resultState);
 		while (counter < maxCount && !resultState.equals(currentState)) {
 			counter++;
@@ -196,6 +215,10 @@ public class CheWorkspaceService {
 			throw new RuntimeException("After waiting for " + WAIT_TIME + " seconds, workspace \""+workspace.getIdeName()+"\" is still"
 					+ " not in state " + resultState);
 		}
+	}
+
+	public static String getWorkspaceName(Object jsonDocument){
+		return JsonPath.read(jsonDocument, "$..config.name");
 	}
 	
 	public static String getWorkspaceRuntimeLink(Object jsonDocument) {
