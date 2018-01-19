@@ -11,29 +11,26 @@
 package redhat.che.functional.tests;
 
 import com.redhat.arquillian.che.resource.CheWorkspace;
-
 import org.apache.log4j.Logger;
 import org.arquillian.extension.recorder.screenshooter.Screenshooter;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import redhat.che.functional.tests.fragments.EditorPart;
-import redhat.che.functional.tests.fragments.Project;
-
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.NoAlertPresentException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import redhat.che.functional.tests.fragments.EditorPart;
+import redhat.che.functional.tests.fragments.Project;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
 import redhat.che.functional.tests.utils.ActionUtils;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.jboss.arquillian.graphene.Graphene.waitModel;
+import static org.jboss.arquillian.graphene.Graphene.waitGui;
 import static redhat.che.functional.tests.utils.Constants.*;
 
 @RunWith(Arquillian.class)
@@ -67,9 +64,6 @@ public abstract class AbstractCheFunctionalTest {
     @FindBy(id = "kc-login")
     private WebElement loginButton;
 
-    @FindBy(id = "gwt-debug-askValueDialog-window")
-    private AskForValueDialog askForValueDialog;
-
     @ArquillianResource
     private static CheWorkspace workspace;
 
@@ -87,12 +81,12 @@ public abstract class AbstractCheFunctionalTest {
         driver.get(wkspc.getIdeLink());
 //        driver.manage().window().maximize(); // Causes crash with Selenium on Xvfb - no window manager present
         screenshooter.setScreenshotTargetDir("target/screenshots");
-        waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
+        waitGui().withTimeout(30, TimeUnit.SECONDS).until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
         if ("username".equals(loginPageOrworkspaceIsRunningPopup.getAttribute("id"))) {
             login();
             waitUntilWorkspaceIsRunningElseRefresh();
         }
-        waitModel().until().element(workspaceIsRunningPopup).is().not().visible();
+        waitGui().until().element(workspaceIsRunningPopup).is().not().visible();
     }
 
     /**
@@ -100,9 +94,9 @@ public abstract class AbstractCheFunctionalTest {
 	 * Should be removed once resolved.
 	 */
 	private void waitUntilWorkspaceIsRunningElseRefresh() {
-		waitModel().withTimeout(3, TimeUnit.MINUTES).until(driver -> {
+        waitGui().withTimeout(3, TimeUnit.MINUTES).until(driver -> {
 			try {
-				waitModel().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
+                waitGui().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
 				return true;
 			}catch(WebDriverException e) {
 				try {
@@ -125,14 +119,6 @@ public abstract class AbstractCheFunctionalTest {
         //ByJQuery collapse = ByJQuery.selector("div:has(path[id='collapse-expand'])");
         //waitModel().withTimeout(40, SECONDS).until().element(collapse).is().visible();
         //driver.findElement(collapse).click();
-    }
-
-    protected void setCursorToLine(int line) {
-        ActionUtils.openMoveCursorDialog(driver);
-        askForValueDialog.waitFormToOpen();
-        askForValueDialog.typeAndWaitText(line);
-        askForValueDialog.clickOkBtn();
-        askForValueDialog.waitFormToClose();
     }
 
     protected static void takeScreenshot(String fileName) {

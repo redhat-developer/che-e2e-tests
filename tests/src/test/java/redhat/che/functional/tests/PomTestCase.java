@@ -41,7 +41,7 @@ public class PomTestCase extends AbstractCheFunctionalTest {
     @After
     public void deleteDependency(){
         editorPart.codeEditor().hideErrors();
-        setCursorToLine(37);
+        editorPart.codeEditor().setCursorToLine(37);
         editorPart.codeEditor().deleteNextLines(5);
         editorPart.codeEditor().waitUnitlPomDependencyIsNotVisible();
         editorPart.tabsPanel().waintUntilFocusedTabSaves();
@@ -50,7 +50,7 @@ public class PomTestCase extends AbstractCheFunctionalTest {
     @Test
     public void testPomXmlReference() {
         openPomXml();
-        setCursorToLine(37);
+        editorPart.codeEditor().setCursorToLine(37);
         editorPart.codeEditor().writeDependency(pomDependency);
         Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError));
     }

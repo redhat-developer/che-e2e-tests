@@ -51,7 +51,7 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
     @After
     public void deleteDependency(){
         editorPart.codeEditor().hideErrors();
-        setCursorToLine(37);
+        editorPart.codeEditor().setCursorToLine(37);
         editorPart.codeEditor().deleteNextLines(5);
         editorPart.codeEditor().waitUnitlPomDependencyIsNotVisible();
         editorPart.tabsPanel().waintUntilFocusedTabSaves();
@@ -61,14 +61,14 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
     public void bayesianErrorShownOnOpenFile() throws MarkerNotPresentException {
         //creating errorneous dependency
         openPomXml();
-        setCursorToLine(37);
+        editorPart.codeEditor().setCursorToLine(37);
         editorPart.codeEditor().writeDependency(pomDependency);
         Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError));
 
         //checking if error markes is visible after re-opening the file
         editorPart.tabsPanel().closeActiveTab();
         openPomXml();
-        setCursorToLine(37);
+        editorPart.codeEditor().setCursorToLine(37);
 
         Assert.assertTrue("Annotation error is not visible when reopening file.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError));
     }

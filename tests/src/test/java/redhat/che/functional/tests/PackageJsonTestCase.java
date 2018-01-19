@@ -71,7 +71,7 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
     @Test
     public void testPackageJsonBayesian() throws MarkerNotPresentException{
         openPackageJson();
-        setCursorToLine(12);
+        editorPart.codeEditor().setCursorToLine(12);
         editorPart.codeEditor().writeDependency(jsonDependency);
         Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(jsonExpectedError));
     }
