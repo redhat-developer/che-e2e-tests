@@ -71,7 +71,13 @@ public class CheWorkspaceManager {
 
         cheWorkspaceProviderInstanceProducer.set(new CheWorkspaceProvider(cheExtensionConfig));
         if (isNotEmpty(cheExtensionConfig.getCheWorkspaceName())) {
-            cheWorkspaceInstanceProducer.set(cheWorkspaceProviderInstanceProducer.get().getCreatedWorkspace());
+            CheWorkspace w = cheWorkspaceProviderInstanceProducer.get().getCreatedWorkspace();
+            if(w!= null){
+                cheWorkspaceInstanceProducer.set(w);
+            } else {
+                logger.info("Gotten workspace does not exists! Creating new workspace.");
+            }
+
         }
         bearerToken = cheExtensionConfig.getKeycloakToken();
     }
