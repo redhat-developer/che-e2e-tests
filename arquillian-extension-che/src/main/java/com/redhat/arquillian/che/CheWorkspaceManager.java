@@ -81,7 +81,7 @@ public class CheWorkspaceManager {
         //get setting from annotation
         Workspace workspaceAnnotation = event.getTestClass().getAnnotation(Workspace.class);
         if(workspaceAnnotation == null){
-            throw new RuntimeException("Annotatin @Workspace wasn't find in class " + event.getTestClass().getName() + ".");
+            throw new RuntimeException("Annotation @Workspace wasn't find in class " + event.getTestClass().getName() + ".");
         }
         CheWorkspace createdWkspc = cheWorkspaceInstanceProducer.get();
 
@@ -104,14 +104,13 @@ public class CheWorkspaceManager {
         if (workspaceAnnotation.removeAfterTest()) {
             CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
             CheWorkspaceService.deleteWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
-            //the attribute deleted is used, because workspace can't be set at null - aruqillian Exception
+            //the attribute deleted is used, because workspace can't be set at null - arquillian Exception
             cheWorkspaceInstanceProducer.get().setDeleted(true);
         }
     }
 
     private void createWorkspace(Workspace workspaceAnnotation) {
         CheWorkspaceProvider provider = cheWorkspaceProviderInstanceProducer.get();
-        String path;
 
         //creating and starting new workspace
         cheWorkspaceInstanceProducer.set(provider.createCheWorkspace(StackService.getPathOfJsonConfig(workspaceAnnotation.stackID())));
