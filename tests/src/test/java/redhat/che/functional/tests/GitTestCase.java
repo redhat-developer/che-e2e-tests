@@ -8,6 +8,8 @@ import static redhat.che.functional.tests.fragments.BottomInfoPanel.TabNames.TAB
 import java.io.File;
 import java.util.Date;
 
+import com.redhat.arquillian.che.annotations.Workspace;
+import com.redhat.arquillian.che.resource.Stack;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
@@ -28,6 +30,7 @@ import redhat.che.functional.tests.fragments.window.UploadPrivateSshFormWindow;
 
 @Ignore
 @RunWith(Arquillian.class)
+@Workspace(stackID = Stack.VERTX, removeAfterTest = false)
 public class GitTestCase extends AbstractCheFunctionalTest {
 	
 	private static final Logger LOG = Logger.getLogger(GitTestCase.class);

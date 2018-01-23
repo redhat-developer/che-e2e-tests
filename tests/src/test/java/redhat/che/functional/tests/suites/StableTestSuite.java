@@ -29,7 +29,7 @@ import redhat.che.functional.tests.PomTestCase;
 	GitTestCase.class,
 	PomTestCase.class,
 	PackageJsonTestCase.class,
-	MavenTestCase.class
+	//MavenTestCase.class
 })
 public class StableTestSuite {
 
