@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.redhat.arquillian.che.resource.Stack;
 import com.redhat.arquillian.che.resource.StackService;
+import net.minidev.json.JSONArray;
 import org.apache.log4j.Logger;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
@@ -54,33 +55,25 @@ public class CheWorkspaceService {
 		return Configuration.defaultConfiguration().jsonProvider().parse(responseString);
 	}
 
+	//This method is used only when parsing created workspace - jsonDocument contains always exactly one workspace
 	public static CheWorkspace getWorkspaceFromDocument(Object jsonDocument) {
 		return new CheWorkspace(getWorkspaceIDELink(jsonDocument), getWorkspaceSelfLink(jsonDocument),
-		        getWorkspaceRuntimeLink(jsonDocument), getWorkspaceName(jsonDocument));
+		        getWorkspaceRuntimeLink(jsonDocument), getWorkspaceStack(jsonDocument), getWorkspaceName(jsonDocument));
 	}
 
 	public static CheWorkspace getWorkspaceFromDocument(Object jsonDocument, String cheWorkspaceName) {
-		List<Object> workspaces = JsonPath.read(jsonDocument, "$.*");
-		for(Object w : workspaces){
-			String wName =(String) (new ArrayList<>(JsonPath.read(w, "$.*.name"))).get(0);
-			if(wName.equals(cheWorkspaceName)){
-				return new CheWorkspace(getWorkspaceIDELink(w), getWorkspaceSelfLink(w),
-						getWorkspaceRuntimeLink(w), getWorkspaceStack(w), cheWorkspaceName);
-			}
+		Object w = JsonPath.read(jsonDocument, "$[?(@.config.name=='"+ cheWorkspaceName +"')]");
+		if(((JSONArray) w).isEmpty()){
+			return null;
 		}
-		return null;
-	}
+		return new CheWorkspace(getWorkspaceIDELink(w), getWorkspaceSelfLink(w),
+						getWorkspaceRuntimeLink(w), getWorkspaceStack(w), cheWorkspaceName);
+		}
 
 	private static Stack getWorkspaceStack(Object jsonDocument) {
 		List<String> wkspcNames = JsonPath.read(jsonDocument, "$..projects[0].type");
 		return StackService.getStackType(wkspcNames.get(0));
 	}
-/*
-	public static CheWorkspace getWorkspaceFromDocument(Object jsonDocument, String cheWorkspaceUrl) {
-		return new CheWorkspace(getWorkspaceIDELink(jsonDocument), getWorkspaceSelfLink(jsonDocument),
-			getWorkspaceRuntimeLink(jsonDocument), getWorkspaceStack(jsonDocument, cheWorkspaceUrl));
-	}
-*/
 
 	private static Stack getWorkspaceStack(Object jsonDocument, String cheWorkspaceUrl) {
 		String wkspcName = cheWorkspaceUrl.substring(cheWorkspaceUrl.length()-5);
@@ -218,7 +211,7 @@ public class CheWorkspaceService {
 	}
 
 	public static String getWorkspaceName(Object jsonDocument){
-		return JsonPath.read(jsonDocument, "$..config.name");
+		return JsonPath.read(jsonDocument, "$.config.name");
 	}
 	
 	public static String getWorkspaceRuntimeLink(Object jsonDocument) {

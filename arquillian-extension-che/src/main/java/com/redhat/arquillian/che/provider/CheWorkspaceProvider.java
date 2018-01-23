@@ -91,10 +91,7 @@ public class CheWorkspaceProvider {
         Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
         response.close();
         client.close();
-        CheWorkspace w = CheWorkspaceService.getWorkspaceFromDocument(jsonDocument);
-        w.setStack(StackService.getStackTypeFromJson(json));
-
-        return w;
+        return CheWorkspaceService.getWorkspaceFromDocument(jsonDocument);
     }
 
     public CheWorkspace getCreatedWorkspace() {
