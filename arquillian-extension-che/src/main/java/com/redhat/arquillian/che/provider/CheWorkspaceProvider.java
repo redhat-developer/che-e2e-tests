@@ -115,11 +115,19 @@ public class CheWorkspaceProvider {
     }
 
     public boolean startWorkspace(CheWorkspace workspace){
-        CheWorkspaceService.startWorkspace(workspace, keycloakToken);
-        if(CheWorkspaceService.getWorkspaceStatus(workspace, keycloakToken).equals(CheWorkspaceStatus.RUNNING.getStatus())){
+        RestClient client = new RestClient(cheStarterURL);
+        String path = "/workspace/" + workspace.getName();
+        Response response = client.sentRequest(path, RequestType.PATCH, null, keycloakToken,
+                new QueryParam("masterUrl", openShiftMasterURL), new QueryParam("namespace", namespace));
+        Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
+        response.close();
+        client.close();
+
+        CheWorkspaceService.waitUntilWorkspaceGetsToState(workspace, CheWorkspaceStatus.RUNNING.getStatus(), keycloakToken);
+        if(CheWorkspaceService.getWorkspaceStatus(workspace, keycloakToken).equals(CheWorkspaceStatus.RUNNING.getStatus())) {
             return true;
         }
-        return  false;
+        return false;
     }
 
     public static CheExtensionConfiguration getConfiguration() {

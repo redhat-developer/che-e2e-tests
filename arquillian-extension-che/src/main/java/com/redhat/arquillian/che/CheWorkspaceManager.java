@@ -98,8 +98,12 @@ public class CheWorkspaceManager {
             createWorkspace(workspaceAnnotation);
             logger.info("Workspace " + createdWkspc.getName() + " created and started.");
         } else if (!CheWorkspaceService.getWorkspaceStatus(createdWkspc, bearerToken).equals(CheWorkspaceStatus.RUNNING.toString())) {
-            cheWorkspaceProviderInstanceProducer.get().startWorkspace(createdWkspc);
-            logger.info("Workspace " + createdWkspc.getName() + " started.");
+            boolean isStarted = cheWorkspaceProviderInstanceProducer.get().startWorkspace(createdWkspc);
+            if(isStarted) { logger.info("Workspace " + createdWkspc.getName() + " started."); }
+            else {
+                logger.info("Can not start given workspace! Creating new one.");
+                createWorkspace(workspaceAnnotation);
+            }
         }
     }
 
@@ -188,10 +192,12 @@ public class CheWorkspaceManager {
     public void cleanUp(@Observes AfterSuite event) {
         logger.info("All tests were executed, cleaning up.");
         CheExtensionConfiguration config = configurationInstance.get();
+
         //if run with created workspace - will not delete it in the end
-        if (isNotEmpty(config.getCheWorkspaceUrl())) {
+        if (isNotEmpty(config.getCheWorkspaceName())) {
             return;
         }
+
         CheWorkspace workspace = cheWorkspaceInstanceProducer.get();
         if (workspace.isDeleted()) {
             logger.info("Skipping workspace deletion - workspace is already deleted.");

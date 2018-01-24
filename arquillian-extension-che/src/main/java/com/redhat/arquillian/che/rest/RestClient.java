@@ -95,6 +95,9 @@ public class RestClient {
 		case ("DELETE"):
 			request = (body == null) ? requestBuilder.delete().build() : requestBuilder.delete(body).build();
 			break;
+		case ("PATCH"):
+			request = requestBuilder.patch(body).build();
+			break;
 		default:
 			request = null;
 		}

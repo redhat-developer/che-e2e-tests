@@ -18,7 +18,8 @@ public enum RequestType {
 	DELETE("DELETE"),
 	OPTIONS("OPTIONS"),
 	TRACE("TRACE"),
-	CONNECT("CONNECT");
+	CONNECT("CONNECT"),
+	PATCH("PATCH");
 	
 	private String request;
 	
@@ -35,6 +36,7 @@ public enum RequestType {
 			case "OPTIONS": return OPTIONS;
 			case "TRACE": return TRACE;
 			case "CONNECT": return CONNECT;
+			case "PATCH": return PATCH;
 			default: throw new IllegalArgumentException("Unknown request type");
 		}	
 	}
