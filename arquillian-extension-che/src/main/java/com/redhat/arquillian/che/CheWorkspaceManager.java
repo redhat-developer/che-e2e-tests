@@ -70,14 +70,8 @@ public class CheWorkspaceManager {
         }
 
         cheWorkspaceProviderInstanceProducer.set(new CheWorkspaceProvider(cheExtensionConfig));
-        if (isNotEmpty(cheExtensionConfig.getCheWorkspaceName())) {
-            CheWorkspace w = cheWorkspaceProviderInstanceProducer.get().getCreatedWorkspace();
-            if(w!= null){
-                cheWorkspaceInstanceProducer.set(w);
-            } else {
-                logger.info("Gotten workspace does not exists! Creating new workspace.");
-            }
-
+        if (isNotEmpty(cheExtensionConfig.getCheWorkspaceUrl())) {
+            cheWorkspaceInstanceProducer.set(cheWorkspaceProviderInstanceProducer.get().getCreatedWorkspace());
         }
         bearerToken = cheExtensionConfig.getKeycloakToken();
     }
@@ -96,6 +90,7 @@ public class CheWorkspaceManager {
             CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
             CheWorkspaceService.deleteWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
             createWorkspace(workspaceAnnotation);
+
             logger.info("Workspace " + createdWkspc.getName() + " created and started.");
         } else if (!CheWorkspaceService.getWorkspaceStatus(createdWkspc, bearerToken).equals(CheWorkspaceStatus.RUNNING.toString())) {
             cheWorkspaceProviderInstanceProducer.get().startWorkspace(createdWkspc);
