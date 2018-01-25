@@ -154,8 +154,7 @@ public class CheWorkspaceManager {
         try {
             Git
                     .cloneRepository()
-                    .setURI("https://github.com/Katka92/che-starter")
-                    .setBranch("version_for_tests")
+                    .setURI("https://github.com/redhat-developer/che-starter")
                     .setDirectory(cheStarterDir)
                     .call();
         } catch (JGitInternalException ex) {
