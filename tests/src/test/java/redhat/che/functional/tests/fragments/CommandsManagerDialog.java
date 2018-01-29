@@ -20,8 +20,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 
-import static org.jboss.arquillian.graphene.Graphene.*;
-
 /*
  * div[id='commandsManagerView']
  */
@@ -90,7 +88,7 @@ public class CommandsManagerDialog {
         nameInput.clear();
         nameInput.sendKeys(commandName);
 
-        guardAjax(saveButton).click();
+        Graphene.guardAjax(saveButton).click();
     }
 
     /**
@@ -99,18 +97,18 @@ public class CommandsManagerDialog {
      */
     public void deleteCommand(String name){
         //creating focus on a row to delete
-        waitModel().until().element(customPlus).is().visible();
+        Graphene.waitModel().until().element(customPlus).is().visible();
         WebElement row = driver.findElement(By.xpath("//div[@id='gwt-debug-commandWizard']/div/div/div[5]/div[2]/div"));
         row.click();
 
         //clik on minus in the row
-        waitModel().until().element(textArea).is().visible();
+        Graphene.waitModel().until().element(textArea).is().visible();
         WebElement rowMinus = driver.findElement(By.xpath("//div[@id='gwt-debug-commandWizard']/div/div/div[5]/div[2]/div/span/span"));
         select(rowMinus);
 
         //confirm deleting
         WebElement ok = driver.findElement(By.id("ask-dialog-ok"));
-        guardAjax(ok).click();
+        Graphene.guardAjax(ok).click();
     }
 
     /**
@@ -119,11 +117,11 @@ public class CommandsManagerDialog {
      */
     public void closeEditCommands(){
         WebElement close = driver.findElement(By.id("window-edit-commands-close"));
-        guardNoRequest(close).click();
+        Graphene.guardNoRequest(close).click();
     }
 
     private void select(WebElement element) {
-        waitModel().until().element(element).is().visible();
+        Graphene.waitModel().until().element(element).is().visible();
         new Actions(driver).click(element).build().perform();
     }
 }

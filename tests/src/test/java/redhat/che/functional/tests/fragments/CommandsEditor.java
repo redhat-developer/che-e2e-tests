@@ -11,17 +11,14 @@
 package redhat.che.functional.tests.fragments;
 
 import org.jboss.arquillian.drone.api.annotation.Drone;
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.utils.ActionUtils;
-
 import java.util.concurrent.TimeUnit;
-
-import static org.jboss.arquillian.graphene.Graphene.guardAjax;
-import static org.jboss.arquillian.graphene.Graphene.waitGui;
 
 public class CommandsEditor {
 
@@ -50,30 +47,28 @@ public class CommandsEditor {
     private WebElement runButton;
 
     public void addNewCommand(String testName, String command) {
-        waitGui().until(webDriver -> webDriver.switchTo().activeElement().equals(cmdInput) || webDriver.switchTo().activeElement().equals(previewURL));
+        Graphene.waitGui().until(webDriver -> webDriver.switchTo().activeElement().equals(cmdInput) || webDriver.switchTo().activeElement().equals(previewURL));
         nameInput.clear();
         nameInput.sendKeys(testName);
         cmdInput.click();
         ActionUtils.selectAll(driver);
         ActionUtils.deleteMarkedLines(driver);
         cmdInput.sendKeys(command);
-        waitGui().withTimeout(10, TimeUnit.SECONDS)
+        Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS)
             .until("Save button was not enabled. Buildscript possibly already exists.")
             .element(saveButton).is().clickable();
         saveButton.click();
-//        guardAjax(saveButton).click();
     }
 
     public void runOpenedCommand() {
-        waitGui().withTimeout(10, TimeUnit.SECONDS)
+        Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS)
             .until("Run button was not enabled. Buildscript possibly not saved.")
             .element(runButton).is().clickable();
         runButton.click();
-//        guardAjax(runButton).click();
     }
 
     public void waitTillEditorVisible() {
-        waitGui().until("Script editor did not open").element(root).is().visible();
+        Graphene.waitGui().until("Script editor did not open").element(root).is().visible();
     }
 
 }

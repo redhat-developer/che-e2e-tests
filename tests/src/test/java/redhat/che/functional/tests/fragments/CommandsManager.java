@@ -11,18 +11,14 @@
 package redhat.che.functional.tests.fragments;
 
 import org.jboss.arquillian.drone.api.annotation.Drone;
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.utils.ActionUtils;
-
-import java.sql.Time;
 import java.util.concurrent.TimeUnit;
-
-import static org.jboss.arquillian.graphene.Graphene.waitGui;
 
 public class CommandsManager {
 
@@ -53,14 +49,14 @@ public class CommandsManager {
     }
 
     public void openEditPanelForAddingBuildCommand() {
-        waitGui().withTimeout(10, TimeUnit.SECONDS)
+        Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS)
             .until("Could not locate add command button")
             .element(buildPlus).is().visible();
         buildPlus.click();
-        waitGui().withTimeout(10, TimeUnit.SECONDS)
+        Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS)
             .until("Command type listbox did not load")
             .element(commandTypeListBoxLoaded).is().visible();
-        waitGui().withTimeout(10, TimeUnit.SECONDS)
+        Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS)
             .until("Could not find command type Maven")
             .element(commandTypeMaven).is().visible();
         ActionUtils.doubleClick(driver, commandTypeMaven);
