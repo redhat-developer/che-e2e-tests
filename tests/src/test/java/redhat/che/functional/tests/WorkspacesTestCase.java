@@ -10,8 +10,13 @@
  */
 package redhat.che.functional.tests;
 
+import com.redhat.arquillian.che.CheWorkspaceManager;
 import com.redhat.arquillian.che.annotations.Workspace;
+import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
+import com.redhat.arquillian.che.resource.CheWorkspace;
+import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.resource.Stack;
+import com.redhat.arquillian.che.service.CheWorkspaceService;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -21,12 +26,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import com.redhat.arquillian.che.CheWorkspaceManager;
-import com.redhat.arquillian.che.config.CheExtensionConfiguration;
-import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
-import com.redhat.arquillian.che.resource.CheWorkspace;
-import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
-import com.redhat.arquillian.che.service.CheWorkspaceService;
 import redhat.che.functional.tests.utils.GetCheLogsOnFailRule;
 
 /**
@@ -35,14 +34,14 @@ import redhat.che.functional.tests.utils.GetCheLogsOnFailRule;
 
 @RunWith(Arquillian.class)
 @Workspace(removeAfterTest = false, stackID = Stack.VERTX)
-public class WorkspacesTestCase {
-    private static final Logger logger = Logger.getLogger(WorkspacesTestCase.class);
+public class WorkspacesTestCase extends AbstractCheFunctionalTest{
+    private static final Logger LOG = Logger.getLogger(CheWorkspaceManager.class);
 
     @ArquillianResource
     private static CheWorkspace firstWorkspace;
 
-    @ArquillianResource
-    private static CheWorkspaceProvider provider;
+//    @ArquillianResource
+//    private static CheWorkspaceProvider provider;
 
     String runningState;
     String stoppedState;
@@ -73,13 +72,13 @@ public class WorkspacesTestCase {
     public void startSecondWorkspace() {
         Assert.assertNotNull(firstWorkspace);
         String status = CheWorkspaceService.getWorkspaceStatus(firstWorkspace, token);
-        logger.info("Status of first workspace is: " +status);
+        LOG.info("Status of first workspace is: " +status);
         Assert.assertEquals("First workspace status should be RUNNING but is " + status, runningState, status);
 
-        logger.info("Creating second workspace");
+        LOG.info("Creating second workspace");
         secondWorkspace = provider.createCheWorkspace(null);
         CheWorkspaceService.waitUntilWorkspaceGetsToState(secondWorkspace, runningState, token);
-        logger.info("Second workspace should be started");
+        LOG.info("Second workspace should be started");
 
         status = CheWorkspaceService.getWorkspaceStatus(secondWorkspace, token);
         Assert.assertEquals("Second workspace status should be RUNNING but is" + status, runningState, status);

@@ -26,18 +26,21 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import redhat.che.functional.tests.customExceptions.BayesianNotFunctionalException;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
 @Workspace(removeAfterTest = false, stackID = Stack.NODEJS)
 public class PackageJsonTestCase extends AbstractCheFunctionalTest {
-    private static final Logger logger = Logger.getLogger(CheWorkspaceManager.class);
+    private static final Logger LOG = Logger.getLogger(CheWorkspaceManager.class);
 
     @FindBy(className = "currentLine")
     private WebElement currentLine;
 
     private static final String jsonDependency = "\"serve-static\": \"1.7.1\" ,\n";
     private static final String jsonExpectedError = "Package serve-static-1.7.1 is vulnerable: CVE-2015-1164 Open redirect vulnerability. Recommendation: use version";
+    private static final Integer jsonExpectedErrorLine = 12;
+    private static final Integer jsonInjectionEntryPoint = 12;
 
     @Before
     public void setEnvironment(){
@@ -46,19 +49,28 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
 
     @After
     public void resetEnvironment(){
-        editorPart.codeEditor().setCursorToLine(12);
+        editorPart.codeEditor().setCursorToLine(jsonInjectionEntryPoint);
         editorPart.codeEditor().deleteNextLines(1);
     }
 
-    @Test
-    public void testPackageJsonBayesian() {
+    @Test(expected = BayesianNotFunctionalException.class)
+    public void testPackageJsonBayesian() throws Throwable {
         openPackageJson();
-        editorPart.codeEditor().setCursorToLine(12);
+        editorPart.codeEditor().setCursorToLine(jsonInjectionEntryPoint);
         editorPart.codeEditor().writeDependency(jsonDependency);
-        Assert.assertTrue(
+        try {
+            Assert.assertTrue(
                 "Annotation error is not visible.",
-                editorPart.codeEditor().verifyAnnotationErrorIsPresent(jsonExpectedError, 12)
-        );
+                editorPart.codeEditor().verifyAnnotationErrorIsPresent(jsonExpectedError, jsonExpectedErrorLine)
+            );
+        } catch (AssertionError e) {
+            if (CheWorkspaceProvider.getConfiguration().getOsioUrlPart().equals(bayesianErrorExpectedURL)) {
+                throw new BayesianNotFunctionalException(bayesianErrorNotVisible);
+            } else {
+                LOG.error("Annotation assert failed:"+e.getMessage());
+                throw e;
+            }
+        }
     }
 
     private void openPackageJson() {

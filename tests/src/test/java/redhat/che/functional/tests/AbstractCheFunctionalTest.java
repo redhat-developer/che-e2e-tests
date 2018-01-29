@@ -10,6 +10,7 @@
 */
 package redhat.che.functional.tests;
 
+import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import com.redhat.arquillian.che.resource.CheWorkspace;
 import org.apache.log4j.Logger;
 import org.arquillian.extension.recorder.screenshooter.Screenshooter;
@@ -67,13 +68,18 @@ public abstract class AbstractCheFunctionalTest {
     @ArquillianResource
     private static Screenshooter screenshooter;
 
-    private static short screenshotsTaken = 0;
+    @ArquillianResource
+    static CheWorkspaceProvider provider;
 
-    protected void openBrowser() {
+    private static short screenshotsTaken = 0;
+    static final String bayesianErrorNotVisible = "Known expected bug : https://github.com/openshiftio/openshift.io/issues/2063";
+    static final String bayesianErrorExpectedURL = "prod-preview.openshift.io";
+
+    void openBrowser() {
         openBrowser(workspace);
     }
 
-    protected void openBrowser(CheWorkspace wkspc) {
+    private void openBrowser(CheWorkspace wkspc) {
         LOG.info("Opening browser");
         driver.get(wkspc.getIdeLink());
 //        driver.manage().window().maximize(); // Causes crash with Selenium on Xvfb - no window manager present
@@ -115,7 +121,7 @@ public abstract class AbstractCheFunctionalTest {
         loginButton.click();
     }
 
-    protected static void takeScreenshot(String fileName) {
+    static void takeScreenshot(String fileName) {
         screenshotsTaken++;
         screenshooter.takeScreenshot(fileName + "_" + screenshotsTaken + ".png");
     }

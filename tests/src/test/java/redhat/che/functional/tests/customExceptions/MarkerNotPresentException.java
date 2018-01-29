@@ -10,10 +10,11 @@
 */
 package redhat.che.functional.tests.customExceptions;
 
-public class MarkerNotPresentException  extends Exception{
+public class MarkerNotPresentException extends Exception{
 
     public MarkerNotPresentException(String message)
     {
         super(message);
     }
+
 }
