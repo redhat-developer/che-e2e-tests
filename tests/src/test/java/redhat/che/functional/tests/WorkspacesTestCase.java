@@ -57,7 +57,7 @@ public class WorkspacesTestCase {
     public void settingAttributes(){
         runningState = CheWorkspaceStatus.RUNNING.getStatus();
         stoppedState = CheWorkspaceStatus.STOPPED.getStatus();
-        token = "Bearer " + System.getProperty(CheExtensionConfiguration.KEYCLOAK_TOKEN_PROPERTY_NAME);
+        token = CheWorkspaceProvider.getConfiguration().getKeycloakToken();
     }
 
     @After

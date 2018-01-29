@@ -33,18 +33,19 @@ public class CheWorkspaceProvider {
     private static String cheStarterURL;
     private static String openShiftMasterURL;
     private static String openshiftToken;
-    private static  String keycloakToken;
+    private static String keycloakToken;
     private static String namespace;
     private static String cheWorkspaceUrl;
+    private static CheExtensionConfiguration configuration;
 
     public CheWorkspaceProvider(CheExtensionConfiguration config){
-        cheStarterURL = config.getCheStarterUrl();
-        openShiftMasterURL = config.getOpenshiftMasterUrl();
-        openshiftToken = config.getOpenshiftToken();
-        keycloakToken = config.getKeycloakToken();
-        namespace = config.getOpenshiftNamespace();
-        cheWorkspaceUrl = config.getCheWorkspaceUrl();
-
+        configuration = config;
+        cheStarterURL = configuration.getCheStarterUrl();
+        openShiftMasterURL = configuration.getOpenshiftMasterUrl();
+        openshiftToken = configuration.getOpenshiftToken();
+        keycloakToken = configuration.getKeycloakToken();
+        namespace = configuration.getOpenshiftNamespace();
+        cheWorkspaceUrl = configuration.getCheWorkspaceUrl();
     }
 
     /**
@@ -121,4 +122,9 @@ public class CheWorkspaceProvider {
         }
         return  false;
     }
+
+    public static CheExtensionConfiguration getConfiguration() {
+        return configuration;
+    }
+
 }

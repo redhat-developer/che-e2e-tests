@@ -23,11 +23,11 @@ import redhat.che.functional.tests.*;
 @RunWith(Suite.class)
 @SuiteClasses({
     //vert.x projects
+    GitTestCase.class,
+    PomTestCase.class,
     AnalyticsErrorMarkersTestCase.class,
     MavenTestCase.class,
-    GitTestCase.class,
-    //WorkspacesTestCase.class,
-    PomTestCase.class,
+    WorkspacesTestCase.class,
 
     //nodejs projects
     PackageJsonTestCase.class
