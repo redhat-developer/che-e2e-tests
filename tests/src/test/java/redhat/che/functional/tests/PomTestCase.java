@@ -25,16 +25,14 @@ public class PomTestCase extends AbstractCheFunctionalTest {
     @FindBy(className = "currentLine")
     private WebElement currentLine;
 
-    private int line = 37;
-
-    private String pomDependency =
+    private static final String pomDependency =
             "<dependency>\n"
                     + "<groupId>ch.qos.logback</groupId>\n"
                     + "<artifactId>logback-core</artifactId>\n"
                     + "<version>1.1.10</version>\n"
                     + "</dependency>\n";
-
-    private String pomExpectedError = "Package ch.qos.logback:logback-core-1.1.10 is vulnerable: CVE-2017-5929. Recommendation: use version ";
+    private static final String pomExpectedError = "Package ch.qos.logback:logback-core-1.1.10 is vulnerable: CVE-2017-5929";
+    private static final Integer pomExpectedErrorLine = 40;
 
     @Before
     public void importProject(){
@@ -44,7 +42,7 @@ public class PomTestCase extends AbstractCheFunctionalTest {
     @After
     public void deleteDependency(){
         editorPart.codeEditor().hideErrors();
-        setCursorToLine(37);
+        editorPart.codeEditor().setCursorToLine(37);
         editorPart.codeEditor().deleteNextLines(5);
         editorPart.codeEditor().waitUnitlPomDependencyIsNotVisible();
         editorPart.tabsPanel().waintUntilFocusedTabSaves();
@@ -53,9 +51,12 @@ public class PomTestCase extends AbstractCheFunctionalTest {
     @Test
     public void testPomXmlReference() {
         openPomXml();
-        setCursorToLine(37);
+        editorPart.codeEditor().setCursorToLine(37);
         editorPart.codeEditor().writeDependency(pomDependency);
-        Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError));
+        Assert.assertTrue(
+                "Annotation error is not visible.",
+                editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError, pomExpectedErrorLine)
+        );
     }
 
     private void openPomXml() {

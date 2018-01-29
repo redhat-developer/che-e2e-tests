@@ -42,7 +42,7 @@ public class ActionUtils {
     }
 
     public static void doubleClick(WebDriver driver, WebElement element){
-        new Actions(driver).doubleClick(element).build().perform();
+        new Actions(driver).doubleClick(element).perform();
     }
 
     public static void selectAll(WebDriver driver){

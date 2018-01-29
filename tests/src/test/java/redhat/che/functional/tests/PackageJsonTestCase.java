@@ -19,11 +19,13 @@ import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import redhat.che.functional.tests.customExceptions.MarkerNotPresentException;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
@@ -40,12 +42,8 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
     @FindBy(className = "currentLine")
     private WebElement currentLine;
 
-    private CheWorkspace nodejsWorkspace;
-    private String token;
-
-    private String jsonDependency = "\"serve-static\": \"1.7.1\" ,\n";
-
-    private String jsonExpectedError = "Package serve-static-1.7.1 is vulnerable: CVE-2015-1164 Open redirect vulnerability. Recommendation: use version";
+    private static final String jsonDependency = "\"serve-static\": \"1.7.1\" ,\n";
+    private static final String jsonExpectedError = "Package serve-static-1.7.1 is vulnerable: CVE-2015-1164 Open redirect vulnerability. Recommendation: use version";
 
     @Before
     public void setEnvironment(){
@@ -54,16 +52,19 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
 
     @After
     public void resetEnvironment(){
-        setCursorToLine(12);
+        editorPart.codeEditor().setCursorToLine(12);
         editorPart.codeEditor().deleteNextLines(1);
     }
 
     @Test
-    public void testPackageJsonBayesian() throws MarkerNotPresentException{
+    public void testPackageJsonBayesian() {
         openPackageJson();
-        setCursorToLine(12);
+        editorPart.codeEditor().setCursorToLine(12);
         editorPart.codeEditor().writeDependency(jsonDependency);
-        Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(jsonExpectedError));
+        Assert.assertTrue(
+                "Annotation error is not visible.",
+                editorPart.codeEditor().verifyAnnotationErrorIsPresent(jsonExpectedError, 12)
+        );
     }
 
     private void openPackageJson() {

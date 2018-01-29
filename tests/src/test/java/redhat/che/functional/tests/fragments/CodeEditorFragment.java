@@ -3,16 +3,16 @@ package redhat.che.functional.tests.fragments;
 import com.redhat.arquillian.che.CheWorkspaceManager;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.drone.api.annotation.Drone;
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
+import redhat.che.functional.tests.fragments.window.AskForValueDialog;
 import redhat.che.functional.tests.utils.ActionUtils;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import static org.jboss.arquillian.graphene.Graphene.waitGui;
-import static redhat.che.functional.tests.utils.ActionUtils.writeIntoElement;
 
 /**
  * id = "gwt-debug-editorPartStack-contentPanel"
@@ -35,52 +35,64 @@ public class CodeEditorFragment {
     @FindByJQuery("div:contains('ch.qos.logback')")
     private WebElement dependency;
 
+    @FindByJQuery("body .textviewTooltip")
+    private WebElement annotationErrorToolTip;
+
+    @FindByJQuery("body .textviewTooltip .tooltipRow .annotationHTML.error")
+    private WebElement annotationErrorToolTipIcon;
+
+    @FindByJQuery("body .textviewTooltip .tooltipRow .tooltipTitle")
+    private WebElement annotationErrorToolTipText;
+
+    @FindByJQuery("body .textviewContent[contenteditable='true'] .annotationLine.currentLine .annotationRange.error")
+    private WebElement annotationErrorEditorField;
+
+    @FindByJQuery("body #gwt-debug-askValueDialog-window")
+    private AskForValueDialog askForValueDialog;
+
     @Drone
     private WebDriver driver;
 
-    private static int WAIT_TIME = 15;
-    private WebElement label;
+    private static final Integer WAIT_TIME = 15;
 
     public void writeDependency(String dependency) {
         new Actions(driver).moveToElement(rootElement).sendKeys(dependency).perform();
     }
 
-    public boolean verifyAnnotationErrorIsPresent(String expectedError) {
+    public void setCursorToLine(int line) {
+        ActionUtils.openMoveCursorDialog(driver);
+        askForValueDialog.waitFormToOpen();
+        askForValueDialog.typeAndWaitText(line);
+        askForValueDialog.clickOkBtn();
+        askForValueDialog.waitFormToClose();
+    }
+
+    public boolean verifyAnnotationErrorIsPresent(String expectedError, int editorLine) {
         logger.info("Waiting for " + WAIT_TIME + " seconds until annotation error should be visible");
         try {
-            waitGui().withTimeout(WAIT_TIME, TimeUnit.SECONDS).until(driver -> {
-
-                for(WebElement error : annotationErrors){
-                    error.click();
-
-                    label = driver.findElement(By.className("tooltipTitle"));
-                    if (label.getText().contains(expectedError)) {
-                        logger.info("Annotation error is present.");
-                        return true;
-                    }
+            Graphene.waitGui().withTimeout(WAIT_TIME, TimeUnit.SECONDS).until(webDriver -> {
+                setCursorToLine(editorLine);
+                new Actions(webDriver).moveToElement(annotationErrorEditorField).perform();
+                try {
+                    Graphene.waitGui().until().element(annotationErrorToolTipIcon).is().visible();
+                } catch (WebDriverException e) {
+                    return false;
                 }
-                return false;
-                });
-        } catch (IndexOutOfBoundsException | WebDriverException i){
+                return annotationErrorToolTipText.getText().contains(expectedError);
+            });
+        } catch (TimeoutException e){
             return false;
         }
         return true;
     }
 
     public void writeIntoTextViewContent(String text) {
-        writeIntoElement(driver, lastSpan, text);
+        ActionUtils.writeIntoElement(driver, lastSpan, text);
     }
 
     public void hideErrors() {
-        rootElement.click();
-        waitGui().until().element(label).is().not().visible();
-        try {
-        	// Sometimes, the tooltip pops up once again. Get rid of it again.
-        	waitGui().withTimeout(1, TimeUnit.SECONDS).until().element(By.className("tooltipTitle")).is().visible();
-        	rootElement.click();
-        }catch (TimeoutException e) {
-        	// Tooltip was successfully hidden. Do nothing.
-        }
+        annotationErrorEditorField.click();
+        Graphene.waitGui().until().element(annotationErrorToolTip).is().not().visible();
     }
 
     public void deleteNextLines(int linesCount) {
@@ -89,6 +101,6 @@ public class CodeEditorFragment {
     }
 
     public void waitUnitlPomDependencyIsNotVisible() {
-        waitGui().until().element(dependency).is().not().visible();
+        Graphene.waitGui().until().element(dependency).is().not().visible();
     }
 }

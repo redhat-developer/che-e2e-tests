@@ -11,7 +11,6 @@
 package redhat.che.functional.tests.fragments;
 
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
 import org.openqa.selenium.WebDriver;
@@ -54,18 +53,23 @@ public class CommandsEditor {
         waitGui().until(webDriver -> webDriver.switchTo().activeElement().equals(cmdInput) || webDriver.switchTo().activeElement().equals(previewURL));
         nameInput.clear();
         nameInput.sendKeys(testName);
-
         cmdInput.click();
         ActionUtils.selectAll(driver);
         ActionUtils.deleteMarkedLines(driver);
         cmdInput.sendKeys(command);
-        waitGui().withTimeout(10, TimeUnit.SECONDS).until("Save button was not enabled. Buildscript possibly already exists.").element(saveButton).is().enabled();
-        guardAjax(saveButton).click();
+        waitGui().withTimeout(10, TimeUnit.SECONDS)
+            .until("Save button was not enabled. Buildscript possibly already exists.")
+            .element(saveButton).is().clickable();
+        saveButton.click();
+//        guardAjax(saveButton).click();
     }
 
     public void runOpenedCommand() {
-        waitGui().until().element(runButton).is().enabled();
-        guardAjax(runButton).click();
+        waitGui().withTimeout(10, TimeUnit.SECONDS)
+            .until("Run button was not enabled. Buildscript possibly not saved.")
+            .element(runButton).is().clickable();
+        runButton.click();
+//        guardAjax(runButton).click();
     }
 
     public void waitTillEditorVisible() {

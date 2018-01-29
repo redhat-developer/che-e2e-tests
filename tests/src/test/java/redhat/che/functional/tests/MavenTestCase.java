@@ -12,6 +12,7 @@ package redhat.che.functional.tests;
 
 import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.resource.Stack;
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.junit.After;
@@ -21,15 +22,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-
 import redhat.che.functional.tests.fragments.CommandsEditor;
 import redhat.che.functional.tests.fragments.CommandsManager;
 import redhat.che.functional.tests.fragments.LeftBar;
-
 import java.util.concurrent.TimeUnit;
-
-import static org.jboss.arquillian.graphene.Graphene.guardAjax;
-import static org.jboss.arquillian.graphene.Graphene.waitModel;
 
 /**
  * Created by katka on 22/06/17.
@@ -67,7 +63,7 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     @After
     public void deleteCommand(){
         commandsManager.removeCommand(testName);
-        guardAjax(okButton).click();
+        Graphene.guardAjax(okButton).click();
     }
 
     /**
@@ -86,7 +82,7 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
 
         //wait for end - if build first time, it last longer -> increasing timeout
         //further increased timeout. test failed just because build took longer.
-        waitModel().withTimeout(3, TimeUnit.MINUTES).until().element(consoleEnds).is().visible();
+        Graphene.waitModel().withTimeout(3, TimeUnit.MINUTES).until().element(consoleEnds).is().visible();
 
         Assert.assertTrue(buildSuccess.isDisplayed());
     }

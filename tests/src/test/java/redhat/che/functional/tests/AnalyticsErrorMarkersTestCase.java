@@ -22,8 +22,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import redhat.che.functional.tests.customExceptions.MarkerNotPresentException;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
+
 import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
@@ -38,14 +38,14 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
     @FindBy(className = "currentLine")
     private WebElement currentLine;
 
-    private String pomDependency =
-            "<dependency>\n"
+    private static final String pomDependency =
+                      "<dependency>\n"
                     + "<groupId>ch.qos.logback</groupId>\n"
                     + "<artifactId>logback-core</artifactId>\n"
                     + "<version>1.1.10</version>\n"
                     + "</dependency>\n";
-
-    private String pomExpectedError = "Package ch.qos.logback:logback-core-1.1.10 is vulnerable: CVE-2017-5929. Recommendation: use version ";
+    private static final String pomExpectedError = "Package ch.qos.logback:logback-core-1.1.10 is vulnerable: CVE-2017-5929";
+    private static final Integer pomExpectedErrorLine = 40;
 
     @Before
     public void importProject() {
@@ -55,27 +55,33 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
     @After
     public void deleteDependency() {
         editorPart.codeEditor().hideErrors();
-        setCursorToLine(37);
+        editorPart.codeEditor().setCursorToLine(37);
         editorPart.codeEditor().deleteNextLines(5);
         editorPart.codeEditor().waitUnitlPomDependencyIsNotVisible();
         editorPart.tabsPanel().waintUntilFocusedTabSaves();
     }
 
     @Test
-    public void bayesianErrorShownOnOpenFile() throws MarkerNotPresentException {
-        //creating errorneous dependency
+    public void bayesianErrorShownOnOpenFile() {
+        //creating invalid dependency
         openPomXml();
-        setCursorToLine(37);
+        editorPart.codeEditor().setCursorToLine(37);
         editorPart.codeEditor().writeDependency(pomDependency);
-        Assert.assertTrue("Annotation error is not visible.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError));
+        Assert.assertTrue(
+                "Annotation error is not visible.",
+                editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError, pomExpectedErrorLine)
+        );
 
-        //checking if error markes is visible after re-opening the file
+        //checking if error marker is visible after re-opening the file
         editorPart.tabsPanel().closeActiveTab(driver);
 
         openPomXml();
-        setCursorToLine(37);
+        editorPart.codeEditor().setCursorToLine(37);
 
-        Assert.assertTrue("Annotation error is not visible when reopening file.", editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError));
+        Assert.assertTrue(
+                "Annotation error is not visible when reopening file.",
+                editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError, pomExpectedErrorLine)
+        );
     }
 
     private void openPomXml() {

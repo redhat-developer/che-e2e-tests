@@ -1,10 +1,5 @@
 package redhat.che.functional.tests;
 
-import static redhat.che.functional.tests.fragments.BottomInfoPanel.FixedConsoleText.GIT_ADDED_TO_INDEX_TEXT;
-import static redhat.che.functional.tests.fragments.BottomInfoPanel.FixedConsoleText.GIT_COMMITED_WITH_REVISION;
-import static redhat.che.functional.tests.fragments.BottomInfoPanel.TabNames.TAB_GIT_ADD_TO_INDEX;
-import static redhat.che.functional.tests.fragments.BottomInfoPanel.TabNames.TAB_GIT_COMMIT;
-
 import java.io.File;
 import java.util.Date;
 
@@ -28,7 +23,6 @@ import redhat.che.functional.tests.fragments.window.GitPushWindow;
 import redhat.che.functional.tests.fragments.window.PreferencesWindow;
 import redhat.che.functional.tests.fragments.window.UploadPrivateSshFormWindow;
 
-@Ignore
 @RunWith(Arquillian.class)
 @Workspace(stackID = Stack.VERTX, removeAfterTest = false)
 public class GitTestCase extends AbstractCheFunctionalTest {
@@ -85,8 +79,8 @@ public class GitTestCase extends AbstractCheFunctionalTest {
 
         mainMenuPanel.clickGit();
         gitPopupTopMenu.addToIndex();
-        bottomInfoPanel.tabsPanel().waitUntilFocusedTabHasName(TAB_GIT_ADD_TO_INDEX);
-        bottomInfoPanel.waitUntilConsolePartContains(GIT_ADDED_TO_INDEX_TEXT);
+        bottomInfoPanel.tabsPanel().waitUntilFocusedTabHasName(BottomInfoPanel.TabNames.TAB_GIT_ADD_TO_INDEX);
+        bottomInfoPanel.waitUntilConsolePartContains(BottomInfoPanel.FixedConsoleText.GIT_ADDED_TO_INDEX_TEXT);
     }
 
     @Test
@@ -98,8 +92,8 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         gitPopupTopMenu.commitSelected();
         commitToRepoWindow.addCommitMessage("changed README as part of a test that was run on: " + new Date());
         commitToRepoWindow.commit();
-        bottomInfoPanel.tabsPanel().waitUntilFocusedTabHasName(TAB_GIT_COMMIT);
-        bottomInfoPanel.waitUntilConsolePartContains(GIT_COMMITED_WITH_REVISION);
+        bottomInfoPanel.tabsPanel().waitUntilFocusedTabHasName(BottomInfoPanel.TabNames.TAB_GIT_COMMIT);
+        bottomInfoPanel.waitUntilConsolePartContains(BottomInfoPanel.FixedConsoleText.GIT_COMMITED_WITH_REVISION);
     }
 
     @Test

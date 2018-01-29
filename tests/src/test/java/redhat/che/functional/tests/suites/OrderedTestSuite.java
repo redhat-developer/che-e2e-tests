@@ -22,15 +22,17 @@ import redhat.che.functional.tests.*;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-        //vert.x projects
-        //AnalyticsErrorMarkersTestCase.class,
-        //MavenTestCase.class,
-        //WorkspacesTestCase.class,
-        PomTestCase.class,
+    //vert.x projects
+    AnalyticsErrorMarkersTestCase.class,
+    MavenTestCase.class,
+    GitTestCase.class,
+    //WorkspacesTestCase.class,
+    PomTestCase.class,
 
-        //nodejs projects
-	    PackageJsonTestCase.class
+    //nodejs projects
+    PackageJsonTestCase.class
 })
+
 public class OrderedTestSuite {
 
 }

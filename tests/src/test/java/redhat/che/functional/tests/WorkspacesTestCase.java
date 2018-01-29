@@ -1,5 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
+ */
 package redhat.che.functional.tests;
-
 
 import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.resource.Stack;
@@ -12,14 +21,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import com.redhat.arquillian.che.CheWorkspaceManager;
 import com.redhat.arquillian.che.config.CheExtensionConfiguration;
 import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import com.redhat.arquillian.che.resource.CheWorkspace;
 import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.service.CheWorkspaceService;
-
 import redhat.che.functional.tests.utils.GetCheLogsOnFailRule;
 
 /**
