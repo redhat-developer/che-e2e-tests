@@ -36,7 +36,7 @@ import redhat.che.functional.tests.utils.GetCheLogsOnFailRule;
 @RunWith(Arquillian.class)
 @Workspace(removeAfterTest = false, stackID = Stack.VERTX)
 public class WorkspacesTestCase {
-    private static final Logger logger = Logger.getLogger(CheWorkspaceManager.class);
+    private static final Logger logger = Logger.getLogger(WorkspacesTestCase.class);
 
     @ArquillianResource
     private static CheWorkspace firstWorkspace;
@@ -62,9 +62,9 @@ public class WorkspacesTestCase {
 
     @After
     public void resetWorkspaces(){
-        Assert.assertTrue(provider.stopWorkspace(secondWorkspace));
+        Assert.assertTrue(CheWorkspaceService.stopWorkspace(secondWorkspace, token));
         logger.info("Second workspace stopped");
-        Assert.assertTrue(provider.startWorkspace(firstWorkspace));
+        Assert.assertTrue(CheWorkspaceService.startWorkspace(firstWorkspace));
         logger.info("First workspace started");
         CheWorkspaceService.deleteWorkspace(secondWorkspace, token);
     }

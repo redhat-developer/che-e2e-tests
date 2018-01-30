@@ -13,8 +13,10 @@ package com.redhat.arquillian.che.service;
 import java.io.IOException;
 import java.util.List;
 
+import com.redhat.arquillian.che.config.CheExtensionConfiguration;
 import com.redhat.arquillian.che.resource.Stack;
 import com.redhat.arquillian.che.resource.StackService;
+import com.redhat.arquillian.che.rest.QueryParam;
 import net.minidev.json.JSONArray;
 import org.apache.log4j.Logger;
 import com.jayway.jsonpath.Configuration;
@@ -26,8 +28,13 @@ import com.redhat.arquillian.che.rest.RestClient;
 import com.redhat.arquillian.che.util.OpenShiftHelper;
 
 import okhttp3.Response;
+import org.jboss.arquillian.core.api.Instance;
+import org.jboss.arquillian.core.api.annotation.Inject;
 
 public class CheWorkspaceService {
+
+    @Inject
+    private static Instance<CheExtensionConfiguration> configurationInstance;
 
     private static final Logger logger = Logger.getLogger(CheWorkspaceService.class);
 
@@ -132,8 +139,29 @@ public class CheWorkspaceService {
      *
      * @param workspace workspace to stop
      */
-    public static void stopWorkspace(CheWorkspace workspace, String authorizationToken) {
-        operateWorkspaceState(workspace, RequestType.DELETE, CheWorkspaceStatus.STOPPED.getStatus(), authorizationToken);
+    public static boolean stopWorkspace(CheWorkspace workspace, String authorizationToken) {
+         operateWorkspaceState(workspace, RequestType.DELETE, CheWorkspaceStatus.STOPPED.getStatus(), authorizationToken);
+        if(CheWorkspaceService.getWorkspaceStatus(workspace, authorizationToken).equals(CheWorkspaceStatus.STOPPED.getStatus())){
+            return true;
+        }
+        return  false;
+    }
+
+    public static boolean startWorkspace(CheWorkspace workspace){
+        CheExtensionConfiguration config = configurationInstance.get();
+        RestClient client = new RestClient(config.getCheStarterUrl());
+        String path = "/workspace/" + workspace.getName();
+        Response response = client.sentRequest(path, RequestType.PATCH, null, config.getKeycloakToken(),
+                new QueryParam("masterUrl", config.getOpenshiftMasterUrl()), new QueryParam("namespace", config.getOpenshiftNamespace()));
+        Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
+        response.close();
+        client.close();
+
+        CheWorkspaceService.waitUntilWorkspaceGetsToState(workspace, CheWorkspaceStatus.RUNNING.getStatus(), config.getKeycloakToken());
+        if(CheWorkspaceService.getWorkspaceStatus(workspace, config.getKeycloakToken()).equals(CheWorkspaceStatus.RUNNING.getStatus())) {
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -98,7 +98,7 @@ public class CheWorkspaceManager {
             createWorkspace(workspaceAnnotation);
             logger.info("Workspace " + createdWkspc.getName() + " created and started.");
         } else if (!CheWorkspaceService.getWorkspaceStatus(createdWkspc, bearerToken).equals(CheWorkspaceStatus.RUNNING.toString())) {
-            boolean isStarted = cheWorkspaceProviderInstanceProducer.get().startWorkspace(createdWkspc);
+            boolean isStarted = CheWorkspaceService.startWorkspace(createdWkspc);
             if(isStarted) { logger.info("Workspace " + createdWkspc.getName() + " started."); }
             else {
                 logger.info("Can not start given workspace! Creating new one.");
