@@ -35,10 +35,9 @@ public class CheWorkspaceProvider {
     private static String openshiftToken;
     private static String keycloakToken;
     private static String namespace;
-    @Deprecated
-    private static String cheWorkspaceUrl;
-    private static CheExtensionConfiguration configuration;
     private static String cheWorkspaceName;
+
+    private static CheExtensionConfiguration configuration;
 
     public CheWorkspaceProvider(CheExtensionConfiguration config){
         configuration = config;
@@ -47,7 +46,6 @@ public class CheWorkspaceProvider {
         openshiftToken = config.getOpenshiftToken();
         keycloakToken = config.getKeycloakToken();
         namespace = config.getOpenshiftNamespace();
-        cheWorkspaceUrl = config.getCheWorkspaceUrl();
         cheWorkspaceName = config.getCheWorkspaceName();
     }
 
@@ -105,33 +103,4 @@ public class CheWorkspaceProvider {
         client.close();
         return CheWorkspaceService.getWorkspaceFromDocument(jsonDocument, cheWorkspaceName);
     }
-
-    public boolean stopWorkspace(CheWorkspace workspace){
-        CheWorkspaceService.stopWorkspace(workspace, keycloakToken);
-        if(CheWorkspaceService.getWorkspaceStatus(workspace, keycloakToken).equals(CheWorkspaceStatus.STOPPED.getStatus())){
-            return true;
-        }
-        return  false;
-    }
-
-    public boolean startWorkspace(CheWorkspace workspace){
-        RestClient client = new RestClient(cheStarterURL);
-        String path = "/workspace/" + workspace.getName();
-        Response response = client.sentRequest(path, RequestType.PATCH, null, keycloakToken,
-                new QueryParam("masterUrl", openShiftMasterURL), new QueryParam("namespace", namespace));
-        Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
-        response.close();
-        client.close();
-
-        CheWorkspaceService.waitUntilWorkspaceGetsToState(workspace, CheWorkspaceStatus.RUNNING.getStatus(), keycloakToken);
-        if(CheWorkspaceService.getWorkspaceStatus(workspace, keycloakToken).equals(CheWorkspaceStatus.RUNNING.getStatus())) {
-            return true;
-        }
-        return false;
-    }
-
-    public static CheExtensionConfiguration getConfiguration() {
-        return configuration;
-    }
-
 }

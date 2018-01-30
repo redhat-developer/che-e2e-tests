@@ -24,7 +24,7 @@ There are 2 ways how to run tests. Each of the following contains complete list 
 - _preserveWorkspace_ - **optional**, default false; set to true if you want to keep workspace after tests execution
 
 **Run tests against an existing workspace**
-- _cheWorkspaceUrl_ - **required**, URL of existing and running Che workspace
+- _cheWorkspaceName_ - **required**, name of existing Che workspace
 - _osioUsername_ - **required**; required if workspace use authentication in front of it (if you dont't have customized Che build)
 - _osioPassword_ - **required**; required if workspace use authentication in front of it (if you dont't have customized Che build)
 
