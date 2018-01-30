@@ -103,4 +103,8 @@ public class CheWorkspaceProvider {
         client.close();
         return CheWorkspaceService.getWorkspaceFromDocument(jsonDocument, cheWorkspaceName);
     }
+
+    public static CheExtensionConfiguration getConfiguration() {
+        return configuration;
+    }
 }
