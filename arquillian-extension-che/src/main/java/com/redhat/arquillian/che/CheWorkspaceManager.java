@@ -70,8 +70,14 @@ public class CheWorkspaceManager {
         }
 
         cheWorkspaceProviderInstanceProducer.set(new CheWorkspaceProvider(cheExtensionConfig));
-        if (isNotEmpty(cheExtensionConfig.getCheWorkspaceUrl())) {
-            cheWorkspaceInstanceProducer.set(cheWorkspaceProviderInstanceProducer.get().getCreatedWorkspace());
+        if (isNotEmpty(cheExtensionConfig.getCheWorkspaceName())) {
+            CheWorkspace w = cheWorkspaceProviderInstanceProducer.get().getCreatedWorkspace();
+            if (w != null) {
+                cheWorkspaceInstanceProducer.set(w);
+            } else {
+                logger.info("Gotten workspace does not exists! Creating new workspace.");
+            }
+
         }
         bearerToken = cheExtensionConfig.getKeycloakToken();
     }
@@ -80,26 +86,48 @@ public class CheWorkspaceManager {
         //get setting from annotation
         Workspace workspaceAnnotation = event.getTestClass().getAnnotation(Workspace.class);
         if (workspaceAnnotation == null) {
-            throw new RuntimeException("Annotation @Workspace wasn't find in class " + event.getTestClass().getName() + ".");
+            throw new RuntimeException("Annotation @Workspace wasn't found in class " + event.getTestClass().getName() + ".");
         }
         CheWorkspace createdWkspc = cheWorkspaceInstanceProducer.get();
 
         if (createdWkspc == null || createdWkspc.isDeleted()) {
-            createWorkspace(workspaceAnnotation);
-        } else if (!(createdWkspc.getStack().equals(workspaceAnnotation.stackID()))) {
+            if (setRunningWorkspace(workspaceAnnotation)) { //running workspace was found and set to producer
+                createdWkspc = cheWorkspaceInstanceProducer.get();
+                if (!(createdWkspc.getStack().equals(workspaceAnnotation.stackID()))) {
+                    CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
+                    CheWorkspaceService.deleteWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
+                    createWorkspace(workspaceAnnotation);
+                    logger.info("Workspace " + createdWkspc.getName() + " created and started.");
+                }
+            } else { //provided workspace is null or deleted and there is no other workspace running
+                createWorkspace(workspaceAnnotation);
+            }
+        } else if (!(createdWkspc.getStack().equals(workspaceAnnotation.stackID()))) { //provided workspace has another stack
             CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
             CheWorkspaceService.deleteWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
             createWorkspace(workspaceAnnotation);
 
             logger.info("Workspace " + createdWkspc.getName() + " created and started.");
-        } else if (!CheWorkspaceService.getWorkspaceStatus(createdWkspc, bearerToken).equals(CheWorkspaceStatus.RUNNING.toString())) {
+        } else if (!CheWorkspaceService.getWorkspaceStatus(createdWkspc, bearerToken).equals(CheWorkspaceStatus.RUNNING.toString())) { //provided workspace is stopped
             boolean isStarted = CheWorkspaceService.startWorkspace(createdWkspc);
-            if(isStarted) { logger.info("Workspace " + createdWkspc.getName() + " started."); }
-            else {
+            if (isStarted) {
+                logger.info("Workspace " + createdWkspc.getName() + " started.");
+            } else {
                 logger.info("Can not start given workspace! Creating new one.");
                 createWorkspace(workspaceAnnotation);
             }
         }
+    }
+
+    private boolean setRunningWorkspace(Workspace annotation) {
+        CheWorkspace workspace = CheWorkspaceService.getRunningWorkspace();
+        if (workspace == null) {
+            return false;
+        } else {
+            logger.info("Running workspace found - reusing.");
+            cheWorkspaceInstanceProducer.set(workspace);
+        }
+        return true;
     }
 
     public void afterClass(@Observes AfterClass event) {
@@ -107,8 +135,6 @@ public class CheWorkspaceManager {
         if (workspaceAnnotation.removeAfterTest()) {
             CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
             CheWorkspaceService.deleteWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
-            //the attribute deleted is used, because workspace can't be set at null - arquillian Exception
-            cheWorkspaceInstanceProducer.get().setDeleted(true);
         }
     }
 
@@ -152,7 +178,8 @@ public class CheWorkspaceManager {
         }
     }
 
-    private void cloneGitDirectory(File cheStarterDir) throws GitAPIException, InvalidRemoteException, TransportException {
+    private void cloneGitDirectory(File cheStarterDir) throws
+            GitAPIException, InvalidRemoteException, TransportException {
         logger.info("Cloning che-starter project.");
         try {
             Git
@@ -188,7 +215,7 @@ public class CheWorkspaceManager {
         logger.info("All tests were executed, cleaning up.");
         CheExtensionConfiguration config = configurationInstance.get();
         //if run with created workspace - will not delete it in the end
-        if (isNotEmpty(config.getCheWorkspaceUrl())) {
+        if (isNotEmpty(config.getCheWorkspaceName())) {
             return;
         }
         CheWorkspace workspace = cheWorkspaceInstanceProducer.get();

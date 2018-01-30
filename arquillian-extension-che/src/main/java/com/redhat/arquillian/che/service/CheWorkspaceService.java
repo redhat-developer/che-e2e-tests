@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.redhat.arquillian.che.config.CheExtensionConfiguration;
+import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import com.redhat.arquillian.che.resource.Stack;
 import com.redhat.arquillian.che.resource.StackService;
 import com.redhat.arquillian.che.rest.QueryParam;
@@ -120,9 +121,10 @@ public class CheWorkspaceService {
         if (counter == maxCount && workspaceExists(client, workspace)) {
             logger.error("Workspace has not been deleted on a server after waiting for " + WAIT_TIME + " seconds");
             throw new RuntimeException(
-                    "After waiting for " + WAIT_TIME + " seconds the workspace is still" + " existing");
+                    "After waiting for " + WAIT_TIME + " seconds the workspace is still existing");
         } else {
             logger.info("Workspace has been successfully deleted from Che server");
+            workspace.setDeleted(true);
         }
         client.close();
     }
@@ -140,14 +142,14 @@ public class CheWorkspaceService {
      * @param workspace workspace to stop
      */
     public static boolean stopWorkspace(CheWorkspace workspace, String authorizationToken) {
-         operateWorkspaceState(workspace, RequestType.DELETE, CheWorkspaceStatus.STOPPED.getStatus(), authorizationToken);
-        if(CheWorkspaceService.getWorkspaceStatus(workspace, authorizationToken).equals(CheWorkspaceStatus.STOPPED.getStatus())){
+        operateWorkspaceState(workspace, RequestType.DELETE, CheWorkspaceStatus.STOPPED.getStatus(), authorizationToken);
+        if (CheWorkspaceService.getWorkspaceStatus(workspace, authorizationToken).equals(CheWorkspaceStatus.STOPPED.getStatus())) {
             return true;
         }
-        return  false;
+        return false;
     }
 
-    public static boolean startWorkspace(CheWorkspace workspace){
+    public static boolean startWorkspace(CheWorkspace workspace) {
         CheExtensionConfiguration config = configurationInstance.get();
         RestClient client = new RestClient(config.getCheStarterUrl());
         String path = "/workspace/" + workspace.getName();
@@ -158,7 +160,7 @@ public class CheWorkspaceService {
         client.close();
 
         CheWorkspaceService.waitUntilWorkspaceGetsToState(workspace, CheWorkspaceStatus.RUNNING.getStatus(), config.getKeycloakToken());
-        if(CheWorkspaceService.getWorkspaceStatus(workspace, config.getKeycloakToken()).equals(CheWorkspaceStatus.RUNNING.getStatus())) {
+        if (CheWorkspaceService.getWorkspaceStatus(workspace, config.getKeycloakToken()).equals(CheWorkspaceStatus.RUNNING.getStatus())) {
             return true;
         }
         return false;
@@ -252,4 +254,24 @@ public class CheWorkspaceService {
     }
 
 
+    public static CheWorkspace getRunningWorkspace() {
+        CheExtensionConfiguration config = configurationInstance.get();
+        String path = "/workspace";
+        RestClient client = new RestClient(config.getCheStarterUrl());
+
+        Response response = client.sentRequest(path, RequestType.GET, null, config.getKeycloakToken(),
+                new QueryParam("masterUrl", config.getOpenshiftMasterUrl()), new QueryParam("namespace", config.getOpenshiftNamespace()));
+        Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
+        CheWorkspace workspace = getRunningWorkspaceFromDocument(jsonDocument);
+        return workspace;
+    }
+
+    private static CheWorkspace getRunningWorkspaceFromDocument(Object jsonDocument) {
+        JSONArray array = JsonPath.read(jsonDocument, "$[?(@.status=='RUNNING')].config.name");
+        if (array.size() <= 0) {
+            return null;
+        } else {
+            return getWorkspaceFromDocument(jsonDocument, array.get(0).toString());
+        }
+    }
 }

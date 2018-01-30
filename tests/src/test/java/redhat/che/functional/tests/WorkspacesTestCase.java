@@ -60,13 +60,13 @@ public class WorkspacesTestCase {
         token = CheWorkspaceProvider.getConfiguration().getKeycloakToken();
     }
 
+    /**
+     * first workspace is stopped - deleting
+     * second workspace is running - CheWorkspaceManager will find it and use it for next test instead of first one
+     */
     @After
     public void resetWorkspaces(){
-        Assert.assertTrue(CheWorkspaceService.stopWorkspace(secondWorkspace, token));
-        logger.info("Second workspace stopped");
-        Assert.assertTrue(CheWorkspaceService.startWorkspace(firstWorkspace));
-        logger.info("First workspace started");
-        CheWorkspaceService.deleteWorkspace(secondWorkspace, token);
+        CheWorkspaceService.deleteWorkspace(firstWorkspace, token);
     }
 
 	@Test
