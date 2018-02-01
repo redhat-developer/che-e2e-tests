@@ -17,20 +17,19 @@ import redhat.che.functional.tests.*;
 
 /**
  * @author kkanova
- *
  */
 
 @RunWith(Suite.class)
 @SuiteClasses({
-    //vert.x projects
-    GitTestCase.class,
-    PomTestCase.class,
-    AnalyticsErrorMarkersTestCase.class,
-    MavenTestCase.class,
-    WorkspacesTestCase.class,
+        //vert.x projects
+        GitTestCase.class,
+        PomTestCase.class,
+        AnalyticsErrorMarkersTestCase.class,
+        MavenTestCase.class,
+        WorkspacesTestCase.class,
 
-    //nodejs projects
-    PackageJsonTestCase.class
+        //nodejs projects
+        PackageJsonTestCase.class
 })
 
 public class OrderedTestSuite {
