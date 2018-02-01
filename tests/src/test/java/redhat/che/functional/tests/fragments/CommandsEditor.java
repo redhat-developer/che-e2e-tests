@@ -10,17 +10,19 @@
  ******************************************************************************/
 package redhat.che.functional.tests.fragments;
 
+import org.apache.log4j.Logger;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.interactions.Actions;
 import redhat.che.functional.tests.utils.ActionUtils;
 import java.util.concurrent.TimeUnit;
 
 public class CommandsEditor {
+    private static final Logger LOG = Logger.getLogger(CommandsEditor.class);
 
     @Drone
     private WebDriver driver;
@@ -37,16 +39,17 @@ public class CommandsEditor {
     @FindByJQuery("#command_editor-preview_url .textviewContent")
     private WebElement previewURL;
 
-    @FindBy(id = "gwt-debug-command-editor-button-save")
+    @FindByJQuery("#gwt-debug-command-editor-button-save:not([disabled])")
     private WebElement saveButton;
 
-    @FindBy(id = "gwt-debug-command-editor-button-cancel")
+    @FindByJQuery("#gwt-debug-command-editor-button-cancel")
     private WebElement cancelButton;
 
-    @FindBy(id = "gwt-debug-command-editor-button-run")
+    @FindByJQuery("#gwt-debug-command-editor-button-run")
     private WebElement runButton;
 
     public void addNewCommand(String testName, String command) {
+        LOG.info("Deleting and writing a new command.");
         Graphene.waitGui().until(webDriver -> webDriver.switchTo().activeElement().equals(cmdInput) || webDriver.switchTo().activeElement().equals(previewURL));
         nameInput.clear();
         nameInput.sendKeys(testName);
@@ -54,17 +57,19 @@ public class CommandsEditor {
         ActionUtils.selectAll(driver);
         ActionUtils.deleteMarkedLines(driver);
         cmdInput.sendKeys(command);
+        LOG.info("Saving command.");
         Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS)
             .until("Save button was not enabled. Buildscript possibly already exists.")
-            .element(saveButton).is().clickable();
-        saveButton.click();
+            .element(saveButton).is().visible();
+        new Actions(driver).click(saveButton).perform();
     }
 
     public void runOpenedCommand() {
+        LOG.info("Running command.");
         Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS)
             .until("Run button was not enabled. Buildscript possibly not saved.")
-            .element(runButton).is().clickable();
-        runButton.click();
+            .element(runButton).is().visible();
+        new Actions(driver).click(runButton).perform();
     }
 
     public void waitTillEditorVisible() {

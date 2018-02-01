@@ -1,7 +1,6 @@
 package redhat.che.functional.tests;
 
 import com.redhat.arquillian.che.annotations.Workspace;
-import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import com.redhat.arquillian.che.resource.Stack;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
@@ -11,14 +10,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import redhat.che.functional.tests.customExceptions.BayesianNotFunctionalException;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
 
 @RunWith(Arquillian.class)
-@Workspace(stackID = Stack.VERTX, removeAfterTest = false)
+@Workspace(stackID = Stack.VERTX)
 public class PomTestCase extends AbstractCheFunctionalTest {
     private static final Logger LOG = Logger.getLogger(PomTestCase.class);
 
@@ -40,46 +37,30 @@ public class PomTestCase extends AbstractCheFunctionalTest {
 
     @Before
     public void importProject(){
+        LOG.info("Starting: " + this.getClass().getName());
         openBrowser();
     }
 
     @After
-    public void deleteDependency() throws Throwable {
-        try {
-            editorPart.codeEditor().hideErrors();
-        } catch (NoSuchElementException e) {
-            if (CheWorkspaceProvider.getConfiguration().getOsioUrlPart().equals(bayesianErrorExpectedURL)) {
-                LOG.info("Expected error encountered:"+bayesianErrorNotVisible);
-            } else {
-                LOG.error("Annotation assert failed:"+e.getMessage());
-                throw e;
-            }
-        }
+    public void deleteDependency() {
+        editorPart.codeEditor().hideErrors(pomExpectedErrorLine);
         editorPart.codeEditor().setCursorToLine(pomInjectionEntryPoint);
         editorPart.codeEditor().deleteNextLines(5);
         editorPart.codeEditor().waitUnitlPomDependencyIsNotVisible();
         editorPart.tabsPanel().waintUntilFocusedTabSaves();
     }
 
-    @Test(expected = BayesianNotFunctionalException.class)
-    public void testPomXmlReference() throws Throwable {
+    @Test
+    public void testPomXmlReference() {
         openPomXml();
         editorPart.codeEditor().setCursorToLine(pomInjectionEntryPoint);
         editorPart.codeEditor().writeDependency(pomDependency);
-        try {
-            Assert.assertTrue(
-                "Annotation error is not visible.",
-                editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError, pomExpectedErrorLine)
-            );
-        } catch (AssertionError e) {
-            if (CheWorkspaceProvider.getConfiguration().getOsioUrlPart().equals(bayesianErrorExpectedURL)) {
-                throw new BayesianNotFunctionalException(bayesianErrorNotVisible);
-            } else {
-                LOG.error("Annotation assert failed:"+e.getMessage());
-                throw e;
-            }
+        boolean annotationFound = editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError, pomExpectedErrorLine);
+        if (isProdPreview()) {
+            Assert.assertFalse(bayesianErrorNotVisible, annotationFound);
+        } else {
+            Assert.assertTrue("Annotation error is not visible.", annotationFound);
         }
-        throw new BayesianNotFunctionalException("AOK");
     }
 
     private void openPomXml() {

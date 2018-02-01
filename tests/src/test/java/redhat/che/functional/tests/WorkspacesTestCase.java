@@ -10,7 +10,6 @@
  */
 package redhat.che.functional.tests;
 
-import com.redhat.arquillian.che.CheWorkspaceManager;
 import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import com.redhat.arquillian.che.resource.CheWorkspace;
@@ -20,11 +19,7 @@ import com.redhat.arquillian.che.service.CheWorkspaceService;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import redhat.che.functional.tests.utils.GetCheLogsOnFailRule;
 
@@ -33,15 +28,12 @@ import redhat.che.functional.tests.utils.GetCheLogsOnFailRule;
  */
 
 @RunWith(Arquillian.class)
-@Workspace(removeAfterTest = false, stackID = Stack.VERTX)
+@Workspace(stackID = Stack.VERTX)
 public class WorkspacesTestCase extends AbstractCheFunctionalTest{
-    private static final Logger LOG = Logger.getLogger(CheWorkspaceManager.class);
+    private static final Logger LOG = Logger.getLogger(WorkspacesTestCase.class);
 
     @ArquillianResource
     private static CheWorkspace firstWorkspace;
-
-//    @ArquillianResource
-//    private static CheWorkspaceProvider provider;
 
     String runningState;
     String stoppedState;
@@ -54,6 +46,7 @@ public class WorkspacesTestCase extends AbstractCheFunctionalTest{
 
     @Before
     public void settingAttributes(){
+        LOG.info("Starting: " + this.getClass().getName());
         runningState = CheWorkspaceStatus.RUNNING.getStatus();
         stoppedState = CheWorkspaceStatus.STOPPED.getStatus();
         token = CheWorkspaceProvider.getConfiguration().getKeycloakToken();

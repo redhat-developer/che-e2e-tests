@@ -17,12 +17,6 @@ import com.redhat.arquillian.che.resource.CheWorkspace;
 import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.resource.StackService;
 import com.redhat.arquillian.che.service.CheWorkspaceService;
-
-import java.io.File;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.apache.log4j.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -40,12 +34,16 @@ import org.jboss.arquillian.test.spi.event.suite.BeforeClass;
 import org.jboss.arquillian.test.spi.event.suite.BeforeSuite;
 import org.jboss.shrinkwrap.resolver.api.maven.embedded.EmbeddedMaven;
 
+import java.io.File;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import static com.redhat.arquillian.che.util.Validate.isEmpty;
 import static com.redhat.arquillian.che.util.Validate.isNotEmpty;
 
 public class CheWorkspaceManager {
-
-    private static final Logger logger = Logger.getLogger(CheWorkspaceManager.class);
+    private static final Logger LOG = Logger.getLogger(CheWorkspaceManager.class);
 
     @Inject
     @ApplicationScoped
@@ -75,7 +73,7 @@ public class CheWorkspaceManager {
             if (w != null) {
                 cheWorkspaceInstanceProducer.set(w);
             } else {
-                logger.info("Gotten workspace does not exists! Creating new workspace.");
+                LOG.info("Gotten workspace does not exists! Creating new workspace.");
             }
 
         }
@@ -97,7 +95,7 @@ public class CheWorkspaceManager {
                     CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
                     CheWorkspaceService.deleteWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
                     createWorkspace(workspaceAnnotation);
-                    logger.info("Workspace " + createdWkspc.getName() + " created and started.");
+                    LOG.info("Workspace " + createdWkspc.getName() + " created and started.");
                 }
             } else { //provided workspace is null or deleted and there is no other workspace running
                 createWorkspace(workspaceAnnotation);
@@ -107,13 +105,13 @@ public class CheWorkspaceManager {
             CheWorkspaceService.deleteWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
             createWorkspace(workspaceAnnotation);
 
-            logger.info("Workspace " + createdWkspc.getName() + " created and started.");
+            LOG.info("Workspace " + createdWkspc.getName() + " created and started.");
         } else if (!CheWorkspaceService.getWorkspaceStatus(createdWkspc, bearerToken).equals(CheWorkspaceStatus.RUNNING.toString())) { //provided workspace is stopped
             boolean isStarted = CheWorkspaceService.startWorkspace(createdWkspc);
             if (isStarted) {
-                logger.info("Workspace " + createdWkspc.getName() + " started.");
+                LOG.info("Workspace " + createdWkspc.getName() + " started.");
             } else {
-                logger.info("Can not start given workspace! Creating new one.");
+                LOG.info("Can not start given workspace! Creating new one.");
                 createWorkspace(workspaceAnnotation);
             }
         }
@@ -124,7 +122,7 @@ public class CheWorkspaceManager {
         if (workspace == null) {
             return false;
         } else {
-            logger.info("Running workspace found - reusing.");
+            LOG.info("Running workspace found - reusing.");
             cheWorkspaceInstanceProducer.set(workspace);
         }
         return true;
@@ -152,7 +150,7 @@ public class CheWorkspaceManager {
 
             cloneGitDirectory(cheStarterDir);
 
-            logger.info("Running che starter.");
+            LOG.info("Running che starter.");
             Properties props = new Properties();
             props.setProperty("OPENSHIFT_TOKEN_URL", "https://sso." + configurationInstance.get().getOsioUrlPart()
                     + "/auth/realms/fabric8/broker/openshift-v3/token");
@@ -178,9 +176,8 @@ public class CheWorkspaceManager {
         }
     }
 
-    private void cloneGitDirectory(File cheStarterDir) throws
-            GitAPIException, InvalidRemoteException, TransportException {
-        logger.info("Cloning che-starter project.");
+    private void cloneGitDirectory(File cheStarterDir) throws GitAPIException {
+        LOG.info("Cloning che-starter project.");
         try {
             Git
                     .cloneRepository()
@@ -212,7 +209,7 @@ public class CheWorkspaceManager {
     }
 
     public void cleanUp(@Observes AfterSuite event) {
-        logger.info("All tests were executed, cleaning up.");
+        LOG.info("All tests were executed, cleaning up.");
         CheExtensionConfiguration config = configurationInstance.get();
         //if run with created workspace - will not delete it in the end
         if (isNotEmpty(config.getCheWorkspaceName())) {
@@ -220,19 +217,19 @@ public class CheWorkspaceManager {
         }
         CheWorkspace workspace = cheWorkspaceInstanceProducer.get();
         if (workspace.isDeleted()) {
-            logger.info("Skipping workspace deletion - workspace is already deleted.");
+            LOG.info("Skipping workspace deletion - workspace is already deleted.");
             return;
         }
         if (workspace != null && !config.getPreserveWorkspace()) {
             String workspaceStatus = CheWorkspaceService.getWorkspaceStatus(workspace, bearerToken);
             if (workspaceStatus.equals(CheWorkspaceStatus.RUNNING.getStatus())) {
-                logger.info("Stopping " + workspace);
+                LOG.info("Stopping " + workspace);
                 CheWorkspaceService.stopWorkspace(workspace, bearerToken);
             }
-            logger.info("Deleting workspace.");
+            LOG.info("Deleting workspace.");
             CheWorkspaceService.deleteWorkspace(workspace, bearerToken);
         } else {
-            logger.info("Skipping workspace deletion - attribute preserve workspace is true.");
+            LOG.info("Skipping workspace deletion - attribute preserve workspace is true.");
         }
     }
 

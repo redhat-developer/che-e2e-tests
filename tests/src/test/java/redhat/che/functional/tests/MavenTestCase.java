@@ -12,6 +12,7 @@ package redhat.che.functional.tests;
 
 import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.resource.Stack;
+import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
@@ -21,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.fragments.CommandsEditor;
 import redhat.che.functional.tests.fragments.CommandsManager;
@@ -32,8 +34,10 @@ import java.util.concurrent.TimeUnit;
  */
 
 @RunWith(Arquillian.class)
-@Workspace(stackID = Stack.VERTX, removeAfterTest = false)
+@Workspace(stackID = Stack.VERTX)
 public class MavenTestCase extends AbstractCheFunctionalTest{
+    private static final Logger LOG = Logger.getLogger(MavenTestCase.class);
+
     @FindBy(id="gwt-debug-leftPanel")
     private LeftBar leftBar;
 
@@ -57,13 +61,14 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
 
     @Before
     public void setup(){
+        LOG.info("Starting: " + this.getClass().getName());
         openBrowser();
     }
 
     @After
     public void deleteCommand(){
         commandsManager.removeCommand(testName);
-        Graphene.guardAjax(okButton).click();
+        new Actions(driver).click(okButton).perform();
     }
 
     /**

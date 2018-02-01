@@ -1,19 +1,14 @@
 package redhat.che.functional.tests;
 
-import java.io.File;
-import java.util.Date;
-
 import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.resource.Stack;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.support.FindBy;
-
 import redhat.che.functional.tests.fragments.BottomInfoPanel;
 import redhat.che.functional.tests.fragments.topmenu.GitPopupTopMenu;
 import redhat.che.functional.tests.fragments.topmenu.MainMenuPanel;
@@ -22,11 +17,12 @@ import redhat.che.functional.tests.fragments.window.CommitToRepoWindow;
 import redhat.che.functional.tests.fragments.window.GitPushWindow;
 import redhat.che.functional.tests.fragments.window.PreferencesWindow;
 import redhat.che.functional.tests.fragments.window.UploadPrivateSshFormWindow;
+import java.io.File;
+import java.util.Date;
 
 @RunWith(Arquillian.class)
-@Workspace(stackID = Stack.VERTX, removeAfterTest = false)
+@Workspace(stackID = Stack.VERTX)
 public class GitTestCase extends AbstractCheFunctionalTest {
-	
 	private static final Logger LOG = Logger.getLogger(GitTestCase.class);
 
     @FindByJQuery("div:contains('Preferences'):contains('Java Compiler'):last")
@@ -57,6 +53,7 @@ public class GitTestCase extends AbstractCheFunctionalTest {
     @InSequence(1)
     public void test_load_ssh_key_and_set_commiter_information(){
         // set commiter credentials
+        LOG.info("Starting: " + this.getClass().getName());
         openBrowser();
         LOG.info("Test: test_load_ssh_key_and_set_commiter_information");
         mainMenuPanel.clickProfile();

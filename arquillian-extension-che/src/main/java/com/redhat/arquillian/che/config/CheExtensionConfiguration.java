@@ -150,4 +150,5 @@ public class CheExtensionConfiguration {
 	public void setCheWorkspaceName(String cheWorkspacename) { this.cheWorkspaceName = cheWorkspacename; }
 
 	public String getCheWorkspaceName(){ return this.cheWorkspaceName; }
+
 }

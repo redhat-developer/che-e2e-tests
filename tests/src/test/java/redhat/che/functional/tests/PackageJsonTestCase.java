@@ -10,15 +10,11 @@
  */
 package redhat.che.functional.tests;
 
-import com.redhat.arquillian.che.CheWorkspaceManager;
 import com.redhat.arquillian.che.annotations.Workspace;
-import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
-import com.redhat.arquillian.che.resource.CheWorkspace;
 import com.redhat.arquillian.che.resource.Stack;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.test.api.ArquillianResource;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,24 +22,25 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import redhat.che.functional.tests.customExceptions.BayesianNotFunctionalException;
+
 import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
-@Workspace(removeAfterTest = false, stackID = Stack.NODEJS)
+@Workspace(stackID = Stack.NODEJS)
 public class PackageJsonTestCase extends AbstractCheFunctionalTest {
-    private static final Logger LOG = Logger.getLogger(CheWorkspaceManager.class);
+    private static final Logger LOG = Logger.getLogger(PackageJsonTestCase.class);
 
     @FindBy(className = "currentLine")
     private WebElement currentLine;
 
     private static final String jsonDependency = "\"serve-static\": \"1.7.1\" ,\n";
-    private static final String jsonExpectedError = "Package serve-static-1.7.1 is vulnerable: CVE-2015-1164 Open redirect vulnerability. Recommendation: use version";
+    private static final String jsonExpectedError = "Package serve-static-1.7.1 is vulnerable: CVE-2015-1164 Open redirect vulnerability";
     private static final Integer jsonExpectedErrorLine = 12;
     private static final Integer jsonInjectionEntryPoint = 12;
 
     @Before
     public void setEnvironment(){
+        LOG.info("Starting: " + this.getClass().getName());
         openBrowser();
     }
 
@@ -53,23 +50,16 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
         editorPart.codeEditor().deleteNextLines(1);
     }
 
-    @Test(expected = BayesianNotFunctionalException.class)
-    public void testPackageJsonBayesian() throws Throwable {
+    @Test
+    public void testPackageJsonBayesian() {
         openPackageJson();
         editorPart.codeEditor().setCursorToLine(jsonInjectionEntryPoint);
         editorPart.codeEditor().writeDependency(jsonDependency);
-        try {
-            Assert.assertTrue(
-                "Annotation error is not visible.",
-                editorPart.codeEditor().verifyAnnotationErrorIsPresent(jsonExpectedError, jsonExpectedErrorLine)
-            );
-        } catch (AssertionError e) {
-            if (CheWorkspaceProvider.getConfiguration().getOsioUrlPart().equals(bayesianErrorExpectedURL)) {
-                throw new BayesianNotFunctionalException(bayesianErrorNotVisible);
-            } else {
-                LOG.error("Annotation assert failed:"+e.getMessage());
-                throw e;
-            }
+        boolean annotationFound = editorPart.codeEditor().verifyAnnotationErrorIsPresent(jsonExpectedError, jsonExpectedErrorLine);
+        if (isProdPreview()) {
+            Assert.assertFalse(bayesianErrorNotVisible, annotationFound);
+        } else {
+            Assert.assertTrue("Annotation error is not visible.", annotationFound);
         }
     }
 

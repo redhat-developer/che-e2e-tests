@@ -20,7 +20,7 @@ import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -29,6 +29,8 @@ import redhat.che.functional.tests.fragments.EditorPart;
 import redhat.che.functional.tests.fragments.Project;
 import redhat.che.functional.tests.utils.Constants;
 
+import java.io.File;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
@@ -47,11 +49,11 @@ public abstract class AbstractCheFunctionalTest {
     @FindBy(id = "gwt-debug-editorMultiPartStack-contentPanel")
     protected EditorPart editorPart;
 
-    @FindByJQuery("#gwt-debug-popup-container:contains('Workspace is running')")
-    private WebElement workspaceIsRunningPopup;
+    @FindByJQuery("#gwt-debug-popup-container")
+    private WebElement workspacePopupContainer;
 
-    @FindByJQuery("#username, #gwt-debug-popup-container:contains('Workspace is running')")
-    private WebElement loginPageOrworkspaceIsRunningPopup;
+    @FindByJQuery("#gwt-debug-popup-container:contains('Workspace is running')")
+    private WebElement workspacePopupIsRunning;
 
     @FindBy(id = "username")
     private WebElement usernameField;
@@ -66,14 +68,14 @@ public abstract class AbstractCheFunctionalTest {
     private static CheWorkspace workspace;
 
     @ArquillianResource
-    private static Screenshooter screenshooter;
-
-    @ArquillianResource
     static CheWorkspaceProvider provider;
 
-    private static short screenshotsTaken = 0;
-    static final String bayesianErrorNotVisible = "Known expected bug : https://github.com/openshiftio/openshift.io/issues/2063";
-    static final String bayesianErrorExpectedURL = "prod-preview.openshift.io";
+    @ArquillianResource
+    private static Screenshooter screenshooter;
+
+    public static final String bayesianErrorNotVisible = "Known expected bug : https://github.com/openshiftio/openshift.io/issues/2063";
+    public static final String bayesianErrorExpectedURL = "prod-preview.openshift.io";
+    private static final String SCREENSHOTS_DIRECTORY_PATH = "./target/screenshots/";
 
     void openBrowser() {
         openBrowser(workspace);
@@ -83,35 +85,13 @@ public abstract class AbstractCheFunctionalTest {
         LOG.info("Opening browser");
         driver.get(wkspc.getIdeLink());
 //        driver.manage().window().maximize(); // Causes crash with Selenium on Xvfb - no window manager present
-        screenshooter.setScreenshotTargetDir("target/screenshots");
-        Graphene.waitGui().withTimeout(30, TimeUnit.SECONDS).until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
-        if ("username".equals(loginPageOrworkspaceIsRunningPopup.getAttribute("id"))) {
+        try {
+            Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS).until().element(usernameField).is().visible();
             login();
-            waitUntilWorkspaceIsRunningElseRefresh();
+        } catch (WebDriverException e) {
+            // Discard in case the login page was not displayed
         }
-        Graphene.waitGui().until().element(workspaceIsRunningPopup).is().not().visible();
-    }
-
-    /**
-     * Workarnound for https://github.com/openshiftio/openshift.io/issues/1304.
-     * Should be removed once resolved.
-     */
-    private void waitUntilWorkspaceIsRunningElseRefresh() {
-        Graphene.waitGui().withTimeout(3, TimeUnit.MINUTES).until(driver -> {
-            try {
-                Graphene.waitGui().until().element(loginPageOrworkspaceIsRunningPopup).is().visible();
-                return true;
-            } catch (WebDriverException e) {
-                try {
-                    driver.switchTo().alert().accept();
-                } catch (NoAlertPresentException ex) {
-                    // Alert didn't come up. Do nothing.
-                }
-                driver.navigate().refresh();
-                return false;
-            }
-        });
-
+        waitForWorkspaceToLoad();
     }
 
     private void login() {
@@ -121,9 +101,71 @@ public abstract class AbstractCheFunctionalTest {
         loginButton.click();
     }
 
-    static void takeScreenshot(String fileName) {
-        screenshotsTaken++;
-        screenshooter.takeScreenshot(fileName + "_" + screenshotsTaken + ".png");
+    private void waitForWorkspaceToLoad() {
+        LOG.info("Waiting for workspace to get up to state.");
+        try {
+            waitForWorkspaceRunningAnnotation();
+            waitUntilAllVisibleAnnotationsDisappear();
+        } catch (WebDriverException e) {
+            // Even if it fails with exception, it's enough time to get the notifications to disappear
+        }
     }
-    
+
+    private void waitUntilAllVisibleAnnotationsDisappear() {
+        Graphene.waitGui().withTimeout(1, TimeUnit.MINUTES).until(webDriver -> {
+            List<WebElement> children = getNumberOfPopupsVisible();
+            return children.isEmpty();
+        });
+    }
+
+    private void waitForWorkspaceRunningAnnotation() {
+        Graphene.waitGui().withTimeout(15, TimeUnit.SECONDS).until().element(workspacePopupIsRunning).is().visible();
+        Graphene.waitGui().withTimeout(15, TimeUnit.SECONDS).until().element(workspacePopupIsRunning).is().not().visible();
+    }
+
+    private List<WebElement> getNumberOfPopupsVisible() {
+        LOG.trace("Gathering children");
+        List<WebElement> children = workspacePopupContainer.findElements(By.xpath(".//*"));
+        LOG.trace("Size:" + children.size());
+        return children;
+    }
+
+    public static boolean isProdPreview() {
+        return CheWorkspaceProvider.getConfiguration().getOsioUrlPart().equals(bayesianErrorExpectedURL);
+    }
+
+    /*===============================*
+     * Screenshooter custom commands *
+     *===============================*/
+    //TODO: Create issue on Arquillian screenshooter repo to ask for this feature
+
+    public void takeScreenshot() {
+        this.takeScreenshot(null);
+    }
+
+    public void takeScreenshot(String fileName) {
+        if (fileName != null) {
+            if (!fileName.isEmpty()) {
+                screenshooter.takeScreenshot(getUnusedFileName(fileName));
+                return;
+            }
+        }
+        screenshooter.takeScreenshot(getUnusedFileName(this.getClass().getSimpleName()));
+    }
+
+    private String getUnusedFileName(String fileName) {
+        String path;
+        String response;
+        long attempt = 0;
+        do {
+            response = fileName + (attempt==0 ? "" : "_" + String.valueOf(attempt)) + ".png";
+            path = SCREENSHOTS_DIRECTORY_PATH + response;
+            LOG.debug("Testing file:"+path);
+            attempt++;
+        } while (new File(path).exists());
+        return response;
+    }
+
+    /*===============================*/
+
 }

@@ -101,8 +101,7 @@ public class AskForValueDialog {
     private Loader loader;
 
     public void waitFormToOpen() {
-        new WebDriverWait(driver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-                .until(ExpectedConditions.visibilityOf(form));
+        new WebDriverWait(driver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC).until(ExpectedConditions.visibilityOf(form));
         loader.setWebDriver(driver);
         loader.waitOnClosed();
     }

@@ -1,17 +1,18 @@
 package redhat.che.functional.tests.fragments;
 
 import com.redhat.arquillian.che.CheWorkspaceManager;
+import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
+import redhat.che.functional.tests.AbstractCheFunctionalTest;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
 import redhat.che.functional.tests.utils.ActionUtils;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * id = "gwt-debug-editorPartStack-contentPanel"
  */
 public class CodeEditorFragment {
-    private static final Logger logger = Logger.getLogger(CheWorkspaceManager.class);
+    private static final Logger LOG = Logger.getLogger(CodeEditorFragment.class);
 
     @Root
     private WebElement rootElement;
@@ -58,6 +59,10 @@ public class CodeEditorFragment {
 
     private static final Integer WAIT_TIME = 15;
 
+    public WebElement getRoot() {
+        return rootElement;
+    }
+
     public void writeDependency(String dependency) {
         new Actions(driver).moveToElement(rootElement).sendKeys(dependency).perform();
     }
@@ -71,19 +76,16 @@ public class CodeEditorFragment {
     }
 
     public boolean verifyAnnotationErrorIsPresent(String expectedError, int editorLine) {
-        logger.info("Waiting for " + WAIT_TIME + " seconds until annotation error should be visible");
+        LOG.info("Waiting for " + WAIT_TIME + " seconds until annotation error should be visible");
         try {
             Graphene.waitGui().withTimeout(WAIT_TIME, TimeUnit.SECONDS).until(webDriver -> {
                 setCursorToLine(editorLine);
                 new Actions(webDriver).moveToElement(annotationErrorEditorField).perform();
-                try {
-                    Graphene.waitGui().until().element(annotationErrorToolTipIcon).is().visible();
-                } catch (WebDriverException e) {
-                    return false;
-                }
+                Graphene.waitGui().until().element(annotationErrorToolTipIcon).is().visible();
                 return annotationErrorToolTipText.getText().contains(expectedError);
             });
-        } catch (TimeoutException e){
+        } catch (WebDriverException e){
+            LOG.error("Annotation assert failed:"+e.getMessage());
             return false;
         }
         return true;
@@ -93,9 +95,19 @@ public class CodeEditorFragment {
         ActionUtils.writeIntoElement(driver, lastSpan, text);
     }
 
-    public void hideErrors() {
-        annotationErrorEditorField.click();
-        Graphene.waitGui().until().element(annotationErrorToolTip).is().not().visible();
+    public void hideErrors(Integer annotationLine) {
+        try {
+            setCursorToLine(annotationLine);
+            annotationErrorEditorField.click();
+            Graphene.waitGui().until().element(annotationErrorToolTip).is().not().visible();
+        } catch (WebDriverException e) {
+            if (AbstractCheFunctionalTest.isProdPreview()) {
+                LOG.info("Expected error encountered:" + AbstractCheFunctionalTest.bayesianErrorNotVisible);
+            } else {
+                LOG.error("Annotation assert failed:" + e.getMessage());
+                throw e;
+            }
+        }
     }
 
     public void deleteNextLines(int linesCount) {

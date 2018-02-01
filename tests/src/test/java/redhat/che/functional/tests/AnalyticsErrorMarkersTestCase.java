@@ -11,7 +11,6 @@
 package redhat.che.functional.tests;
 
 import com.redhat.arquillian.che.annotations.Workspace;
-import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import com.redhat.arquillian.che.resource.Stack;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
@@ -23,14 +22,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import redhat.che.functional.tests.customExceptions.BayesianNotFunctionalException;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
-@Workspace(stackID = Stack.VERTX, removeAfterTest = false)
+@Workspace(stackID = Stack.VERTX)
 public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
-
     private static final Logger LOG = Logger.getLogger(AnalyticsErrorMarkersTestCase.class);
 
     @FindBy(id = "gwt-debug-askValueDialog-window")
@@ -51,48 +48,45 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
 
     @Before
     public void importProject() {
+        LOG.info("Starting: " + this.getClass().getName());
         openBrowser();
     }
 
     @After
     public void deleteDependency() {
-        editorPart.codeEditor().hideErrors();
+        editorPart.codeEditor().hideErrors(pomExpectedErrorLine);
         editorPart.codeEditor().setCursorToLine(pomInjectionEntryPoint);
         editorPart.codeEditor().deleteNextLines(5);
         editorPart.codeEditor().waitUnitlPomDependencyIsNotVisible();
         editorPart.tabsPanel().waintUntilFocusedTabSaves();
     }
 
-    @Test(expected = BayesianNotFunctionalException.class)
-    public void bayesianErrorShownOnOpenFile() throws BayesianNotFunctionalException {
+    @Test
+    public void bayesianErrorShownOnOpenFile(){
         //creating invalid dependency
         openPomXml();
         editorPart.codeEditor().setCursorToLine(pomInjectionEntryPoint);
         editorPart.codeEditor().writeDependency(pomDependency);
-        try {
-            Assert.assertTrue(
-                "Annotation error is not visible.",
-                editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError, pomExpectedErrorLine)
-            );
-        } catch (AssertionError e) {
-            if (CheWorkspaceProvider.getConfiguration().getOsioUrlPart().equals(bayesianErrorExpectedURL)) {
-                throw new BayesianNotFunctionalException(bayesianErrorNotVisible);
-            } else {
-                LOG.error("Annotation assert failed:"+e.getMessage());
-                throw e;
-            }
+
+        boolean annotationFound = editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError, pomExpectedErrorLine);
+        if (isProdPreview()) {
+            Assert.assertFalse(bayesianErrorNotVisible, annotationFound);
+        } else {
+            Assert.assertTrue("Annotation error is not visible.", annotationFound);
         }
 
         //checking if error marker is visible after re-opening the file
         editorPart.tabsPanel().closeActiveTab(driver);
 
         openPomXml();
-        editorPart.codeEditor().setCursorToLine(37);
+        editorPart.codeEditor().setCursorToLine(pomInjectionEntryPoint);
 
-        Assert.assertTrue(
-            "Annotation error is not visible when reopening file.",
-            editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError, pomExpectedErrorLine)
-        );
+        annotationFound = editorPart.codeEditor().verifyAnnotationErrorIsPresent(pomExpectedError, pomExpectedErrorLine);
+        if (isProdPreview()) {
+            Assert.assertFalse(bayesianErrorNotVisible, annotationFound);
+        } else {
+            Assert.assertTrue("Annotation error is not visible.", annotationFound);
+        }
     }
 
     private void openPomXml() {
