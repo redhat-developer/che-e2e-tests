@@ -17,6 +17,7 @@ public class CheWorkspace {
 	private String runtimeLink;
 	private Stack stack;
 	private boolean deleted;
+	private String name;
 	
 	/**
 	 * Creates a new Che workspace containing links to various endpoints.
@@ -25,19 +26,21 @@ public class CheWorkspace {
 	 * @param selfLink
 	 * @param runtimeLink
 	 */
-	public CheWorkspace(String ideLink, String selfLink, String runtimeLink) {
+	public CheWorkspace(String ideLink, String selfLink, String runtimeLink, String name) {
 	   this.ideLink = ideLink;
 	   this.selfLink = selfLink;
 	   this.runtimeLink = runtimeLink;
 	   this.deleted = false;
+	   this.name = name;
 	}
 
-	public CheWorkspace(String ideLink, String selfLink, String runtimeLink, Stack stack) {
+	public CheWorkspace(String ideLink, String selfLink, String runtimeLink, Stack stack, String name) {
 		this.ideLink = ideLink;
 		this.selfLink = selfLink;
 		this.runtimeLink = runtimeLink;
 		this.stack = stack;
 		this.deleted = false;
+		this.name = name;
 	}
 	
 	public String getIdeLink() {
@@ -81,8 +84,7 @@ public class CheWorkspace {
 		return "workspace accessible at " + ideLink;
 	}
 
-	public String getIdeName(){
-		String link = this.getIdeLink();
-		return link.substring(link.length()-5, link.length());
-	}
+	public String getName(){ return name; }
+
+	public void setName(String name){ this.name = name; }
 }

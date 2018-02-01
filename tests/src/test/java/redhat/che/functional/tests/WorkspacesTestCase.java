@@ -36,7 +36,7 @@ import redhat.che.functional.tests.utils.GetCheLogsOnFailRule;
 @RunWith(Arquillian.class)
 @Workspace(removeAfterTest = false, stackID = Stack.VERTX)
 public class WorkspacesTestCase {
-    private static final Logger logger = Logger.getLogger(CheWorkspaceManager.class);
+    private static final Logger logger = Logger.getLogger(WorkspacesTestCase.class);
 
     @ArquillianResource
     private static CheWorkspace firstWorkspace;
@@ -60,13 +60,13 @@ public class WorkspacesTestCase {
         token = CheWorkspaceProvider.getConfiguration().getKeycloakToken();
     }
 
+    /**
+     * first workspace is stopped - deleting
+     * second workspace is running - CheWorkspaceManager will find it and use it for next test instead of first one
+     */
     @After
     public void resetWorkspaces(){
-        Assert.assertTrue(provider.stopWorkspace(secondWorkspace));
-        logger.info("Second workspace stopped");
-        Assert.assertTrue(provider.startWorkspace(firstWorkspace));
-        logger.info("First workspace started");
-        CheWorkspaceService.deleteWorkspace(secondWorkspace, token);
+        CheWorkspaceService.deleteWorkspace(firstWorkspace, token);
     }
 
 	@Test

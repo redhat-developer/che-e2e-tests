@@ -14,7 +14,7 @@ public class CheExtensionConfiguration {
     public static final String OPENSHIFT_TOKEN_PROPERTY_NAME = "openShiftToken";
     public static final String PRESERVE_WORKSPACE_PROPERTY_NAME = "preserveWorkspace";
     public static final String OPENSHIFT_NAMESPACE_PROPERTY_NAME = "openShiftNamespace";
-    public static final String CHE_WORKSPACE_URL_PROPERTY_NAME = "cheWorkspaceUrl";
+    public static final String CHE_WORKSPACE_NAME = "cheWorkspaceName";
     public static final String OSIO_USERNAME_PROPERTY_NAME = "osioUsername";
     public static final String OSIO_PASSWORD_PROPERTY_NAME = "osioPassword";
     public static final String OSIO_URL_PART = "osioUrlPart";
@@ -24,9 +24,9 @@ public class CheExtensionConfiguration {
     private String keycloakToken;
     private String openshiftToken;
     private String openshiftNamespace;
-    private String cheWorkspaceUrl;
     private Boolean preserveWorkspace;
     private String osioUrlPart;
+    private String cheWorkspaceName;
 
     private String osioUsername;
     private String osioPassword;
@@ -38,12 +38,13 @@ public class CheExtensionConfiguration {
         config.keycloakToken = loadProperty(reporterProps, KEYCLOAK_TOKEN_PROPERTY_NAME);
         config.openshiftToken = loadProperty(reporterProps, OPENSHIFT_TOKEN_PROPERTY_NAME);
         config.openshiftNamespace = loadProperty(reporterProps, OPENSHIFT_NAMESPACE_PROPERTY_NAME, "eclipse-che");
-        config.cheWorkspaceUrl = loadProperty(reporterProps, CHE_WORKSPACE_URL_PROPERTY_NAME);
         config.preserveWorkspace = Boolean.valueOf(loadProperty(reporterProps, PRESERVE_WORKSPACE_PROPERTY_NAME));
         config.osioUrlPart = loadProperty(reporterProps, OSIO_URL_PART, "openshift.io");
 
         config.osioUsername = loadPropertyAndSetAsSystemProperty(reporterProps, OSIO_USERNAME_PROPERTY_NAME);
         config.osioPassword = loadPropertyAndSetAsSystemProperty(reporterProps, OSIO_PASSWORD_PROPERTY_NAME);
+
+        config.cheWorkspaceName = loadProperty(reporterProps, CHE_WORKSPACE_NAME);
 
         return config;
     }
@@ -110,14 +111,6 @@ public class CheExtensionConfiguration {
         this.openshiftNamespace = openshiftNamespace;
     }
 
-    public String getCheWorkspaceUrl() {
-        return cheWorkspaceUrl;
-    }
-
-    public void setCheWorkspaceUrl(String cheWorkspaceUrl) {
-        this.cheWorkspaceUrl = cheWorkspaceUrl;
-    }
-
     public Boolean getPreserveWorkspace() {
         return preserveWorkspace;
     }
@@ -153,4 +146,8 @@ public class CheExtensionConfiguration {
 	public void setOsioUrlPart(String osioUrlPart) {
 		this.osioUrlPart = osioUrlPart;
 	}
+
+	public void setCheWorkspaceName(String cheWorkspacename) { this.cheWorkspaceName = cheWorkspacename; }
+
+	public String getCheWorkspaceName(){ return this.cheWorkspaceName; }
 }

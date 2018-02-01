@@ -35,17 +35,18 @@ public class CheWorkspaceProvider {
     private static String openshiftToken;
     private static String keycloakToken;
     private static String namespace;
-    private static String cheWorkspaceUrl;
+    private static String cheWorkspaceName;
+
     private static CheExtensionConfiguration configuration;
 
     public CheWorkspaceProvider(CheExtensionConfiguration config){
         configuration = config;
-        cheStarterURL = configuration.getCheStarterUrl();
-        openShiftMasterURL = configuration.getOpenshiftMasterUrl();
-        openshiftToken = configuration.getOpenshiftToken();
-        keycloakToken = configuration.getKeycloakToken();
-        namespace = configuration.getOpenshiftNamespace();
-        cheWorkspaceUrl = configuration.getCheWorkspaceUrl();
+        cheStarterURL = config.getCheStarterUrl();
+        openShiftMasterURL = config.getOpenshiftMasterUrl();
+        openshiftToken = config.getOpenshiftToken();
+        keycloakToken = config.getKeycloakToken();
+        namespace = config.getOpenshiftNamespace();
+        cheWorkspaceName = config.getCheWorkspaceName();
     }
 
     /**
@@ -88,11 +89,7 @@ public class CheWorkspaceProvider {
         Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
         response.close();
         client.close();
-
-        CheWorkspace w = CheWorkspaceService.getWorkspaceFromDocument(jsonDocument);
-        w.setStack(StackService.getStackTypeFromJson(json));
-
-        return w;
+        return CheWorkspaceService.getWorkspaceFromDocument(jsonDocument);
     }
 
     public CheWorkspace getCreatedWorkspace() {
@@ -104,27 +101,10 @@ public class CheWorkspaceProvider {
         Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
         response.close();
         client.close();
-        return CheWorkspaceService.getWorkspaceFromDocument(jsonDocument, cheWorkspaceUrl);
-    }
-
-    public boolean stopWorkspace(CheWorkspace workspace){
-        CheWorkspaceService.stopWorkspace(workspace, keycloakToken);
-        if(CheWorkspaceService.getWorkspaceStatus(workspace, keycloakToken).equals(CheWorkspaceStatus.STOPPED.getStatus())){
-            return true;
-        }
-        return  false;
-    }
-
-    public boolean startWorkspace(CheWorkspace workspace){
-        CheWorkspaceService.startWorkspace(workspace, keycloakToken);
-        if(CheWorkspaceService.getWorkspaceStatus(workspace, keycloakToken).equals(CheWorkspaceStatus.RUNNING.getStatus())){
-            return true;
-        }
-        return  false;
+        return CheWorkspaceService.getWorkspaceFromDocument(jsonDocument, cheWorkspaceName);
     }
 
     public static CheExtensionConfiguration getConfiguration() {
         return configuration;
     }
-
 }
