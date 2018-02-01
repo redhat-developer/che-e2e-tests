@@ -22,7 +22,7 @@
   </extension>
   
   <extension qualifier="screenshooter">
-  	<property name="takeOnEveryAction">true</property>
+  	<property name="takeOnEveryAction">false</property>
   </extension>
 	
 </arquillian>

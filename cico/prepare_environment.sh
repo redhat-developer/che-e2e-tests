@@ -51,9 +51,9 @@ cat jenkins-env \
     | grep -E "(OSIO|KEYCLOAK|BUILD_NUMBER|JOB_NAME)" \
     | sed 's/^/export /g' \
     | sed 's/= /=/g' \
-    > credential_file
+    > export_env_variables
 
-source credential_file
+source export_env_variables
 
 CURL_OUTPUT=$(curl -H "Content-Type: application/json" -X POST -d '{"refresh_token":"'$KEYCLOAK_TOKEN'"}' https://auth.${OSIO_URL_PART}/api/token/refresh)
 ACTIVE_TOKEN=$(echo $CURL_OUTPUT | jq --raw-output ".token | .access_token")
