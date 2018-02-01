@@ -193,7 +193,7 @@ public class CheWorkspaceService {
 		if (counter == maxCount && !resultState.equals(currentState)) {
 			logger.error("Workspace has not successfuly changed its state in required time period of " + WAIT_TIME
 					+ " seconds");
-			throw new RuntimeException("After waiting for " + WAIT_TIME + " seconds the workspace is still"
+			throw new RuntimeException("After waiting for " + WAIT_TIME + " seconds, workspace \""+workspace.getIdeName()+"\" is still"
 					+ " not in state " + resultState);
 		}
 	}

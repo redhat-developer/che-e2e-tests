@@ -33,12 +33,6 @@ import java.util.concurrent.TimeUnit;
 public class PackageJsonTestCase extends AbstractCheFunctionalTest {
     private static final Logger logger = Logger.getLogger(CheWorkspaceManager.class);
 
-    @ArquillianResource
-    private static CheWorkspace firstWorkspace;
-
-    @ArquillianResource
-    private static CheWorkspaceProvider provider;
-
     @FindBy(className = "currentLine")
     private WebElement currentLine;
 
