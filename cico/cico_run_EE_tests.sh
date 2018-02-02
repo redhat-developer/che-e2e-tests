@@ -1,13 +1,15 @@
 #!/bin/bash
 archive_artifacts(){
-  echo "With date $DATE"
+#  echo "With date $DATE"
   ls -la ./artifacts.key
   chmod 600 ./artifacts.key
   chown root ./artifacts.key
-  mkdir -p ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/surefire-reports
-  cp -R ./tests/target/surefire-reports/*.txt ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/surefire-reports
-  cp -R ./tests/target/screenshots/ ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/
-  rsync --password-file=./artifacts.key -PHva --relative ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER} devtools@artifacts.ci.centos.org::devtools/
+#  mkdir -p ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/surefire-reports
+#  cp -R ./tests/target/surefire-reports/*.txt ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/surefire-reports
+#  cp -R ./tests/target/screenshots/ ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/
+#  rsync --password-file=./artifacts.key -PHva --relative ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER} devtools@artifacts.ci.centos.org::devtools/
+mkdir -p ./che-functional-tests/
+rsync --password-file=./artifacts.key -PHva --delete ./che-functional-tests/ devtools@artifacts.ci.centos.org::devtools/che-functional-tests/
  }
 
 set -x
@@ -36,7 +38,7 @@ chown -R 1000:1000 ./*
 docker run -d --user=fabric8 --cap-add SYS_ADMIN --name=che-selenium -t -v $(pwd):/home/fabric8/che:Z kkanova/che-selenium:latest
 
 ## Exec tests
-docker exec --user=fabric8 che-selenium /home/fabric8/che/cico/run_EE_tests.sh $CONFIG_FILE || RETURN_CODE=$? && true
+#docker exec --user=fabric8 che-selenium /home/fabric8/che/cico/run_EE_tests.sh $CONFIG_FILE || RETURN_CODE=$? && true
 echo "Tests ended, now executing archiving artifacts."
 archive_artifacts
 
