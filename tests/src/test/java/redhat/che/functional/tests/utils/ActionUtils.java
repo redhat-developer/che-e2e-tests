@@ -3,14 +3,18 @@ package redhat.che.functional.tests.utils;
 import static org.jboss.arquillian.graphene.Graphene.waitAjax;
 import static org.jboss.arquillian.graphene.Graphene.waitGui;
 
+import java.util.concurrent.TimeUnit;
+
+import org.apache.log4j.Logger;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class ActionUtils {
+	
+	private static final Logger LOG = Logger.getLogger(ActionUtils.class);
 
     public static void writeIntoElement(WebDriver driver, WebElement element, String text) {
         waitAjax().until().element(element).is().present();
@@ -19,8 +23,15 @@ public class ActionUtils {
 
     public static void click(WebDriver driver,WebElement element) {
         waitGui().until().element(element).is().visible();
-        new WebDriverWait(driver, 10).until(ExpectedConditions.elementToBeClickable(element));
-        element.click();
+        waitGui().withTimeout(10, TimeUnit.SECONDS).withMessage("Trying to click on "+element+" failed").until(d->{
+        	try {
+        		element.click();
+        		return true;
+        	}catch (WebDriverException ex) {
+        		LOG.debug("Element is not clickable");
+        		return false;
+        	}
+        });
     }
 
     public static void openMoveCursorDialog(WebDriver driver) {

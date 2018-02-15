@@ -11,12 +11,17 @@
 package redhat.che.functional.tests.fragments;
 
 import com.google.common.base.Function;
+
+import redhat.che.functional.tests.utils.ActionUtils;
+
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import static org.jboss.arquillian.graphene.Graphene.waitGui;
 import static org.jboss.arquillian.graphene.Graphene.waitModel;
@@ -59,6 +64,13 @@ public class TabsPanel {
 		} catch (Exception e) {
 			// if exception arise, changes were saved automatically
 		}
+	}
+	
+	public void closeAllTabs(WebDriver driver) {
+		new Actions(driver).contextClick(activeTab).perform();;
+		WebElement menu = driver.findElement(By.id("menu-lock-layer-id"));
+		menu.findElement(By.id("gwt-debug-contextMenu/closeAllEditors")).click();
+		Graphene.waitGui().until().element(menu).is().not().present();
 	}
 
 	public void waintUntilFocusedTabSaves() {

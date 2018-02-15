@@ -10,17 +10,23 @@
  */
 package redhat.che.functional.tests;
 
+import org.apache.log4j.Logger;
+import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.test.api.ArquillianResource;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import com.redhat.arquillian.che.resource.CheWorkspace;
 import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.resource.Stack;
 import com.redhat.arquillian.che.service.CheWorkspaceService;
-import org.apache.log4j.Logger;
-import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.test.api.ArquillianResource;
-import org.junit.*;
-import org.junit.runner.RunWith;
+
 import redhat.che.functional.tests.utils.GetCheLogsOnFailRule;
 
 /**
@@ -34,7 +40,7 @@ public class WorkspacesTestCase extends AbstractCheFunctionalTest{
 
     @ArquillianResource
     private static CheWorkspace firstWorkspace;
-
+    
     String runningState;
     String stoppedState;
     CheWorkspace secondWorkspace;
@@ -71,7 +77,7 @@ public class WorkspacesTestCase extends AbstractCheFunctionalTest{
         LOG.info("Creating second workspace");
         secondWorkspace = provider.createCheWorkspace(null);
         CheWorkspaceService.waitUntilWorkspaceGetsToState(secondWorkspace, runningState, token);
-        LOG.info("Second workspace should be started");
+        LOG.info("Second workspace is running");
 
         status = CheWorkspaceService.getWorkspaceStatus(secondWorkspace, token);
         Assert.assertEquals("Second workspace status should be RUNNING but is" + status, runningState, status);

@@ -18,6 +18,8 @@ import org.openqa.selenium.WebElement;
 
 import static org.jboss.arquillian.graphene.Graphene.waitModel;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * 
  * Root JQuery: div#gwt-debug-popup-container
@@ -34,6 +36,6 @@ public class Popup {
     private WebElement root;
     
     public void waitForPopup(String popupTitle) {
-    	waitModel().until().element(ByJQuery.selector("div[title=\""+popupTitle+"\"]")).is().visible();
+    	waitModel().withTimeout(10, TimeUnit.SECONDS).until().element(ByJQuery.selector("div[title=\""+popupTitle+"\"]")).is().visible();
     }
 }

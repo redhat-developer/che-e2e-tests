@@ -21,12 +21,10 @@ import com.redhat.arquillian.che.service.CheWorkspaceService;
 import com.redhat.arquillian.che.util.Constants;
 import com.redhat.arquillian.che.util.Utils;
 import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 import okhttp3.Response;
 import org.apache.log4j.Logger;
 
 import java.io.InputStream;
-import java.util.HashMap;
 
 import static com.redhat.arquillian.che.util.Constants.CREATE_WORKSPACE_REQUEST_VERTX_JSON;
 
@@ -36,10 +34,8 @@ public class CheWorkspaceProvider {
 
     private static String cheStarterURL;
     private static String openShiftMasterURL;
-    private static String openshiftToken;
     private static String keycloakToken;
     private static String namespace;
-    private static String cheWorkspaceName;
 
     private static CheExtensionConfiguration configuration;
 
@@ -49,10 +45,8 @@ public class CheWorkspaceProvider {
         openShiftMasterURL = config.getCustomCheServerFullURL().isEmpty()
                 ? config.getOpenshiftMasterUrl()
                 : config.getCustomCheServerFullURL();
-        openshiftToken = config.getOpenshiftToken();
         keycloakToken = config.getKeycloakToken();
         namespace = config.getOpenshiftNamespace();
-        cheWorkspaceName = config.getCheWorkspaceName();
     }
 
     /**
@@ -156,5 +150,21 @@ public class CheWorkspaceProvider {
         }
         cheServerClient.close();
     }
+    
+    /**
+     * Uses auth API to obtain github token, which is consequently set using che-server API.
+     */
+	public void reimportGithubToken() {
+		RestClient authClient = new RestClient("https://auth." + configuration.getOsioUrlPart() + "/");
+		Response authResponse = authClient.sendRequest("api/token?for=https://github.com", RequestType.GET, null,
+				keycloakToken, (QueryParam[]) null);
+		Object jsonObject = CheWorkspaceService.getDocumentFromResponse(authResponse);
+		String githubToken = JsonPath.read(jsonObject, "$.access_token");
+		RestClient cheClient = new RestClient("https://rhche." + configuration.getOsioUrlPart() + "/");
+		String jsonRequestBody = "{\"token\":\"" + githubToken + "\"}";
+		Response cheResponse = cheClient.sendRequest("api/token/github", RequestType.POST, jsonRequestBody,
+				keycloakToken, (QueryParam[]) null);
+		LOG.info("Setting new github token response: " + cheResponse.code());
+	}
 
 }

@@ -7,6 +7,7 @@ archive_artifacts(){
   mkdir -p ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/surefire-reports
   cp -R ./tests/target/surefire-reports/*.txt ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/surefire-reports
   cp -R ./tests/target/screenshots/ ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/
+  cp -R ./tests/target/videos/ ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER}/
   rsync --password-file=./artifacts.key -PHva --relative ./che-functional-tests/${JOB_NAME}/${BUILD_NUMBER} devtools@artifacts.ci.centos.org::devtools/
  }
 

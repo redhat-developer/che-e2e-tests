@@ -10,17 +10,26 @@
  ******************************************************************************/
 package redhat.che.functional.tests;
 
-import com.redhat.arquillian.che.annotations.Workspace;
-import com.redhat.arquillian.che.resource.Stack;
+import static org.junit.Assert.fail;
+
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+
+import com.redhat.arquillian.che.annotations.Workspace;
+import com.redhat.arquillian.che.resource.Stack;
+
 import redhat.che.functional.tests.fragments.BottomInfoPanel;
 import redhat.che.functional.tests.fragments.popup.Popup;
 import redhat.che.functional.tests.fragments.topmenu.GitPopupTopMenu;
@@ -28,11 +37,9 @@ import redhat.che.functional.tests.fragments.topmenu.ProfileTopMenu;
 import redhat.che.functional.tests.fragments.window.CommitToRepoWindow;
 import redhat.che.functional.tests.fragments.window.GitPushWindow;
 import redhat.che.functional.tests.fragments.window.PreferencesWindow;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
-@Workspace(stackID = Stack.VERTX, requireNewWorkspace = true)
+@Workspace(stackID = Stack.VERTX)
 public class GitTestCase extends AbstractCheFunctionalTest {
 	private static final Logger LOG = Logger.getLogger(GitTestCase.class);
 
@@ -56,11 +63,9 @@ public class GitTestCase extends AbstractCheFunctionalTest {
     
     @FindBy(id = "gwt-debug-popup-container")
     private Popup popup;
-
-    @After
-    public void closeTab(){
-        editorPart.tabsPanel().closeActiveTab(driver);
-    }
+    
+    @FindBy(id = "gwt-debug-loader-message")
+    private WebElement updatingPopup;
 
     @Test
     @InSequence(1)
@@ -69,6 +74,15 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         LOG.info("Starting: " + this.getClass().getName());
         openBrowser();
         waitUntilProjectImported("Project vertx-http-booster imported", 60);
+        vertxProject.getResource("README.md").open();
+        //get the "Updating project..." popup out of the way
+        try {
+	        Graphene.waitGui().withTimeout(30, TimeUnit.SECONDS).until().element(updatingPopup).is().visible();
+	        Graphene.waitGui().withTimeout(30, TimeUnit.SECONDS).until().element(updatingPopup).is().not().visible();
+        }catch(NoSuchElementException ex) {
+        	//Updating projects popup didn't show up. Nothing happens
+        }
+        
         LOG.info("Test: test_load_ssh_key_and_set_commiter_information");
         mainMenuPanel.clickProfile();
         profileTopMenu.openPreferences();
@@ -80,15 +94,20 @@ public class GitTestCase extends AbstractCheFunctionalTest {
     @InSequence(2)
     public void test_change_file_and_add_into_index() {
         //openBrowser(driver);
-
         vertxProject.getResource("README.md").open();
         editorPart.tabsPanel().waitUntilActiveTabHasName("README.md");
-        editorPart.codeEditor().writeIntoElementContainingString("changes added on: " + new Date(), "changes added on:");
-
+        String stringToAdd = "changes added on: " + new Date().toInstant().toEpochMilli();
+        LOG.info("Writing string to README.md: \""+stringToAdd+"\"");
+        editorPart.codeEditor().writeIntoElementContainingString(stringToAdd, "changes added on:");
         mainMenuPanel.clickGit();
         gitPopupTopMenu.addToIndex();
         bottomInfoPanel.tabsPanel().waitUntilFocusedTabHasName(BottomInfoPanel.TabNames.TAB_GIT_ADD_TO_INDEX);
-        bottomInfoPanel.waitUntilConsolePartContains(BottomInfoPanel.FixedConsoleText.GIT_ADDED_TO_INDEX_TEXT);
+        try {
+        	bottomInfoPanel.waitUntilConsolePartContains(BottomInfoPanel.FixedConsoleText.GIT_ADDED_TO_INDEX_TEXT);
+        }catch (TimeoutException ex) {
+        	LOG.error("Failure to edit file", ex);
+        	fail("Failure to edit file");
+        }
     }
 
     @Test
@@ -113,10 +132,30 @@ public class GitTestCase extends AbstractCheFunctionalTest {
     @InSequence(4)
     public void test_push_changes(){
         //openBrowser(driver);
-
         mainMenuPanel.clickGit();
         gitPopupTopMenu.push();
         gitPushWindow.push();
-        popup.waitForPopup("Pushed to origin");
+        try {
+        	popup.waitForPopup("Pushed to origin");
+        }catch (TimeoutException ex) {
+        	// Push failed. Try to reimport github token and try again
+        	LOG.error("Popup didn't show up", ex); 
+        	infoPanel.getNotificationManager(); //open notification pane to see the error on screenshot
+      
+        	provider.reimportGithubToken();
+        	//wait for 10 seconds
+        	try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+        	// Push again
+            mainMenuPanel.clickGit();
+            gitPopupTopMenu.push();
+            gitPushWindow.push();
+            popup.waitForPopup("Pushed to origin");
+            //Still want to fail - it should have succeeded in the first try
+            throw new RuntimeException("Second try PUSH was successfull");
+        }
     }
 }
