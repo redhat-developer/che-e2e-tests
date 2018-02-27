@@ -24,16 +24,9 @@ mvn -f $LOGIN_USERS/pom.xml clean compile
 cat $USERS_PROPERTIES_FILE > $LOGIN_USERS/target/classes/users.properties
 TOKENS_FILE_PREFIX=`readlink -f /tmp/osioperftest.tokens`
 
-#echo "  Auth login..."
-#echo "SKIPPING"
-#MVN_LOG=$JOB_BASE_NAME-$BUILD_NUMBER-mvn.log
-#mvn -f $LOGIN_USERS/pom.xml -l $MVN_LOG exec:java -Dauth.server.address=$SERVER_SCHEME://$SERVER_HOST -Duser.tokens.file=$TOKENS_FILE_PREFIX.auth -Pauth
-#LOGIN_USERS_LOG=$JOB_BASE_NAME-$BUILD_NUMBER-login-users.log
-#cat $MVN_LOG | grep login-users-log > $LOGIN_USERS_LOG
-
 echo "  OAuth2 friendly login..."
 MVN_LOG=$JOB_BASE_NAME-$BUILD_NUMBER-oauth2-mvn.log
-mvn -f $LOGIN_USERS/pom.xml -l $MVN_LOG exec:java -Dauth.server.address=$SERVER_SCHEME://$SERVER_HOST -Duser.tokens.file=$TOKENS_FILE_PREFIX.oauth2 -Poauth2
+mvn -f $LOGIN_USERS/pom.xml -l $MVN_LOG exec:java -Dauth.server.address=$AUTH_SERVER_URL -Duser.tokens.file=$TOKENS_FILE_PREFIX.oauth2 -Poauth2
 LOGIN_USERS_OAUTH2_LOG=$JOB_BASE_NAME-$BUILD_NUMBER-login-users-oauth2.log
 cat $MVN_LOG | grep login-users-log > $LOGIN_USERS_OAUTH2_LOG
 
@@ -71,6 +64,7 @@ export USER_TOKENS=\"0;0\"
 	fi
 	for s in $(seq 1 $SLAVES); do
 		echo "#!/bin/bash
+export CHE_SERVER_URL=\"$CHE_SERVER_URL\"
 export USER_TOKENS=\"$(cat $TOKENS_FILE-slave-$s)\"
 " > $ENV_FILE-slave-$s;
 	done
@@ -193,11 +187,11 @@ function distribution_2_csv {
 
  REPORT_FILE=$JOB_BASE_NAME-report.md
  cat README.md $RESULTS_FILE > $REPORT_FILE
-# if [ -z "$GRIP_USER" ]; then
+ if [ -z "$GRIP_USER" ]; then
  	grip --export $REPORT_FILE
-# else
-# 	grip --user=$GRIP_USER --pass=$GRIP_PASS --export $REPORT_FILE
-# fi
+ else
+ 	grip --user=$GRIP_USER --pass=$GRIP_PASS --export $REPORT_FILE
+ fi
 
  if [ "$RUN_LOCALLY" != "true" ]; then
  	echo " Shut Locust slaves down"

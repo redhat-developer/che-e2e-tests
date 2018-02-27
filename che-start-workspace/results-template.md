@@ -10,7 +10,7 @@ monitoring system to track the results' history.
 | Scenario | Minimal | Median | Maximal |
 | :--- | ---: | ---: | ---: |
 | `createWorkspace` | @@CREATE_WORKSPACE_MIN@@ ms | @@CREATE_WORKSPACE_MEDIAN@@ ms | @@CREATE_WORKSPACE_MAX@@ ms |
-| `startWorkspace` | @@START_WORKSPACE_MIN@@ ms | - | @@START_WORKSPACE_MEDIAN@@ ms | @@START_WORKSPACE_MAX@@ ms |
+| `startWorkspace` | @@START_WORKSPACE_MIN@@ ms | @@START_WORKSPACE_MEDIAN@@ ms | @@START_WORKSPACE_MAX@@ ms |
 | `getWorkspaceStatus` | @@GET_WORKSPACE_STATUS_MIN@@ ms | @@GET_WORKSPACE_STATUS_MEDIAN@@ ms | @@GET_WORKSPACE_STATUS_MAX@@ ms |
 | `timeForStartingWorkspace` | @@TIME_FOR_STARTING_WORKSPACE_MIN@@ ms | @@TIME_FOR_STARTING_WORKSPACE_MEDIAN@@ ms | @@TIME_FOR_STARTING_WORKSPACE_MAX@@ ms |
 | `stopWorkspace` | @@STOP_WORKSPACE_MIN@@ ms | @@STOP_WORKSPACE_MEDIAN@@ ms | @@STOP_WORKSPACE_MAX@@ ms |

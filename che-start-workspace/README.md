@@ -27,18 +27,6 @@ The performance test suite is divided into two phases of testing:
 Executed once per user to get user’s tokens, ID and name before the load test begins.
 This is necessary to obtain access tokens for the requests to the secured endpoints.
 
-#### Auth Login
-##### *Open login page* (`open-login-page-time`)
-From `GET /api/login?redirect=http://localhost:8090/link.html` wait for the `LOG IN` button to be clickable
-which indicates that the page is loaded.
-
-##### *Login the user* (`login-time`)
-From clicking on the `LOG IN` button wait for the redirect to the `http://localhost:8090/link.html?token_json=<JSON>`.
-
-From the redirect URL extract the `<JSON>` part and from in the `auth_token` and `refresh_token`.
-
-Run `auth-api-user` scenario once to get the user’s info and extract the `username` and `user ID`.
-
 #### OAuth2 Friendly Login
 ##### *Open login page* (`oauth2-open-login-page-time`)
 From 
@@ -67,44 +55,8 @@ From the response JSON extract the `auth_token` and `refresh_token`.
 This is computed as a sum of `oauth2-get-code-time` and `oauth2-get-token-time` values.
 
 ### Load phase
-#### *Get user info by token* (`auth-api-user`)
-```
-GET /api/user
-Authorization: Bearer <auth_token>
-```
+TODO: describe metrics
 
-#### *Get user by ID* (`api-user-by-id`)
-```
-GET /api/users/<user ID>
-```
-
-#### *Find user by name* (`api-user-by-name`)
-```
-GET /api/users?filter[username]=<username>
-```
-
-#### *Refresh user's auth token* (`auth-api-token-refresh`)
-using `/api/token/refresh`
-```
-POST /api/token/refresh
-Authorization: Bearer <auth_token>
-Content-Type: application/json
-
-{"refresh_token":"<refresh_token>"}
-```
-using `/api/token` with grant_type=refresh_token
-```
-POST /api/token
-Content-Type: application/json
-
-{"grant_type":"refresh_token","client_id": "740650a2-9c44-4db5-b067-a3d1b2cd2d01", "refresh_token":"$REFRESH_TOKEN", "scope": "openid"}
-
-```
-#### *Get access tokens for linked GitHub account* (`auth-api-user-github-token`)
-```
-GET /api/token?for=https://github.com
-Authorization: Bearer <auth_token>
-```
 
 ## How to run the tests locally
 By default the load test executed by Locust tool runs in a distributed mode, i.e. uses remote access

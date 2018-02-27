@@ -3,10 +3,82 @@ from locust import HttpLocust, TaskSet, task, events
 from datetime import datetime
 import time
 
-serverScheme = "https"
-serverHost = "auth.openshift.io"
-authPort = "443"
-cheServerUrl = "https://che.openshift.io"
+cheServerUrl = os.getenv("CHE_SERVER_URL")
+bodyJson='{\
+    "commands": [\
+        {\
+            "commandLine": "scl enable rh-maven33 \u0027mvn compile vertx:debug -f ${current.project.path}\u0027",\
+            "name": "debug",\
+            "type": "custom",\
+            "attributes": {\
+                "previewUrl": "http://${server.port.8080}",\
+                "goal": "Debug"\
+            }\
+        },\
+        {\
+            "commandLine": "scl enable rh-maven33 \u0027mvn compile vertx:run -f ${current.project.path}\u0027",\
+            "name": "run",\
+            "type": "custom",\
+            "attributes": {\
+                "previewUrl": "http://${server.port.8080}",\
+                "goal": "Run"\
+            }\
+        },\
+        {\
+            "commandLine": "scl enable rh-maven33 \u0027mvn clean install -f ${current.project.path}\u0027",\
+            "name": "build",\
+            "type": "mvn",\
+            "attributes": {\
+                "previewUrl": "",\
+                "goal": "Build"\
+            }\
+        }\
+    ],\
+    "defaultEnv": "default",\
+    "description": "mycustomdescription",\
+    "environments": {\
+        "default": {\
+            "recipe": {\
+                "type": "dockerimage",\
+                "location": "registry.devshift.net/che/vertx"\
+            },\
+            "machines": {\
+                "dev-machine": {\
+                    "agents": [\
+                        "com.redhat.bayesian.lsp",\
+                        "org.eclipse.che.ws-agent",\
+                        "org.eclipse.che.terminal"\
+                    ],\
+                    "attributes": {\
+                        "memoryLimitBytes": "2147483648"\
+                    }\
+                }\
+            }\
+        }\
+    },\
+    "name": "qdmsg",\
+    "links": [],\
+    "projects": [\
+        {\
+            "name": "vertx-http-booster",\
+            "type": "maven",\
+            "description": "Created via che-starter API",\
+            "path": "/vertx-http-booster",\
+            "source": {\
+                "parameters": {\
+                    "keepVcs": "true",\
+                    "branch": "master"\
+                },\
+                "type": "git",\
+                "location": "https://github.com/openshiftio-vertx-boosters/vertx-http-booster"\
+            },\
+            "links": [],\
+            "mixins": [\
+                "git"\
+            ]\
+        }\
+    ]\
+}'
 
 _users = -1
 _userTokens = []
@@ -69,8 +141,7 @@ class TokenBehavior(TaskSet):
 
 	def createWorkspace(self):
 		print "Creating workspace"
-		json_data=open("./body.json").read()
-		response = self.client.post("/api/workspace", headers = {"Authorization" : "Bearer " + self.taskUserToken, "Content-Type":"application/json"}, name = "createWorkspace", data = json_data, catch_response = True)
+		response = self.client.post("/api/workspace", headers = {"Authorization" : "Bearer " + self.taskUserToken, "Content-Type":"application/json"}, name = "createWorkspace", data = bodyJson, catch_response = True)
 
 		try:
 			resp_json = response.json()
@@ -162,3 +233,78 @@ class TokenUser(HttpLocust):
 	task_set = TokenBehavior
 	min_wait = 1000
 	max_wait = 10000
+{
+    "commands": [
+        {
+            "commandLine": "scl enable rh-maven33 \u0027mvn compile vertx:debug -f ${current.project.path}\u0027",
+            "name": "debug",
+            "type": "custom",
+            "attributes": {
+                "previewUrl": "http://${server.port.8080}",
+                "goal": "Debug"
+            }
+        },
+        {
+            "commandLine": "scl enable rh-maven33 \u0027mvn compile vertx:run -f ${current.project.path}\u0027",
+            "name": "run",
+            "type": "custom",
+            "attributes": {
+                "previewUrl": "http://${server.port.8080}",
+                "goal": "Run"
+            }
+        },
+        {
+            "commandLine": "scl enable rh-maven33 \u0027mvn clean install -f ${current.project.path}\u0027",
+            "name": "build",
+            "type": "mvn",
+            "attributes": {
+                "previewUrl": "",
+                "goal": "Build"
+            }
+        }
+    ],
+    "defaultEnv": "default",
+    "description": "mycustomdescription",
+    "environments": {
+        "default": {
+            "recipe": {
+                "type": "dockerimage",
+                "location": "registry.devshift.net/che/vertx"
+            },
+            "machines": {
+                "dev-machine": {
+                    "agents": [
+                        "com.redhat.bayesian.lsp",
+                        "org.eclipse.che.ws-agent",
+                        "org.eclipse.che.terminal"
+                    ],
+                    "attributes": {
+                        "memoryLimitBytes": "2147483648"
+                    }
+                }
+            }
+        }
+    },
+    "name": "qdmsg",
+    "links": [],
+    "projects": [
+        {
+            "name": "vertx-http-booster",
+            "type": "maven",
+            "description": "Created via che-starter API",
+            "path": "/vertx-http-booster",
+            "source": {
+                "parameters": {
+                    "keepVcs": "true",
+                    "branch": "master"
+                },
+                "type": "git",
+                "location": "https://github.com/openshiftio-vertx-boosters/vertx-http-booster"
+            },
+            "links": [],
+            "mixins": [
+                "git"
+            ]
+        }
+    ]
+}
