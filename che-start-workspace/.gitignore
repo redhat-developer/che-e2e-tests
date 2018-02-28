@@ -1,1 +1,11 @@
+*.iml
 *.env
+*.png
+*.csv
+*.log
+*.pyc
+*results.md
+*report.md
+*report.html
+common.git
+openshift-loginusers.git

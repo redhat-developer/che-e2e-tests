@@ -24,16 +24,9 @@ mvn -f $LOGIN_USERS/pom.xml clean compile
 cat $USERS_PROPERTIES_FILE > $LOGIN_USERS/target/classes/users.properties
 TOKENS_FILE_PREFIX=`readlink -f /tmp/osioperftest.tokens`
 
-#echo "  Auth login..."
-#echo "SKIPPING"
-#MVN_LOG=$JOB_BASE_NAME-$BUILD_NUMBER-mvn.log
-#mvn -f $LOGIN_USERS/pom.xml -l $MVN_LOG exec:java -Dauth.server.address=$SERVER_SCHEME://$SERVER_HOST -Duser.tokens.file=$TOKENS_FILE_PREFIX.auth -Pauth
-#LOGIN_USERS_LOG=$JOB_BASE_NAME-$BUILD_NUMBER-login-users.log
-#cat $MVN_LOG | grep login-users-log > $LOGIN_USERS_LOG
-
 echo "  OAuth2 friendly login..."
 MVN_LOG=$JOB_BASE_NAME-$BUILD_NUMBER-oauth2-mvn.log
-mvn -f $LOGIN_USERS/pom.xml -l $MVN_LOG exec:java -Dauth.server.address=$SERVER_SCHEME://$SERVER_HOST -Duser.tokens.file=$TOKENS_FILE_PREFIX.oauth2 -Poauth2
+mvn -f $LOGIN_USERS/pom.xml -l $MVN_LOG exec:java -Dauth.server.address=$AUTH_SERVER_URL -Duser.tokens.file=$TOKENS_FILE_PREFIX.oauth2 -Poauth2
 LOGIN_USERS_OAUTH2_LOG=$JOB_BASE_NAME-$BUILD_NUMBER-login-users-oauth2.log
 cat $MVN_LOG | grep login-users-log > $LOGIN_USERS_OAUTH2_LOG
 
@@ -71,6 +64,7 @@ export USER_TOKENS=\"0;0\"
 	fi
 	for s in $(seq 1 $SLAVES); do
 		echo "#!/bin/bash
+export CHE_SERVER_URL=\"$CHE_SERVER_URL\"
 export USER_TOKENS=\"$(cat $TOKENS_FILE-slave-$s)\"
 " > $ENV_FILE-slave-$s;
 	done
@@ -164,40 +158,40 @@ function distribution_2_csv {
     VALUE=`cat $1 | grep $2 | head -n 1 | cut -d " " -f 4`
     sed -i -e "s,$3,$VALUE,g" $4
  }
- filterZabbixValue $ZABBIX_LOG "createWorkspace-min" "@@CREATE_WORKSPACE_MIN@@" $RESULTS_FILE;
- filterZabbixValue $ZABBIX_LOG "createWorkspace-median" "@@CREATE_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
- filterZabbixValue $ZABBIX_LOG "createWorkspace-max" "@@CREATE_WORKSPACE_MAX@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "createWorkspace-rt_min" "@@CREATE_WORKSPACE_MIN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "createWorkspace-rt_median" "@@CREATE_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "createWorkspace-rt_max" "@@CREATE_WORKSPACE_MAX@@" $RESULTS_FILE;
 
- filterZabbixValue $ZABBIX_LOG "startWorkspace-min" "@@START_WORKSPACE_MIN@@" $RESULTS_FILE;
- filterZabbixValue $ZABBIX_LOG "startWorkspace-median" "@@START_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
- filterZabbixValue $ZABBIX_LOG "startWorkspace-max" "@@START_WORKSPACE_MAX@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "startWorkspace-rt_min" "@@START_WORKSPACE_MIN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "startWorkspace-rt_median" "@@START_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "startWorkspace-rt_max" "@@START_WORKSPACE_MAX@@" $RESULTS_FILE;
 
- filterZabbixValue $ZABBIX_LOG "getWorkspaceStatus-min" "@@GET_WORKSPACE_STATUS_MIN@@" $RESULTS_FILE;
- filterZabbixValue $ZABBIX_LOG "getWorkspaceStatus-median" "@@GET_WORKSPACE_STATUS_MEDIAN@@" $RESULTS_FILE;
- filterZabbixValue $ZABBIX_LOG "getWorkspaceStatus-max" "@@GET_WORKSPACE_STATUS_MAX@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "getWorkspaceStatus-rt_min" "@@GET_WORKSPACE_STATUS_MIN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "getWorkspaceStatus-rt_median" "@@GET_WORKSPACE_STATUS_MEDIAN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "getWorkspaceStatus-rt_max" "@@GET_WORKSPACE_STATUS_MAX@@" $RESULTS_FILE;
 
- filterZabbixValue $ZABBIX_LOG "timeForStartingWorkspace-min" "@@TIME_FOR_STARTING_WORKSPACE_MIN@@" $RESULTS_FILE;
- filterZabbixValue $ZABBIX_LOG "timeForStartingWorkspace-median" "@@TIME_FOR_STARTING_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
- filterZabbixValue $ZABBIX_LOG "timeForStartingWorkspace-max" "@@TIME_FOR_STARTING_WORKSPACE_MAX@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "timeForStartingWorkspace-rt_min" "@@TIME_FOR_STARTING_WORKSPACE_MIN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "timeForStartingWorkspace-rt_median" "@@TIME_FOR_STARTING_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "timeForStartingWorkspace-rt_max" "@@TIME_FOR_STARTING_WORKSPACE_MAX@@" $RESULTS_FILE;
 
- filterZabbixValue $ZABBIX_LOG "stopWorkspace-min" "@@STOP_WORKSPACE_MIN@@" $RESULTS_FILE;
- filterZabbixValue $ZABBIX_LOG "stopWorkspace-median" "@@STOP_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
- filterZabbixValue $ZABBIX_LOG "stopWorkspace-max" "@@STOP_WORKSPACE_MAX@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "stopWorkspace-rt_min" "@@STOP_WORKSPACE_MIN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "stopWorkspace-rt_median" "@@STOP_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "stopWorkspace-rt_max" "@@STOP_WORKSPACE_MAX@@" $RESULTS_FILE;
 
- filterZabbixValue $ZABBIX_LOG "deleteWorkspace-min" "@@DELETE_WORKSPACE_MIN@@" $RESULTS_FILE;
- filterZabbixValue $ZABBIX_LOG "deleteWorkspace-median" "@@DELETE_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
- filterZabbixValue $ZABBIX_LOG "deleteWorkspace-max" "@@DELETE_WORKSPACE_MAX@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "deleteWorkspace-rt_min" "@@DELETE_WORKSPACE_MIN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "deleteWorkspace-rt_median" "@@DELETE_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "deleteWorkspace-rt_max" "@@DELETE_WORKSPACE_MAX@@" $RESULTS_FILE;
 
  REPORT_TIMESTAMP=`date '+%Y-%m-%d %H:%M:%S (%Z)'`
  sed -i -e "s,@@TIMESTAMP@@,$REPORT_TIMESTAMP,g" $RESULTS_FILE
 
  REPORT_FILE=$JOB_BASE_NAME-report.md
  cat README.md $RESULTS_FILE > $REPORT_FILE
-# if [ -z "$GRIP_USER" ]; then
+ if [ -z "$GRIP_USER" ]; then
  	grip --export $REPORT_FILE
-# else
-# 	grip --user=$GRIP_USER --pass=$GRIP_PASS --export $REPORT_FILE
-# fi
+ else
+ 	grip --user=$GRIP_USER --pass=$GRIP_PASS --export $REPORT_FILE
+ fi
 
  if [ "$RUN_LOCALLY" != "true" ]; then
  	echo " Shut Locust slaves down"
