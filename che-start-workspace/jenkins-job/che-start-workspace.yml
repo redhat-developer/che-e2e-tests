@@ -4,7 +4,10 @@
     node: osioperf-server-1-centos7-x86_64
     properties:
        - ownership:
-           owner: pmacik
+           owner: kkanova
+           co-owners:
+               - rhopp
+               - pmacik
        - authorization:
            anonymous:
                - job-read
@@ -87,8 +90,8 @@
             url: https://github.com/redhat-developer/che-functional-tests.git
             branches:
                 - '*/master'
-#    triggers:
-#        - timed: H * * * *
+    triggers:
+        - timed: H 1 * * *
     wrappers:
         - workspace-cleanup:
             dirmatch: false
