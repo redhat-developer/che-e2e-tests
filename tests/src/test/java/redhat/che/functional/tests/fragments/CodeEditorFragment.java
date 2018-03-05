@@ -1,7 +1,16 @@
+/******************************************************************************* 
+ * Copyright (c) 2018 Red Hat, Inc. 
+ * Distributed under license by Red Hat, Inc. All rights reserved. 
+ * This program is made available under the terms of the 
+ * Eclipse Public License v1.0 which accompanies this distribution, 
+ * and is available at http://www.eclipse.org/legal/epl-v10.html 
+ * 
+ * Contributors: 
+ * Red Hat, Inc. - initial API and implementation 
+ ******************************************************************************/
+
 package redhat.che.functional.tests.fragments;
 
-import com.redhat.arquillian.che.CheWorkspaceManager;
-import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
@@ -97,8 +106,7 @@ public class CodeEditorFragment {
 
     public void hideErrors(Integer annotationLine) {
         try {
-            setCursorToLine(annotationLine);
-            annotationErrorEditorField.click();
+        	rootElement.click();
             Graphene.waitGui().until().element(annotationErrorToolTip).is().not().visible();
         } catch (WebDriverException e) {
             if (AbstractCheFunctionalTest.isProdPreview()) {
