@@ -103,3 +103,9 @@ However, it is possible to switch the test to the local execution. To do that si
 variable `RUN_LOCALLY=true`. The easiest way is to uncomment the respective line in `_setenv.sh` file.
 
 To run the test, configure the test in `_setenv.sh` file and run the `run.sh` script.
+
+To update jenkins job use this syntax:
+´´´
+sudo PYTHONHTTPSVERIFY=0 jenkins-jobs --conf jenkins_jobs.ini update job.yml
+´´´
+and update jenkins_job.ini with your credentials. 
