@@ -199,4 +199,11 @@ function distribution_2_csv {
  fi
 
  echo " Check for errors in Locust master log"
- if [[ "0" -ne `cat $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log | grep 'Error report' | wc -l` ]]; then echo '[:(] THERE WERE ERRORS OR FAILURES!!!'; else echo '[:)] NO ERRORS OR FAILURES DETECTED.'; fi
+ EXIT_CODE=0
+ if [[ "0" -ne `cat $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log | grep 'Error report' | wc -l` ]] || [[ `wc -l < $JOB_BASE_NAME-$BUILD_NUMBER-report_distribution.csv` -eq "7" ]]; then
+    echo '[:(] THERE WERE ERRORS OR FAILURES!!!';
+    EXIT_CODE=1;
+ else
+    echo '[:)] NO ERRORS OR FAILURES DETECTED.';
+ fi
+ exit $EXIT_CODE
