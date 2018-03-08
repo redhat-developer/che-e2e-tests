@@ -7,6 +7,7 @@ export COMMON="common.git"
 #rm -vf *.log
 #rm -vf *.csv
 #rm -vf *.png
+#exit 0
 
  git clone https://github.com/pmacik/openshiftio-performance-common $COMMON
 
@@ -74,6 +75,8 @@ export USER_TOKENS=\"`cat $TOKENS_FILE`\"
 " > $ENV_FILE-master;
 fi
 
+#adding INFO level log on slaves instead of WARNING for better idea what's happening
+sed -i.bak 's/WARNING/INFO/g' __start-locust-slaves.sh
 if [ "$RUN_LOCALLY" != "true" ]; then
 	echo " Shut Locust master down"
 	$COMMON/__stop-locust-master.sh

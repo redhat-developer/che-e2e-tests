@@ -87,9 +87,9 @@
            description: A hostname in Zabbix the report is for
     scm:
         - git:
-            url: https://github.com/redhat-developer/che-functional-tests.git
+            url: https://github.com/Katka92/che-functional-tests.git
             branches:
-                - '*/master'
+                - '*/performace_failures'
     triggers:
         - timed: H 1 * * *
     wrappers:
