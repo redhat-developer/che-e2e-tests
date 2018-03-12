@@ -40,10 +40,10 @@ public abstract class AbstractCheFunctionalTest {
     @Drone
     protected WebDriver driver;
 
-    @FindByJQuery("#gwt-debug-projectTree > div:contains('" + Constants.VERTX_PROJECT_NAME + "'):first")
+    @FindByJQuery("#gwt-debug-projectTree div[project='/" + Constants.VERTX_PROJECT_NAME + "']")
     protected Project vertxProject;
 
-    @FindByJQuery("#gwt-debug-projectTree > div:contains('" + Constants.NODEJS_PROJECT_NAME + "'):first")
+    @FindByJQuery("#gwt-debug-projectTree div[project='/" + Constants.NODEJS_PROJECT_NAME + "']")
     protected Project nodejsProject;
 
     @FindBy(id = "gwt-debug-editorMultiPartStack-contentPanel")

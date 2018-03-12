@@ -7,7 +7,7 @@ import redhat.che.functional.tests.fragments.popup.PopupMenu;
 
 public class ProfileTopMenu extends PopupMenu {
 
-    @FindBy(id = "topmenu/Profile/Preferences")
+    @FindBy(id = "gwt-debug-topmenu/Profile/showPreferences")
     private WebElement preferencesItem;
 
     public void openPreferences(){

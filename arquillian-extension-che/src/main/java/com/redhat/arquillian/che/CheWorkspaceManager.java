@@ -159,7 +159,7 @@ public class CheWorkspaceManager {
             props.setProperty("osio.domain.name", "api.starter-us-east-2.openshift.com");
             props.setProperty("oso.address", "api.starter-us-east-2.openshift.com");
             props.setProperty("MULTI_TENANT_CHE_SERVER_URL",
-                    "https://che." + configurationInstance.get().getOsioUrlPart());
+                    "https://rhche." + configurationInstance.get().getOsioUrlPart());
             EmbeddedMaven
                     .forProject(cheStarterDir.getAbsolutePath() + File.separator + "pom.xml")
                     .useMaven3Version("3.5.0")

@@ -11,7 +11,7 @@
 package redhat.che.functional.tests.fragments.popup;
 
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.findby.FindByJQuery;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -33,21 +33,7 @@ public class Popup {
     @Root
     private WebElement root;
     
-    @FindByJQuery("div[title=\"Running Tests...\"]")
-    private WebElement runningTests;
-    
-    @FindByJQuery("div[title=\"Test runner executed successfully\"]")
-    private WebElement successfulTests;
-    
-    public void waitUntilTestsAreRunnig() {
-        waitModel().until().element(runningTests).is().visible();
-    }
-    
-    public void waitWhileTestsAreRunning() {
-        waitModel().until().element(runningTests).is().not().visible();
-    }
-    
-    public void waitUntilTestsAreFinishedSuccessfully() {
-        waitModel().until().element(successfulTests).is().visible();
+    public void waitForPopup(String popupTitle) {
+    	waitModel().until().element(ByJQuery.selector("div[title=\""+popupTitle+"\"]")).is().visible();
     }
 }

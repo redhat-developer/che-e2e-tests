@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.fragments.BottomInfoPanel;
+import redhat.che.functional.tests.fragments.popup.Popup;
 import redhat.che.functional.tests.fragments.topmenu.GitPopupTopMenu;
 import redhat.che.functional.tests.fragments.topmenu.MainMenuPanel;
 import redhat.che.functional.tests.fragments.topmenu.ProfileTopMenu;
@@ -25,11 +26,8 @@ import java.util.Date;
 public class GitTestCase extends AbstractCheFunctionalTest {
 	private static final Logger LOG = Logger.getLogger(GitTestCase.class);
 
-    @FindByJQuery("div:contains('Preferences'):contains('Java Compiler'):last")
+    @FindByJQuery("table[title='Preferences']")
     private PreferencesWindow preferencesWindow;
-
-    @FindByJQuery("div:contains('Host'):contains('Upload'):last")
-    private UploadPrivateSshFormWindow uploadPrivateSshForm;
 
     @FindBy(id = "gwt-debug-mainMenuPanel")
     private MainMenuPanel mainMenuPanel;
@@ -48,6 +46,9 @@ public class GitTestCase extends AbstractCheFunctionalTest {
 
     @FindBy(id = "gwt-debug-git-remotes-push-window")
     private GitPushWindow gitPushWindow;
+    
+    @FindBy(id = "gwt-debug-popup-container")
+    private Popup popup;
 
     @Test
     @InSequence(1)
@@ -58,10 +59,7 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         LOG.info("Test: test_load_ssh_key_and_set_commiter_information");
         mainMenuPanel.clickProfile();
         profileTopMenu.openPreferences();
-        preferencesWindow.writeCommiterInformation("dev-test-user", "mlabuda@redhat.com");
-        //preferencesWindow.openUploadPrivateKeyWindow();
-        File idRsa = new File("src/test/resources/id_rsa");
-        //uploadPrivateSshForm.upload("github.com", idRsa);
+        preferencesWindow.writeCommiterInformation("test-user", "test@mail.com");
         preferencesWindow.close();
     }
 
@@ -71,8 +69,8 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         //openBrowser(driver);
 
         vertxProject.getResource("README.md").open();
-        editorPart.tabsPanel().waitUntilFocusedTabHasName("README.md");
-        editorPart.codeEditor().writeIntoTextViewContent("\n changes added on: " + new Date());
+        editorPart.tabsPanel().waitUntilActiveTabHasName("README.md");
+        editorPart.codeEditor().writeIntoElementContainingString("changes added on: " + new Date(), "changes added on:");
 
         mainMenuPanel.clickGit();
         gitPopupTopMenu.addToIndex();
@@ -93,6 +91,11 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         bottomInfoPanel.waitUntilConsolePartContains(BottomInfoPanel.FixedConsoleText.GIT_COMMITED_WITH_REVISION);
     }
 
+	/*
+	 * This test case will only work, when it is run with osio user who has push
+	 * access to github repo.
+	 */
+    
     @Test
     @InSequence(4)
     public void test_push_changes(){
@@ -101,5 +104,6 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         mainMenuPanel.clickGit();
         gitPopupTopMenu.push();
         gitPushWindow.push();
+        popup.waitForPopup("Pushed to origin");
     }
 }

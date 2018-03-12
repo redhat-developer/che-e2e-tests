@@ -14,12 +14,6 @@ public class PreferencesWindow {
     @Root
     private WebElement preferencesWindowElement;
 
-    @FindBy(id = "gwt-debug-projectWizard-VCS")
-    private WebElement sshVcsItem;
-
-    @FindBy(id = "gwt-debug-sshKeys-upload")
-    private WebElement sshKeyUploadButton;
-
     @FindBy(id = "gwt-debug-projectWizard-Committer")
     private WebElement gitCommiterItem;
 
@@ -30,7 +24,7 @@ public class PreferencesWindow {
     private WebElement gitCommiterEmailInput;
 
     @FindBy(id = "window-preferences-storeChanges")
-    private WebElement storeChangesButton;
+    private WebElement saveButton;
 
     @FindBy(id = "window-preferences-close")
     private WebElement closeButton;
@@ -43,18 +37,11 @@ public class PreferencesWindow {
         gitCommiterNameInput.sendKeys(name);
         gitCommiterEmailInput.clear();
         gitCommiterEmailInput.sendKeys(email);
-        storeChangesButton.click();
+        saveButton.click();
     }
 
     public void close(){
         closeButton.click();
         waitAjax().until().element(preferencesWindowElement).is().not().visible();
-    }
-
-    public void openUploadPrivateKeyWindow() {
-        waitAjax().until().element(sshVcsItem).is().visible();
-        sshVcsItem.click();
-        waitAjax().until().element(sshKeyUploadButton).is().visible();
-        sshKeyUploadButton.click();
     }
 }

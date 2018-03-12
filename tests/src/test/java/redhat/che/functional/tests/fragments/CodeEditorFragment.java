@@ -5,8 +5,10 @@ import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -91,8 +93,9 @@ public class CodeEditorFragment {
         return true;
     }
 
-    public void writeIntoTextViewContent(String text) {
-        ActionUtils.writeIntoElement(driver, lastSpan, text);
+    public void writeIntoElementContainingString(String textToWrite, String textSelector) {
+    	WebElement element = driver.findElement(ByJQuery.selector(".textviewContent[contenteditable='true'] span:contains('"+textSelector+"')"));
+    	new Actions(driver).moveToElement(element).click().sendKeys(Keys.HOME,Keys.chord(Keys.SHIFT,Keys.END), textToWrite).perform();
     }
 
     public void hideErrors(Integer annotationLine) {
