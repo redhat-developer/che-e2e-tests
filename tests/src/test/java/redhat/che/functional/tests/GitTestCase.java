@@ -3,6 +3,7 @@ package redhat.che.functional.tests;
 import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.resource.Stack;
 import org.apache.log4j.Logger;
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
@@ -17,8 +18,6 @@ import redhat.che.functional.tests.fragments.topmenu.ProfileTopMenu;
 import redhat.che.functional.tests.fragments.window.CommitToRepoWindow;
 import redhat.che.functional.tests.fragments.window.GitPushWindow;
 import redhat.che.functional.tests.fragments.window.PreferencesWindow;
-import redhat.che.functional.tests.fragments.window.UploadPrivateSshFormWindow;
-import java.io.File;
 import java.util.Date;
 
 @RunWith(Arquillian.class)
@@ -49,13 +48,20 @@ public class GitTestCase extends AbstractCheFunctionalTest {
     
     @FindBy(id = "gwt-debug-popup-container")
     private Popup popup;
-
+    
+	private void waitUntilProjectImported() {
+		Graphene.waitGui().until().element(
+				infoPanel.getNotificationManager().getNotificationElement("Project vertx-http-booster imported")).is()
+				.present();
+	}
+	
     @Test
     @InSequence(1)
     public void test_load_ssh_key_and_set_commiter_information(){
         // set commiter credentials
         LOG.info("Starting: " + this.getClass().getName());
         openBrowser();
+        waitUntilProjectImported();
         LOG.info("Test: test_load_ssh_key_and_set_commiter_information");
         mainMenuPanel.clickProfile();
         profileTopMenu.openPreferences();

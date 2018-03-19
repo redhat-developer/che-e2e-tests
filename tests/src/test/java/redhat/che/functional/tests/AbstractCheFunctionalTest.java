@@ -27,6 +27,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.fragments.EditorPart;
 import redhat.che.functional.tests.fragments.Project;
+import redhat.che.functional.tests.fragments.infoPanel.InfoPanel;
 import redhat.che.functional.tests.utils.Constants;
 
 import java.io.File;
@@ -63,6 +64,9 @@ public abstract class AbstractCheFunctionalTest {
 
     @FindBy(id = "kc-login")
     private WebElement loginButton;
+    
+    @FindBy(id = "gwt-debug-infoPanel")
+    protected InfoPanel infoPanel;
 
     @ArquillianResource
     private static CheWorkspace workspace;
@@ -104,22 +108,22 @@ public abstract class AbstractCheFunctionalTest {
     private void waitForWorkspaceToLoad() {
         LOG.info("Waiting for workspace to get up to state.");
         try {
-            waitForWorkspaceRunningAnnotation();
-            waitUntilAllVisibleAnnotationsDisappear();
+            waitForWorkspaceRunningPopup();
+            waitUntilAllVisiblePopupsDisappear();
         } catch (WebDriverException e) {
             // Even if it fails with exception, it's enough time to get the notifications to disappear
         }
     }
 
-    private void waitUntilAllVisibleAnnotationsDisappear() {
+	private void waitUntilAllVisiblePopupsDisappear() {
         Graphene.waitGui().withTimeout(1, TimeUnit.MINUTES).until(webDriver -> {
             List<WebElement> children = getNumberOfPopupsVisible();
             return children.isEmpty();
         });
     }
 
-    private void waitForWorkspaceRunningAnnotation() {
-        Graphene.waitGui().withTimeout(15, TimeUnit.SECONDS).until().element(workspacePopupIsRunning).is().visible();
+    private void waitForWorkspaceRunningPopup() {
+        Graphene.waitGui().withTimeout(30, TimeUnit.SECONDS).until().element(workspacePopupIsRunning).is().visible();
         Graphene.waitGui().withTimeout(15, TimeUnit.SECONDS).until().element(workspacePopupIsRunning).is().not().visible();
     }
 
