@@ -124,6 +124,7 @@ class TokenBehavior(TaskSet):
 		self.stopWorkspace(self.id)
 		self.waitForWorkspaceToStop(self.id)
 		self.deleteWorkspace(self.id)
+		self.deleteExistingWorkspaces()
 
 	@task
 	def createStartDeleteWorkspace(self):
@@ -229,6 +230,28 @@ class TokenBehavior(TaskSet):
 		ret_val = (self.stop - self.start) * 1000
 		self.start = self.stop
 		return ret_val
+
+	def deleteExistingWorkspaces(self):
+		response = self.client.get("/api/workspace/", headers = {"Authorization" : "Bearer " + self.taskUserToken}, name = "getWorkspaces", catch_response = True)
+		try:
+			resp_json = response.json()
+			content = response.content
+			if not response.ok:
+				response.failure("Got wrong response: [" + content + "]")
+			else:
+				response.success()
+				print "Removing " + str(len(resp_json)) + " existing workspaces."
+				for wkspc in resp_json:
+					id = wkspc["id"]
+					if wkspc["status"] != "STOPPED":
+						self.stopWorkspace(id)
+						self.waitForWorkspaceToStop(id)
+					self.deleteWorkspace(id)
+		except ValueError:
+			response.failure("Got wrong response: [" + content + "]")
+
+
+
 
 
 class TokenUser(HttpLocust):

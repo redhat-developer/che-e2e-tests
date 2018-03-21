@@ -76,7 +76,7 @@ export USER_TOKENS=\"`cat $TOKENS_FILE`\"
 fi
 
 #adding INFO level log on slaves instead of WARNING for better idea what's happening
-sed -i.bak 's/WARNING/INFO/g' __start-locust-slaves.sh
+sed -i.bak 's/WARNING/INFO/g' $COMMON/__start-locust-slaves.sh
 if [ "$RUN_LOCALLY" != "true" ]; then
 	echo " Shut Locust master down"
 	$COMMON/__stop-locust-master.sh
@@ -107,6 +107,7 @@ if [ "$RUN_LOCALLY" != "true" ]; then
 else
 	$COMMON/__stop-locust-master-standalone.sh TERM
 fi
+
 echo " Extract CSV data from logs:"
 $COMMON/_locust-log-to-csv.sh 'POST createWorkspace' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
 $COMMON/_locust-log-to-csv.sh 'GET getWorkspaceStatus' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
