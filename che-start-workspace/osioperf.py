@@ -56,7 +56,7 @@ bodyJson='{\
             }\
         }\
     },\
-    "name": "qdmsg",\
+    "name": "WORKSPACE_NAME",\
     "links": [],\
     "projects": [\
         {\
@@ -136,18 +136,22 @@ class TokenBehavior(TaskSet):
 		self.wait()
 		self.waitForWorkspaceToStart(id)
 		self.stopWorkspace(id)
+		self.waitForWorkspaceToStop(self.id)
 		self.wait()
 		self.deleteWorkspace(id)
 
 	def createWorkspace(self):
 		print "Creating workspace"
-		response = self.client.post("/api/workspace", headers = {"Authorization" : "Bearer " + self.taskUserToken, "Content-Type":"application/json"}, name = "createWorkspace", data = bodyJson, catch_response = True)
+		now_time_ms = "%.f" % (time.time()*1000)
+		print "now time:" + now_time_ms
+		json = bodyJson.replace("WORKSPACE_NAME", now_time_ms)
+		response = self.client.post("/api/workspace", headers = {"Authorization" : "Bearer " + self.taskUserToken, "Content-Type":"application/json"}, name = "createWorkspace", data = json, catch_response = True)
 
 		try:
 			resp_json = response.json()
 			print resp_json
 			if not response.ok:
-				response.failure("Got wrong response: [" + response.content + "]")
+				response.failure("Can not create workspace: [" + response.content + "]")
 			else:
 				response.success()
 				return resp_json["id"]
@@ -225,7 +229,6 @@ class TokenBehavior(TaskSet):
 		ret_val = (self.stop - self.start) * 1000
 		self.start = self.stop
 		return ret_val
-
 
 
 class TokenUser(HttpLocust):

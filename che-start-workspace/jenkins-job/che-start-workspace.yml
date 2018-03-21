@@ -25,7 +25,8 @@
            description: Auth server machine address.
        - string:
            name: CHE_SERVER_URL
-           default: https://che.openshift.io
+           #default: https://che.openshift.io
+           default: https://rhche.openshift.io
            description: Che server machine address.
        - string:
            name: SSH_USER
@@ -87,9 +88,9 @@
            description: A hostname in Zabbix the report is for
     scm:
         - git:
-            url: https://github.com/Katka92/che-functional-tests.git
+            url: https://github.com/redhat-developer/che-functional-tests.git
             branches:
-                - '*/performace_failures'
+                - '*/master'
     triggers:
         - timed: H 1 * * *
     wrappers:

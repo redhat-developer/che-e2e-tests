@@ -201,12 +201,12 @@ function distribution_2_csv {
  	$COMMON/__stop-locust-slaves.sh
  fi
 
- echo " Check for errors in Locust master log"
+ echo "Check for errors in Locust master log"
  EXIT_CODE=0
- if [[ "0" -ne `cat $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log | grep 'Error report' | wc -l` ]] || [[ `wc -l < $JOB_BASE_NAME-$BUILD_NUMBER-report_distribution.csv` -eq "7" ]]; then
-    echo '[:(] THERE WERE ERRORS OR FAILURES!!!';
+ if [[ "0" -ne `cat $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log | grep 'Error report' | wc -l` ]] || [[ `wc -l < $JOB_BASE_NAME-$BUILD_NUMBER-report_distribution.csv` -ne "7" ]]; then
+    echo 'THERE WERE ERRORS OR FAILURES!!!';
     EXIT_CODE=1;
  else
-    echo '[:)] NO ERRORS OR FAILURES DETECTED.';
+    echo 'NO ERRORS OR FAILURES DETECTED.';
  fi
  exit $EXIT_CODE
