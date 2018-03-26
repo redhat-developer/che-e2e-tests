@@ -13,7 +13,6 @@ import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.fragments.BottomInfoPanel;
 import redhat.che.functional.tests.fragments.popup.Popup;
 import redhat.che.functional.tests.fragments.topmenu.GitPopupTopMenu;
-import redhat.che.functional.tests.fragments.topmenu.MainMenuPanel;
 import redhat.che.functional.tests.fragments.topmenu.ProfileTopMenu;
 import redhat.che.functional.tests.fragments.window.CommitToRepoWindow;
 import redhat.che.functional.tests.fragments.window.GitPushWindow;
@@ -27,9 +26,6 @@ public class GitTestCase extends AbstractCheFunctionalTest {
 
     @FindByJQuery("table[title='Preferences']")
     private PreferencesWindow preferencesWindow;
-
-    @FindBy(id = "gwt-debug-mainMenuPanel")
-    private MainMenuPanel mainMenuPanel;
 
     @FindBy(id = "menu-lock-layer-id")
     private ProfileTopMenu profileTopMenu;

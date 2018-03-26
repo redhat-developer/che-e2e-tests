@@ -27,7 +27,11 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.fragments.EditorPart;
 import redhat.che.functional.tests.fragments.Project;
+import redhat.che.functional.tests.fragments.infoPanel.ConsolesPanel;
 import redhat.che.functional.tests.fragments.infoPanel.InfoPanel;
+import redhat.che.functional.tests.fragments.infoPanel.WorkspaceStatusPage;
+import redhat.che.functional.tests.fragments.topmenu.MainMenuPanel;
+import redhat.che.functional.tests.fragments.topmenu.WorkspaceTopMenu;
 import redhat.che.functional.tests.utils.Constants;
 
 import java.io.File;
@@ -67,6 +71,18 @@ public abstract class AbstractCheFunctionalTest {
     
     @FindBy(id = "gwt-debug-infoPanel")
     protected InfoPanel infoPanel;
+    
+    @FindBy(id = "gwt-debug-mainMenuPanel")
+    protected MainMenuPanel mainMenuPanel;
+    
+    @FindBy(id = "menu-lock-layer-id")
+    private WorkspaceTopMenu workspaceTopMenu;
+    
+    @FindBy(id = "ide-loader-progress-bar")
+    private WebElement loaderProgressBar;
+    
+    @FindBy(id = "codenvyIdeWorkspaceViewImpl")
+    private WebElement ideElement;
 
     @ArquillianResource
     private static CheWorkspace workspace;
@@ -105,26 +121,33 @@ public abstract class AbstractCheFunctionalTest {
         loginButton.click();
     }
 
-    private void waitForWorkspaceToLoad() {
-        LOG.info("Waiting for workspace to get up to state.");
-        try {
-            waitForWorkspaceRunningPopup();
-            waitUntilAllVisiblePopupsDisappear();
-        } catch (WebDriverException e) {
-            // Even if it fails with exception, it's enough time to get the notifications to disappear
-        }
-    }
+	private void waitForWorkspaceToLoad() {
+		LOG.info("Waiting for workspace to get up to state.");
+		waitForLoaderToDisappear();
+		waitForWorkspaceIsRunning();
+		waitUntilAllVisiblePopupsDisappear();
+	}
+    
+	private void waitForLoaderToDisappear() {
+		System.out.println(loaderProgressBar.isDisplayed());
+		Graphene.waitModel().until().element(loaderProgressBar).is().visible();
+		Graphene.waitModel().until().element(ideElement).is().visible();
+	}
+
+	private void waitForWorkspaceIsRunning() {
+		mainMenuPanel.clickWorkspace();
+		workspaceTopMenu.showStatus();
+		ConsolesPanel consolesPanel = infoPanel.getConsolesPanel();
+		consolesPanel.activateTab("Workspace Status");
+		WorkspaceStatusPage workspaceStatusPage = consolesPanel.getWorkspaceStatusPage();
+		Graphene.waitModel().withTimeout(15, TimeUnit.SECONDS).until(d -> workspaceStatusPage.isWorkspaceRunning());
+	}
 
 	private void waitUntilAllVisiblePopupsDisappear() {
         Graphene.waitGui().withTimeout(1, TimeUnit.MINUTES).until(webDriver -> {
             List<WebElement> children = getNumberOfPopupsVisible();
             return children.isEmpty();
         });
-    }
-
-    private void waitForWorkspaceRunningPopup() {
-        Graphene.waitGui().withTimeout(30, TimeUnit.SECONDS).until().element(workspacePopupIsRunning).is().visible();
-        Graphene.waitGui().withTimeout(15, TimeUnit.SECONDS).until().element(workspacePopupIsRunning).is().not().visible();
     }
 
     private List<WebElement> getNumberOfPopupsVisible() {

@@ -16,8 +16,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
-import static org.jboss.arquillian.graphene.Graphene.guardAjax;
-
 /*
  * root div[id="gwt-debug-toolbarPanel"]
  */
@@ -35,8 +33,7 @@ public class LeftBar {
     /**
      * Clicks button to execute selected command.
      */
-
     public void openCommandsPart() {
-        guardAjax(commandsPart).click();
+    	commandsPart.click();
     }
 }

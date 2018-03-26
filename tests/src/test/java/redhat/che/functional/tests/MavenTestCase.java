@@ -38,10 +38,10 @@ import java.util.concurrent.TimeUnit;
 public class MavenTestCase extends AbstractCheFunctionalTest{
     private static final Logger LOG = Logger.getLogger(MavenTestCase.class);
 
-    @FindBy(id="gwt-debug-leftPanel")
+    @FindBy(id="gwt-debug-navPanel")
     private LeftBar leftBar;
 
-    @FindBy(id="gwt-debug-navPanel")
+    @FindBy(id="gwt-debug-commands-explorer")
     private CommandsManager commandsManager;
 
     @FindByJQuery("pre:contains('Total time')")

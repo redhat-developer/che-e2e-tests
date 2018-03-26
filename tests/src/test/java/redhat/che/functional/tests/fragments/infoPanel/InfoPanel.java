@@ -40,8 +40,14 @@ public class InfoPanel {
     @FindBy(id = "gwt-debug-notificationManager-mainPanel")
     private NotificationManager notificationManager;
     
+    @FindBy(id = "gwt-debug-consolesPanel")
+    private ConsolesPanel consolesPanel;
+    
     @FindBy(id = "gwt-debug-partButton-Events")
     private WebElement notificationButon;
+    
+    @FindBy(id = "gwt-debug-partButton-Processes")
+    private WebElement processesButton; 
 
 	public NotificationManager getNotificationManager() {
 		LOG.info("Retrieving notification area.");
@@ -52,10 +58,24 @@ public class InfoPanel {
 			return notificationManager;
 		}
 	}
+	
+	public ConsolesPanel getConsolesPanel() {
+		LOG.info("Retrieving consoles panel.");
+		if (new WebElementConditionFactory(consolesPanel.getRootElement()).isVisible().apply(driver)) {
+			return consolesPanel;
+		} else {
+			switchToConsolesPanel();
+			return consolesPanel;
+		}
+	}
 
 	private void switchToNotificationManager() {
 		LOG.info("Notification area not focused. Focusing.");
 		notificationButon.click();
-		Graphene.waitGui().until().element(notificationManager.getRootElement()).is().visible();
+	}
+	
+	private void switchToConsolesPanel() {
+		LOG.info("ConsolePanel not focused. Focusing.");
+		Graphene.guardAjax(processesButton).click();
 	}
 }

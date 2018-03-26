@@ -14,6 +14,7 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -27,10 +28,7 @@ public class CommandsManager {
 
     @Root
     private WebElement rootElement;
-
-    @FindBy(id = "gwt-debug-commands-explorer")
-    private WebElement commandExplorer;
-
+    
     @FindBy(id = "commands_tree-button-add")
     private WebElement buildPlus;
 
@@ -68,7 +66,11 @@ public class CommandsManager {
     }
 
     public boolean isCommandsExplorerOpen() {
-        return commandExplorer.isDisplayed();
+    	try {
+    		return rootElement.isDisplayed();
+    	}catch (NoSuchElementException e) {
+    		return false;
+    	}
     }
 
 }
