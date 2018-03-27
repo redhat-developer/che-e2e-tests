@@ -11,3 +11,4 @@ export ZABBIX_TIMESTAMP=`date +%s`
 ./__zabbix-process-load.sh '"POST","startWorkspace"' "startWorkspace" >> $ZABBIX_LOG
 ./__zabbix-process-load.sh '"DELETE","stopWorkspace"' "stopWorkspace" >> $ZABBIX_LOG
 ./__zabbix-process-load.sh '"REPEATED_GET","timeForStartingWorkspace"' "timeForStartingWorkspace" >> $ZABBIX_LOG
+./__zabbix-process-load.sh '"REPEATED_GET","timeForStoppingWorkspace"' "timeForStoppingWorkspace" >> $ZABBIX_LOG

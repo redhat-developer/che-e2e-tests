@@ -1,8 +1,8 @@
-# Che.openshift.io Workspace Services Performance Evaluation
+# Workspace Services Performance Evaluation
 These tests are intended to measure performance of the REST endpoints of creating/starting/stopping/deleting workspace.
 
 ## Environment
-The tested server is the OSIO (https://che.openshift.io).
+The tested server is the OSIO (https://che.openshift.io or temporarily rhche.openshift.io).
 The clients to the tested server are deployed on the client nodes 
 of the [OsioPerf Lab](https://github.com/redhat-developer/che-functional-tests/che-start-workspace/README.md).
 
@@ -78,6 +78,7 @@ Using HTTP client repeatedly send:
 ```
 GET /api/worksapce/<worksapce_id>
 ```
+Waiting until workspace status changes to RUNNING.
 
 HTTP client keeps sending these requests until the status of workspace is running. Time of each GET request is measured
 (getWorksapceStatus metrics) and time needed to start worksapce is measured too (timeForStartingWorksapce metrics).
@@ -87,6 +88,13 @@ Using HTTP client send:
 ```
 DELETE /api/workspace/<workspace_id>/runtime
 ```
+
+#### *Waiting until workspace stops* (`timeForStoppingWorkspace` and `getWorkspaceStatus`)
+Using HTTP client repeatedly send:
+```
+GET /api/worksapce/<worksapce_id>
+```
+Than sending request for getting status and measuring time untill the status is STOPPED.
 
 #### *Deleting workspace* (`deleteWorkspace`)
 Using HTTP client send:

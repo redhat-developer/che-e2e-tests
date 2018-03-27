@@ -13,6 +13,7 @@ monitoring system to track the results' history.
 | `startWorkspace` | @@START_WORKSPACE_MIN@@ ms | @@START_WORKSPACE_MEDIAN@@ ms | @@START_WORKSPACE_MAX@@ ms |
 | `getWorkspaceStatus` | @@GET_WORKSPACE_STATUS_MIN@@ ms | @@GET_WORKSPACE_STATUS_MEDIAN@@ ms | @@GET_WORKSPACE_STATUS_MAX@@ ms |
 | `timeForStartingWorkspace` | @@TIME_FOR_STARTING_WORKSPACE_MIN@@ ms | @@TIME_FOR_STARTING_WORKSPACE_MEDIAN@@ ms | @@TIME_FOR_STARTING_WORKSPACE_MAX@@ ms |
+| `timeForStoppingWorkspace` | @@TIME_FOR_STOPPING_WORKSPACE_MIN@@ ms | @@TIME_FOR_STOPPING_WORKSPACE_MEDIAN@@ ms | @@TIME_FOR_STOPPING_WORKSPACE_MAX@@ ms |
 | `stopWorkspace` | @@STOP_WORKSPACE_MIN@@ ms | @@STOP_WORKSPACE_MEDIAN@@ ms | @@STOP_WORKSPACE_MAX@@ ms |
 | `deleteWorkspace` | @@DELETE_WORKSPACE_MIN@@ ms | @@DELETE_WORKSPACE_MEDIAN@@ ms | @@DELETE_WORKSPACE_MAX@@ ms |
 
@@ -44,6 +45,14 @@ The charts bellow show the whole duration of all the phases for each scenario - 
 ![timeForStartingWorkspace-maximal-reponse-time](./@@JOB_BASE_NAME@@-@@BUILD_NUMBER@@-REPEATED_GET_timeForStartingWorkspace-maximal-response-time.png)
 ![timeForStartingWorkspace-average-reponse-time](./@@JOB_BASE_NAME@@-@@BUILD_NUMBER@@-REPEATED_GET_timeForStartingWorkspace-average-response-time.png)
 ![timeForStartingWorkspace-rt-histo](./@@JOB_BASE_NAME@@-@@BUILD_NUMBER@@-REPEATED_GET_timeForStartingWorkspace-rt-histo.png)
+
+#### `timeForStoppingWorkspace` Response Time
+![timeForStoppingWorkspace-reponse-time](./@@JOB_BASE_NAME@@-@@BUILD_NUMBER@@-REPEATED_GET_timeForStoppingWorkspace-response-time.png)
+![timeForStoppingWorkspace-minimal-reponse-time](./@@JOB_BASE_NAME@@-@@BUILD_NUMBER@@-REPEATED_GET_timeForStoppingWorkspace-minimal-response-time.png)
+![timeForStoppingWorkspace-median-reponse-time](./@@JOB_BASE_NAME@@-@@BUILD_NUMBER@@-REPEATED_GET_timeForStoppingWorkspace-median-response-time.png)
+![timeForStoppingWorkspace-maximal-reponse-time](./@@JOB_BASE_NAME@@-@@BUILD_NUMBER@@-REPEATED_GET_timeForStoppingWorkspace-maximal-response-time.png)
+![timeForStoppingWorkspace-average-reponse-time](./@@JOB_BASE_NAME@@-@@BUILD_NUMBER@@-REPEATED_GET_timeForStoppingWorkspace-average-response-time.png)
+![timeForStoppingWorkspace-rt-histo](./@@JOB_BASE_NAME@@-@@BUILD_NUMBER@@-REPEATED_GET_timeForStoppingWorkspace-rt-histo.png)
 
 #### `getWorkspaceStatus` Response Time
 ![getWorkspaceStatus-reponse-time](./@@JOB_BASE_NAME@@-@@BUILD_NUMBER@@-GET_getWorkspaceStatus-response-time.png)

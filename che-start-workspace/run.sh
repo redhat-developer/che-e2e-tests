@@ -115,6 +115,7 @@ $COMMON/_locust-log-to-csv.sh 'REPEATED_GET timeForStartingWorkspace' $JOB_BASE_
 $COMMON/_locust-log-to-csv.sh 'POST startWorkspace' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
 $COMMON/_locust-log-to-csv.sh 'DELETE stopWorkspace' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
 $COMMON/_locust-log-to-csv.sh 'DELETE deleteWorkspace' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
+$COMMON/_locust-log-to-csv.sh 'REPEATED_GET timeForStoppingWorkspace' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
 
 echo " Generate charts from CSV"
 export REPORT_CHART_WIDTH=1000
@@ -135,6 +136,7 @@ function distribution_2_csv {
  	distribution_2_csv $c '"POST createWorkspace"';
  	distribution_2_csv $c '"GET getWorkspaceStatus"';
  	distribution_2_csv $c '"REPEATED_GET timeForStartingWorkspace"';
+ 	distribution_2_csv $c '"REPEATED_GET timeForStoppingWorkspace"';
  	distribution_2_csv $c '"POST startWorkspace"';
  	distribution_2_csv $c '"DELETE stopWorkspace"';
  	distribution_2_csv $c '"DELETE deleteWorkspace"';
@@ -178,6 +180,10 @@ function distribution_2_csv {
  filterZabbixValue $ZABBIX_LOG "timeForStartingWorkspace-rt_median" "@@TIME_FOR_STARTING_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
  filterZabbixValue $ZABBIX_LOG "timeForStartingWorkspace-rt_max" "@@TIME_FOR_STARTING_WORKSPACE_MAX@@" $RESULTS_FILE;
 
+ filterZabbixValue $ZABBIX_LOG "timeForStoppingWorkspace-rt_min" "@@TIME_FOR_STOPPING_WORKSPACE_MIN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "timeForStoppingWorkspace-rt_median" "@@TIME_FOR_STOPPING_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "timeForStoppingWorkspace-rt_max" "@@TIME_FOR_STOPPING_WORKSPACE_MAX@@" $RESULTS_FILE;
+
  filterZabbixValue $ZABBIX_LOG "stopWorkspace-rt_min" "@@STOP_WORKSPACE_MIN@@" $RESULTS_FILE;
  filterZabbixValue $ZABBIX_LOG "stopWorkspace-rt_median" "@@STOP_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
  filterZabbixValue $ZABBIX_LOG "stopWorkspace-rt_max" "@@STOP_WORKSPACE_MAX@@" $RESULTS_FILE;
@@ -204,7 +210,7 @@ function distribution_2_csv {
 
  echo "Check for errors in Locust master log"
  EXIT_CODE=0
- if [[ "0" -ne `cat $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log | grep 'Error report' | wc -l` ]] || [[ `wc -l < $JOB_BASE_NAME-$BUILD_NUMBER-report_distribution.csv` -ne "7" ]]; then
+ if [[ "0" -ne `cat $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log | grep 'Error report' | wc -l` ]] || [[ `wc -l < $JOB_BASE_NAME-$BUILD_NUMBER-report_distribution.csv` -ne "9" ]]; then
     echo 'THERE WERE ERRORS OR FAILURES!!!';
     EXIT_CODE=1;
  else

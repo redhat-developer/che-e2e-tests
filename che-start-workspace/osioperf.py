@@ -136,6 +136,7 @@ class TokenBehavior(TaskSet):
 		self.startWorkspace(id)
 		self.wait()
 		self.waitForWorkspaceToStart(id)
+		self._reset_timer()
 		self.stopWorkspace(id)
 		self.waitForWorkspaceToStop(self.id)
 		self.wait()
@@ -184,6 +185,8 @@ class TokenBehavior(TaskSet):
 			print "Workspace id "+id+" is still not in state STOPPED"
 			self.wait()
 		print "Workspace id "+id+" is STOPPED"
+		events.request_success.fire(request_type="REPEATED_GET", name="timeForStoppingWorkspace", response_time=self._tick_timer(), response_length=0)
+
 
 	def stopWorkspace(self, id):
 		print "Stopping workspace id "+id
