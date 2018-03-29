@@ -121,8 +121,11 @@ class TokenBehavior(TaskSet):
 
 	def on_stop(self):
 		print "Running on_stop method - trying to stop and delete workspace with id " + self.id
-		self.stopWorkspace(self.id)
-		self.waitForWorkspaceToStop(self.id)
+		if self.getWorkspaceStatus(self.id) == "STOPPING":
+			self.waitForWorkspaceToStop(self.id)
+		if self.getWorkspaceStatus(self.id) != "STOPPED":
+			self.stopWorkspace(self.id)
+			self.waitForWorkspaceToStop(self.id)
 		self.deleteWorkspace(self.id)
 		self.deleteExistingWorkspaces()
 

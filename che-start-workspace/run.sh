@@ -209,11 +209,17 @@ function distribution_2_csv {
  fi
 
  echo "Check for errors in Locust master log"
+
+ REPORT_COUNT=`wc -l < $JOB_BASE_NAME-$BUILD_NUMBER-report_distribution.csv`
+
  EXIT_CODE=0
- if [[ "0" -ne `cat $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log | grep 'Error report' | wc -l` ]] || [[ `wc -l < $JOB_BASE_NAME-$BUILD_NUMBER-report_distribution.csv` -ne "9" ]]; then
-    echo 'THERE WERE ERRORS OR FAILURES!!!';
+ if [[ "0" -ne `cat $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log | grep 'Error report' | wc -l` ]]; then
+    echo 'THERE WERE ERRORS OR FAILURES WHILE SENDING REQUESTS';
+    EXIT_CODE=1;
+ elif [[ REPORT_COUNT -ne "9" ]]; then
+    echo "THERE WERE NOT CORRECT AMOUNT OF RECORDS IN REPORT FILE expected 9 gotten $REPORT_COUNT";
     EXIT_CODE=1;
  else
-    echo 'NO ERRORS OR FAILURES DETECTED.';
+    echo 'NO ERRORS OR FAILURES DETECTED';
  fi
  exit $EXIT_CODE
