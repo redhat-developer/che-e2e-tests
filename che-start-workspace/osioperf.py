@@ -176,7 +176,13 @@ class TokenBehavior(TaskSet):
 			response.failure("Got wrong response: [" + content + "]")
 
 	def waitForWorkspaceToStart(self, id):
+		timeout_in_seconds = 300
 		while self.getWorkspaceStatus(id) != "RUNNING":
+			now = time.time()
+			if now - self.start > timeout_in_seconds:
+				events.request_failure.fire(request_type="REPEATED_GET", name="timeForStartingWorkspace",response_time=self._tick_timer(), exception="Workspace wasn't able to start in " + timeout_in_seconds + " seconds.")
+				print "Workspace wasn't able to start in " + timeout_in_seconds + " seconds."
+				return
 			print "Workspace id "+id+" is still not in state RUNNING"
 			self.wait()
 		print "Workspace id "+id+" is RUNNING"
@@ -234,7 +240,6 @@ class TokenBehavior(TaskSet):
 	def _tick_timer(self):
 		self.stop = time.time()
 		ret_val = (self.stop - self.start) * 1000
-		self.start = self.stop
 		return ret_val
 
 	def deleteExistingWorkspaces(self):
