@@ -216,7 +216,7 @@ function distribution_2_csv {
  if [[ "0" -ne `cat $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log | grep 'Error report' | wc -l` ]]; then
     echo 'THERE WERE ERRORS OR FAILURES WHILE SENDING REQUESTS';
     EXIT_CODE=1;
- elif [[ REPORT_COUNT -ne "9" ]]; then
+ elif [[ REPORT_COUNT -ne "8" ]]; then
     echo "THERE WERE NOT CORRECT AMOUNT OF RECORDS IN REPORT FILE expected 9 gotten $REPORT_COUNT";
     EXIT_CODE=1;
  else
