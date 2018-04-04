@@ -180,8 +180,8 @@ class TokenBehavior(TaskSet):
 		while self.getWorkspaceStatus(id) != "RUNNING":
 			now = time.time()
 			if now - self.start > timeout_in_seconds:
-				events.request_failure.fire(request_type="REPEATED_GET", name="timeForStartingWorkspace",response_time=self._tick_timer(), exception="Workspace wasn't able to start in " + timeout_in_seconds + " seconds.")
-				print "Workspace wasn't able to start in " + timeout_in_seconds + " seconds."
+				events.request_failure.fire(request_type="REPEATED_GET", name="timeForStartingWorkspace",response_time=self._tick_timer(), exception="Workspace wasn't able to start in " + str(timeout_in_seconds) + " seconds.")
+				print "Workspace wasn't able to start in " + str(timeout_in_seconds) + " seconds."
 				return
 			print "Workspace id "+id+" is still not in state RUNNING"
 			self.wait()
