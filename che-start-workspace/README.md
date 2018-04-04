@@ -1,5 +1,5 @@
 # Workspace Services Performance Evaluation
-These tests are intended to measure performance of the REST endpoints of creating/starting/stopping/deleting workspace.
+These tests are intended to measure performance of the REST endpoints of creating/starting/stopping/deleting workspace. It serves as monitoring of service on daily basis.
 
 ## Environment
 The tested server is the OSIO (https://che.openshift.io or temporarily rhche.openshift.io).
@@ -94,7 +94,7 @@ Using HTTP client repeatedly send:
 ```
 GET /api/worksapce/<worksapce_id>
 ```
-Than sending request for getting status and measuring time untill the status is STOPPED.
+Than sending request for getting status and measuring time until the status is STOPPED.
 
 #### *Deleting workspace* (`deleteWorkspace`)
 Using HTTP client send:
@@ -103,16 +103,13 @@ DELETE /api/workspace/<workspace_id>
 ```
 
 ## How to run the tests locally
-By default the load test is executed by Locust tool running in a distributed mode, i.e. uses remote access
-to the Master and Slave nodes via SSH to start Locust process on those nodes to load the tested system
-from a different places.
+By default the load test is executed by Locust tool running locally (for two users it is not necesary to run in a distributed mode).
 
-However, it is possible to switch the test to the local execution. To do that simply set the environment
-variable `RUN_LOCALLY=true`. The easiest way is to uncomment the respective line in `_setenv.sh` file.
+So the environment variable is set `RUN_LOCALLY=true`.
 
 To run the test, configure the test in `_setenv.sh` file and run the `run.sh` script.
 
-To update jenkins job use this syntax:
+To update jenkins job use this syntax (not working for last version of jenkins job builder):
 ´´´
 sudo PYTHONHTTPSVERIFY=0 jenkins-jobs --conf jenkins_jobs.ini update job.yml
 ´´´
