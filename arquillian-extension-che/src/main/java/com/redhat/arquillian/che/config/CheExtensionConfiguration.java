@@ -18,6 +18,7 @@ public class CheExtensionConfiguration {
     public static final String OSIO_USERNAME_PROPERTY_NAME = "osioUsername";
     public static final String OSIO_PASSWORD_PROPERTY_NAME = "osioPassword";
     public static final String OSIO_URL_PART = "osioUrlPart";
+    public static final String CUSTOM_CHE_SERVER_FULL_URL = "customCheServerFullURL";
 
     private String cheStarterUrl;
     private String openshiftMasterUrl;
@@ -27,6 +28,7 @@ public class CheExtensionConfiguration {
     private Boolean preserveWorkspace;
     private String osioUrlPart;
     private String cheWorkspaceName;
+    private String customCheServerFullURL;
 
     private String osioUsername;
     private String osioPassword;
@@ -40,6 +42,10 @@ public class CheExtensionConfiguration {
         config.openshiftNamespace = loadProperty(reporterProps, OPENSHIFT_NAMESPACE_PROPERTY_NAME, "eclipse-che");
         config.preserveWorkspace = Boolean.valueOf(loadProperty(reporterProps, PRESERVE_WORKSPACE_PROPERTY_NAME));
         config.osioUrlPart = loadProperty(reporterProps, OSIO_URL_PART, "openshift.io");
+        config.customCheServerFullURL = loadProperty(reporterProps, CUSTOM_CHE_SERVER_FULL_URL);
+        if (!config.getCustomCheServerFullURL().isEmpty()) {
+            config.osioUrlPart = "prod-preview.openshift.io";
+        }
 
         config.osioUsername = loadPropertyAndSetAsSystemProperty(reporterProps, OSIO_USERNAME_PROPERTY_NAME);
         config.osioPassword = loadPropertyAndSetAsSystemProperty(reporterProps, OSIO_PASSWORD_PROPERTY_NAME);
@@ -150,5 +156,13 @@ public class CheExtensionConfiguration {
 	public void setCheWorkspaceName(String cheWorkspacename) { this.cheWorkspaceName = cheWorkspacename; }
 
 	public String getCheWorkspaceName(){ return this.cheWorkspaceName; }
+
+    public String getCustomCheServerFullURL() {
+        return customCheServerFullURL != null ? customCheServerFullURL : "";
+    }
+
+    public void setCustomCheServerFullURL(String customCheServerFullURL) {
+        this.customCheServerFullURL = customCheServerFullURL;
+    }
 
 }

@@ -42,7 +42,9 @@ public class CheWorkspaceProvider {
     public CheWorkspaceProvider(CheExtensionConfiguration config){
         configuration = config;
         cheStarterURL = config.getCheStarterUrl();
-        openShiftMasterURL = config.getOpenshiftMasterUrl();
+        openShiftMasterURL = config.getCustomCheServerFullURL().isEmpty()
+                ? config.getOpenshiftMasterUrl()
+                : config.getCustomCheServerFullURL();
         openshiftToken = config.getOpenshiftToken();
         keycloakToken = config.getKeycloakToken();
         namespace = config.getOpenshiftNamespace();

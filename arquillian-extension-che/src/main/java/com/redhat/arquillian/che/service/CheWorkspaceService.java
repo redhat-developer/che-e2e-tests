@@ -154,7 +154,12 @@ public class CheWorkspaceService {
         RestClient client = new RestClient(config.getCheStarterUrl());
         String path = "/workspace/" + workspace.getName();
         Response response = client.sentRequest(path, RequestType.PATCH, null, config.getKeycloakToken(),
-                new QueryParam("masterUrl", config.getOpenshiftMasterUrl()), new QueryParam("namespace", config.getOpenshiftNamespace()));
+                new QueryParam("masterUrl",
+                        config.getCustomCheServerFullURL().isEmpty()
+                        ? config.getOpenshiftMasterUrl()
+                        : config.getCustomCheServerFullURL()),
+                new QueryParam("namespace", config.getOpenshiftNamespace())
+        );
         Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
         response.close();
         client.close();
@@ -215,6 +220,7 @@ public class CheWorkspaceService {
             try {
                 Thread.sleep(SLEEP_TIME_TICK);
             } catch (InterruptedException e) {
+                //TODO: Why is this empty?
             }
             currentState = getWorkspaceStatus(client, workspace, authorizationToken);
         }
@@ -250,7 +256,7 @@ public class CheWorkspaceService {
     private static String getLinkHref(Object workspaceDocument, String rel) {
         String linkPath = "$..links[?(@.rel=='" + rel + "')].href";
         List<String> wsLinks = JsonPath.read(workspaceDocument, linkPath);
-        return wsLinks.get(0).toString();
+        return wsLinks.get(0);
     }
 
 
@@ -260,7 +266,12 @@ public class CheWorkspaceService {
         RestClient client = new RestClient(config.getCheStarterUrl());
 
         Response response = client.sentRequest(path, RequestType.GET, null, config.getKeycloakToken(),
-                new QueryParam("masterUrl", config.getOpenshiftMasterUrl()), new QueryParam("namespace", config.getOpenshiftNamespace()));
+                new QueryParam("masterUrl",
+                        config.getCustomCheServerFullURL().isEmpty()
+                        ? config.getOpenshiftMasterUrl()
+                        : config.getCustomCheServerFullURL()),
+                new QueryParam("namespace", config.getOpenshiftNamespace())
+        );
         Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
         CheWorkspace workspace = getRunningWorkspaceFromDocument(jsonDocument);
         return workspace;

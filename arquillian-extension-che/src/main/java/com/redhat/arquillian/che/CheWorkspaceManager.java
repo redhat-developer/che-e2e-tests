@@ -156,10 +156,12 @@ public class CheWorkspaceManager {
                     + "/auth/realms/fabric8/broker/openshift-v3/token");
             props.setProperty("GITHUB_TOKEN_URL", "https://auth." + configurationInstance.get().getOsioUrlPart()
                     + "/api/token?for=https://github.com");
-            props.setProperty("osio.domain.name", "api.starter-us-east-2.openshift.com");
-            props.setProperty("oso.address", "api.starter-us-east-2.openshift.com");
-            props.setProperty("MULTI_TENANT_CHE_SERVER_URL",
-                    "https://rhche." + configurationInstance.get().getOsioUrlPart());
+            props.setProperty(
+                    "MULTI_TENANT_CHE_SERVER_URL",
+                    configurationInstance.get().getCustomCheServerFullURL().isEmpty()
+                    ? "https://rhche." + configurationInstance.get().getOsioUrlPart()
+                    : configurationInstance.get().getCustomCheServerFullURL()
+            );
             EmbeddedMaven
                     .forProject(cheStarterDir.getAbsolutePath() + File.separator + "pom.xml")
                     .useMaven3Version("3.5.0")
