@@ -1,7 +1,34 @@
-- job:
-    name: 'che-start-workspace'
-    project-type: freestyle
-    node: osioperf-server-1-centos7-x86_64
+- wrapper:
+    name: che-functional-perf-test-template-wrapper-grip-creds
+    wrappers:
+        - credentials-binding:
+            - username-password-separated:
+                credential-id: grip-creds
+                username: GRIP_USER
+                password: GRIP_PASS
+
+- wrapper:
+    name: che-functional-perf-test-template-wrapper-prod-2
+    wrappers:
+        - che-functional-perf-test-template-wrapper-grip-creds
+        - credentials-binding:
+            - file:
+                credential-id: devtools-automated-tests-osiotestX
+                variable: USERS_PROPERTIES_FILE
+
+- wrapper:
+    name: che-functional-perf-test-template-wrapper-prod-2a
+    wrappers:
+        - che-functional-perf-test-template-wrapper-grip-creds
+        - credentials-binding:
+            - file:
+                credential-id: devtools-automated-tests-osiotestX-2a
+                variable: USERS_PROPERTIES_FILE
+
+
+- che-functional-perf-test-template: &che-functional-perf-test-template
+    name: 'che-functional-perf-test-template'
+    description: "Automated once-a-day performance test against production clusters"
     properties:
        - ownership:
            owner: kkanova
@@ -96,14 +123,6 @@
     wrappers:
         - workspace-cleanup:
             dirmatch: false
-        - credentials-binding:
-            - file:
-                credential-id: devtools-automated-tests-osiotestX
-                variable: USERS_PROPERTIES_FILE
-            - username-password-separated:
-                credential-id: grip-creds
-                username: GRIP_USER
-                password: GRIP_PASS
     builders:
         - shell: |-
             cd che-start-workspace
@@ -116,3 +135,19 @@
            artifacts: 'che-start-workspace/*.log,che-start-workspace/*.png,che-start-workspace/*.csv,che-start-workspace/*.html'
            allow-empty: 'true'
            fingerprint: true
+
+- job:
+    name: 'che-start-workspace'
+    project-type: freestyle
+    node: osioperf-server-1-centos7-x86_64
+    wrappers:
+        - che-functional-perf-test-template-wrapper-prod-2
+    <<: *che-functional-perf-test-template
+
+- job:
+    name: 'che-start-workspace-2a'
+    project-type: freestyle
+    node: osioperf-server-1-centos7-x86_64
+    wrappers:
+        - che-functional-perf-test-template-wrapper-prod-2a
+    <<: *che-functional-perf-test-template

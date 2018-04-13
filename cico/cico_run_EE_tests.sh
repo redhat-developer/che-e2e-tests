@@ -21,7 +21,7 @@ if [[ $# -gt 0 ]]; then
     echo "Provided argument is not a valid config file. Default config will be used."
   else
     echo "Replacing default config by the provided one."
-	CONFIG_FILE=$1
+    CONFIG_FILE=$1
   fi
 fi
 echo "Sourcing configuration."
