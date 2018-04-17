@@ -13,9 +13,11 @@ package redhat.che.functional.tests;
 import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.resource.Stack;
 import org.apache.log4j.Logger;
+import org.arquillian.extension.recorder.video.Recorder;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.test.api.ArquillianResource;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -56,6 +58,9 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     @FindBy(id = "ask-dialog-ok")
     private WebElement okButton;
 
+//    @ArquillianResource
+//    private Recorder recorder;
+    
     private final String testName = "buildTest";
     private final String command = "cd ${current.project.path} && scl enable rh-maven33 'mvn clean install'";
 
@@ -69,6 +74,7 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     public void deleteCommand(){
         commandsManager.removeCommand(testName);
         new Actions(driver).click(okButton).perform();
+//        recorder.stopRecording();
     }
 
     /**
@@ -77,6 +83,7 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     @Test
     public void test_maven_build() {
         //creating build command in left commands panel
+//    	recorder.startRecording();
     	takeScreenshot("startMavenBuild");
         if (!commandsManager.isCommandsExplorerOpen()) {
             leftBar.openCommandsPart();
@@ -87,6 +94,7 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
         takeScreenshot("editorShouldBeVisible");
         commandsEditor.addNewCommand(testName, command);
         commandsEditor.runOpenedCommand();
+//        recorder.stopRecording();
 
         //wait for end - if build first time, it last longer -> increasing timeout
         //further increased timeout. test failed just because build took longer.

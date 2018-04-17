@@ -83,7 +83,7 @@ public class GitTestCase extends AbstractCheFunctionalTest {
 
         vertxProject.getResource("README.md").open();
         editorPart.tabsPanel().waitUntilActiveTabHasName("README.md");
-        editorPart.codeEditor().writeIntoElementContainingString("changes added on: " + new Date(), "changes added on:");
+        editorPart.codeEditor().writeIntoElementContainingString("changes added on: " + new Date().toInstant().toEpochMilli(), "changes added on:");
 
         mainMenuPanel.clickGit();
         gitPopupTopMenu.addToIndex();
