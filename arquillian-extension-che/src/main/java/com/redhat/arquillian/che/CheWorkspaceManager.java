@@ -16,7 +16,12 @@ import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import com.redhat.arquillian.che.resource.CheWorkspace;
 import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.resource.StackService;
+import com.redhat.arquillian.che.rest.RequestType;
+import com.redhat.arquillian.che.rest.RestClient;
 import com.redhat.arquillian.che.service.CheWorkspaceService;
+
+import okhttp3.Response;
+
 import org.apache.log4j.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -137,6 +142,13 @@ public class CheWorkspaceManager {
         if (workspaceAnnotation.removeAfterTest()) {
             CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
             waitingForDeletion.add(cheWorkspaceInstanceProducer.get());
+        }
+        
+        //Cleanup preferences:
+        RestClient restClient = new RestClient("https://rhche."+configurationInstance.get().getOsioUrlPart()+"/api/");
+        Response response = restClient.sentRequest("preferences", RequestType.DELETE, null, CheWorkspaceProvider.getConfiguration().getAuthorizationToken());
+        if (response.code()!=204) {
+        	throw new RuntimeException("Clearing preferences failed with response code: "+response.code());
         }
     }
 
