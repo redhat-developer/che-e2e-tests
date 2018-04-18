@@ -110,7 +110,7 @@ So the environment variable is set `RUN_LOCALLY=true`.
 To run the test, configure the test in `_setenv.sh` file and run the `run.sh` script.
 
 To update jenkins job use this syntax (not working for last version of jenkins job builder):
-´´´
+```
 sudo PYTHONHTTPSVERIFY=0 jenkins-jobs --conf jenkins_jobs.ini update job.yml
-´´´
+```
 and update jenkins_job.ini with your credentials. 
