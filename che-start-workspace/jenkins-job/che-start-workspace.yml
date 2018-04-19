@@ -17,7 +17,7 @@
     parameters:
        - bool:
            name: RUN_LOCALLY
-           default: false
+           default: true
            description: Checked if a report is to be sent to the Zabbix instance.
        - string:
            name: AUTH_SERVER_URL
