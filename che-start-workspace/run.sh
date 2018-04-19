@@ -95,7 +95,8 @@ else
 	echo " Run Locust locally"
 	$COMMON/__start-locust-master-standalone.sh
 fi
-echo " Run test for $DURATION seconds"
+endtime=$(date -d "+$DURATION seconds" +%X)
+echo " Run test for $DURATION seconds (will ends at $endtime)"
 
 sleep $DURATION
 if [ "$RUN_LOCALLY" != "true" ]; then
@@ -107,6 +108,10 @@ if [ "$RUN_LOCALLY" != "true" ]; then
 else
 	$COMMON/__stop-locust-master-standalone.sh TERM
 fi
+
+echo "Removing all workspaces from accounts"
+./removeWorkspaces.sh
+
 
 echo " Extract CSV data from logs:"
 $COMMON/_locust-log-to-csv.sh 'POST createWorkspace' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
@@ -211,7 +216,7 @@ function distribution_2_csv {
  echo "Check for errors in Locust master log"
 
  REPORT_COUNT=`wc -l < $JOB_BASE_NAME-$BUILD_NUMBER-report_distribution.csv`
- EXPECTED_REPORT_COUNT=9
+ EXPECTED_REPORT_COUNT=8
  EXIT_CODE=0
  if [[ "0" -ne `cat $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log | grep 'Error report' | wc -l` ]]; then
     echo 'THERE WERE ERRORS OR FAILURES WHILE SENDING REQUESTS';
@@ -223,3 +228,5 @@ function distribution_2_csv {
     echo 'NO ERRORS OR FAILURES DETECTED';
  fi
  exit $EXIT_CODE
+
+

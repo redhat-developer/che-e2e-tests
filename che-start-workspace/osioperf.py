@@ -107,7 +107,6 @@ class TokenBehavior(TaskSet):
 	id = ""
 
 	def on_start(self):
-		events.quitting += self.on_stop
 		global _currentUser, _users, _userLock, _userTokens, _userRefreshTokens
 		_userLock.acquire()
 		self.taskUser = _currentUser
@@ -118,16 +117,6 @@ class TokenBehavior(TaskSet):
 		_userLock.release()
 		self.taskUserToken = _userTokens[self.taskUser]
 		self.taskUserRefreshToken = _userRefreshTokens[self.taskUser]
-
-	def on_stop(self):
-		print "Running on_stop method - trying to stop and delete workspace with id " + self.id
-		if self.getWorkspaceStatus(self.id) == "STOPPING":
-			self.waitForWorkspaceToStop(self.id)
-		if self.getWorkspaceStatus(self.id) != "STOPPED":
-			self.stopWorkspace(self.id)
-			self.waitForWorkspaceToStop(self.id)
-		self.deleteWorkspace(self.id)
-		self.deleteExistingWorkspaces()
 
 	@task
 	def createStartDeleteWorkspace(self):
