@@ -7,7 +7,9 @@ RUN yum -y update && \
       xorg-x11-server-Xvfb xfonts-100dpi libXfont GConf2 \
       xorg-x11-fonts-75dpi xfonts-scalable xfonts-cyrillic \
       ipa-gothic-fonts xorg-x11-utils xorg-x11-fonts-Type1 xorg-x11-fonts-misc && \
-      yum -y clean all
+      yum -y clean all && \
+    yum install -y epel-release && \
+    yum install -y libappindicator
 
 COPY google-chrome.repo /etc/yum.repos.d/google-chrome.repo
 RUN yum install -y xorg-x11-server-Xvfb google-chrome-stable

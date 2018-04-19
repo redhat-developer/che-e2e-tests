@@ -33,7 +33,7 @@ source ./cico/prepare_environment.sh
 # Run test image
 cat /tmp/jenkins-env >> ./env-vars
 chown -R 1000:1000 ./*
-docker run -d --user=fabric8 --cap-add SYS_ADMIN --name=che-selenium -t -v $(pwd):/home/fabric8/che:Z kkanova/che-selenium:latest
+docker run -d --user=fabric8 --cap-add SYS_ADMIN --name=che-selenium -t -v $(pwd):/home/fabric8/che:Z rhopp/che-selenium:latest
 
 ## Exec tests
 docker exec --user=fabric8 che-selenium /home/fabric8/che/cico/run_EE_tests.sh $CONFIG_FILE || RETURN_CODE=$? && true
