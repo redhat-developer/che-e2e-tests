@@ -83,6 +83,7 @@ bodyJson='{\
 _users = -1
 _userTokens = []
 _userRefreshTokens = []
+_userNames = []
 _currentUser = 0
 _userLock = threading.RLock()
 
@@ -96,6 +97,7 @@ for u in lines:
 	up = u.split(';')
 	_userTokens.append(up[0])
 	_userRefreshTokens.append(up[1])
+	_userNames.append(up[2])
 
 class TokenBehavior(TaskSet):
 
@@ -107,7 +109,7 @@ class TokenBehavior(TaskSet):
 	id = ""
 
 	def on_start(self):
-		global _currentUser, _users, _userLock, _userTokens, _userRefreshTokens
+		global _currentUser, _users, _userLock, _userTokens, _userRefreshTokens, _userNames
 		_userLock.acquire()
 		self.taskUser = _currentUser
 		if _currentUser < _users - 1:
@@ -117,6 +119,7 @@ class TokenBehavior(TaskSet):
 		_userLock.release()
 		self.taskUserToken = _userTokens[self.taskUser]
 		self.taskUserRefreshToken = _userRefreshTokens[self.taskUser]
+		self.taskUserName = _userNames[self.taskUser]
 
 	@task
 	def createStartDeleteWorkspace(self):
@@ -135,7 +138,7 @@ class TokenBehavior(TaskSet):
 		self.deleteWorkspace(id)
 
 	def createWorkspace(self):
-		print "Creating workspace"
+		print "Creating workspace of user "+self.taskUserName
 		now_time_ms = "%.f" % (time.time()*1000)
 		print "now time:" + now_time_ms
 		json = bodyJson.replace("WORKSPACE_NAME", now_time_ms)
@@ -147,13 +150,14 @@ class TokenBehavior(TaskSet):
 			if not response.ok:
 				response.failure("Can not create workspace: [" + response.content + "]")
 			else:
+				print "Workspace of user " + self.taskUserName + " with id " + resp_json["id"] + " was successfully created."
 				response.success()
 				return resp_json["id"]
 		except ValueError:
 			response.failure("Got wrong response: [" + response.content + "]")
 
 	def startWorkspace(self, id):
-		print "Starting workspace id "+id
+		print "Starting workspace id "+id+" of user "+self.taskUserName
 		response = self.client.post("/api/workspace/"+id+"/runtime", headers = {"Authorization" : "Bearer " + self.taskUserToken}, name = "startWorkspace", catch_response = True)
 		try:
 			content = response.content
@@ -187,7 +191,7 @@ class TokenBehavior(TaskSet):
 
 
 	def stopWorkspace(self, id):
-		print "Stopping workspace id "+id
+		print "Stopping workspace id "+id+" of user "+self.taskUserName
 		response = self.client.delete("/api/workspace/"+id+"/runtime", headers = {"Authorization" : "Bearer " + self.taskUserToken}, name = "stopWorkspace", catch_response = True)
 		try:
 			content = response.content
@@ -249,9 +253,6 @@ class TokenBehavior(TaskSet):
 					self.deleteWorkspace(id)
 		except ValueError:
 			response.failure("Got wrong response: [" + content + "]")
-
-
-
 
 
 class TokenUser(HttpLocust):
