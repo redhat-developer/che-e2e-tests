@@ -27,7 +27,7 @@ TOKENS_FILE_PREFIX=`readlink -f /tmp/osioperftest.tokens`
 
 echo "  OAuth2 friendly login..."
 MVN_LOG=$JOB_BASE_NAME-$BUILD_NUMBER-oauth2-mvn.log
-mvn -f $LOGIN_USERS/pom.xml -l $MVN_LOG exec:java -Dauth.server.address=$AUTH_SERVER_URL -Duser.tokens.file=$TOKENS_FILE_PREFIX.oauth2 -Poauth2
+mvn -f $LOGIN_USERS/pom.xml -l $MVN_LOG exec:java -Dmax.users=$USERS -Dauth.server.address=$AUTH_SERVER_URL -Duser.tokens.file=$TOKENS_FILE_PREFIX.oauth2 -Poauth2
 LOGIN_USERS_OAUTH2_LOG=$JOB_BASE_NAME-$BUILD_NUMBER-login-users-oauth2.log
 cat $MVN_LOG | grep login-users-log > $LOGIN_USERS_OAUTH2_LOG
 
