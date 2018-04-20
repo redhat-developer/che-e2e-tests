@@ -7,6 +7,8 @@ cd /home/fabric8/che
 source $1
 source env-vars
 
+/home/fabric8/che/cico/validate_jwt_token.sh "${KEYCLOAK_TOKEN}"
+
 if [[ -z "${OSO_MASTER_URL}" ]]; then
   echo "OSO Master URL env var is empty"
   exit 1
@@ -15,7 +17,7 @@ if [[ -z "${OSO_NAMESPACE}" ]]; then
   echo "OSO namespac env var is empty"
   exit 1
 fi
-if [[ -z "${OSIO_USERNAME}" ]] || [[ -z "${OSIO_PASSWORD}" ]] || [[ -z "${KEYCLOAK_TOKEN}" ]]; then
+if [[ -z "${OSIO_USERNAME}" ]] || [[ -z "${OSIO_PASSWORD}" ]]; then
   echo "One or more credentials is not set, cannot proceed with tests"
   exit 1
 fi
@@ -23,7 +25,11 @@ fi
 cd /home/fabric8/che
 export DISPLAY=:99
 mvn clean install -DskipTests
-mvn clean verify -f tests/pom.xml -DosioUrlPart=$OSIO_URL_PART -Dtest=$TEST_SUITE -DopenShiftMasterURL=$OSO_MASTER_URL -DkeycloakToken=$KEYCLOAK_TOKEN -DopenShiftNamespace=$OSO_NAMESPACE -DosioUsername=$OSIO_USERNAME -DosioPassword=$OSIO_PASSWORD
+if [[ -z "${CUSTOM_CHE_SERVER_FULL_URL}" ]]; then
+  mvn clean verify -f tests/pom.xml -DosioUrlPart=$OSIO_URL_PART -Dtest=$TEST_SUITE -DopenShiftMasterURL=$OSO_MASTER_URL -DkeycloakToken=$KEYCLOAK_TOKEN -DopenShiftNamespace=$OSO_NAMESPACE -DosioUsername=$OSIO_USERNAME -DosioPassword=$OSIO_PASSWORD
+else
+  mvn clean verify -f tests/pom.xml -DosioUrlPart=$OSIO_URL_PART -Dtest=$TEST_SUITE -DkeycloakToken=$KEYCLOAK_TOKEN -DosioUsername=$OSIO_USERNAME -DosioPassword=$OSIO_PASSWORD -DcustomCheServerFullURL=$CUSTOM_CHE_SERVER_FULL_URL
+fi
 TEST_RESULT=$?
 set -x
 

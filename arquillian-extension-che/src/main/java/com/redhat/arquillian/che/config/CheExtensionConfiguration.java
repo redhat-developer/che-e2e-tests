@@ -1,11 +1,15 @@
 package com.redhat.arquillian.che.config;
 
 import com.redhat.arquillian.che.util.Validate;
+import org.apache.log4j.Logger;
+
 import java.util.Map;
 
 import static com.redhat.arquillian.che.util.Validate.isNotEmpty;
 
 public class CheExtensionConfiguration {
+
+    private static final Logger LOG = Logger.getLogger(CheExtensionConfiguration.class);
 
     // Properties
     public static final String CHE_STARTER_PROPERTY_NAME = "cheStarterURL";
@@ -18,7 +22,7 @@ public class CheExtensionConfiguration {
     public static final String OSIO_USERNAME_PROPERTY_NAME = "osioUsername";
     public static final String OSIO_PASSWORD_PROPERTY_NAME = "osioPassword";
     public static final String OSIO_URL_PART = "osioUrlPart";
-    public static final String CUSTOM_CHE_SERVER_FULL_URL = "customCheServerFullURL";
+    public static final String CUSTOM_CHE_SERVER_FULL_URL_NAME = "customCheServerFullURL";
 
     private String cheStarterUrl;
     private String openshiftMasterUrl;
@@ -42,7 +46,7 @@ public class CheExtensionConfiguration {
         config.openshiftNamespace = loadProperty(reporterProps, OPENSHIFT_NAMESPACE_PROPERTY_NAME, "eclipse-che");
         config.preserveWorkspace = Boolean.valueOf(loadProperty(reporterProps, PRESERVE_WORKSPACE_PROPERTY_NAME));
         config.osioUrlPart = loadProperty(reporterProps, OSIO_URL_PART, "openshift.io");
-        config.customCheServerFullURL = loadProperty(reporterProps, CUSTOM_CHE_SERVER_FULL_URL);
+        config.customCheServerFullURL = loadProperty(reporterProps, CUSTOM_CHE_SERVER_FULL_URL_NAME);
         if (!config.getCustomCheServerFullURL().isEmpty()) {
             config.osioUrlPart = "prod-preview.openshift.io";
         }
@@ -158,6 +162,7 @@ public class CheExtensionConfiguration {
 	public String getCheWorkspaceName(){ return this.cheWorkspaceName; }
 
     public String getCustomCheServerFullURL() {
+        LOG.info("Che server custom url requested by code:"+customCheServerFullURL);
         return customCheServerFullURL != null ? customCheServerFullURL : "";
     }
 

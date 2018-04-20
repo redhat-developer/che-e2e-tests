@@ -69,9 +69,9 @@ public class OpenShiftHelper {
 	 */
 
 	public static String getCheLogs() {
-		String openshiftMasterURL = System.getProperty(CheExtensionConfiguration.CUSTOM_CHE_SERVER_FULL_URL).isEmpty()
+		String openshiftMasterURL = System.getProperty(CheExtensionConfiguration.CUSTOM_CHE_SERVER_FULL_URL_NAME).isEmpty()
 				? System.getProperty(CheExtensionConfiguration.OPENSHIFT_MASTER_URL_PROPERTY_NAME)
-				: System.getProperty(CheExtensionConfiguration.CUSTOM_CHE_SERVER_FULL_URL);
+				: System.getProperty(CheExtensionConfiguration.CUSTOM_CHE_SERVER_FULL_URL_NAME);
 		String openshiftNamespace = System.getProperty(CheExtensionConfiguration.OPENSHIFT_NAMESPACE_PROPERTY_NAME);
 		String osioUsername = System.getProperty(CheExtensionConfiguration.OSIO_USERNAME_PROPERTY_NAME);
 		String osioPassword = System.getProperty(CheExtensionConfiguration.OSIO_PASSWORD_PROPERTY_NAME);

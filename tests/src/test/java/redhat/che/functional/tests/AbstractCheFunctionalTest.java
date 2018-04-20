@@ -109,6 +109,7 @@ public abstract class AbstractCheFunctionalTest {
             Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS).until().element(usernameField).is().visible();
             login();
         } catch (WebDriverException e) {
+            LOG.error("Login failed", e);
             // Discard in case the login page was not displayed
         }
         waitForWorkspaceToLoad();

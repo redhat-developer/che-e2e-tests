@@ -13,6 +13,7 @@ package redhat.che.functional.tests.suites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import redhat.che.functional.tests.GitTestCase;
 import redhat.che.functional.tests.MavenTestCase;
 
 /**
@@ -21,7 +22,8 @@ import redhat.che.functional.tests.MavenTestCase;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-    MavenTestCase.class
+    MavenTestCase.class,
+    GitTestCase.class
 })
 
 public class SmokeTestSuite {

@@ -9,38 +9,37 @@ set -e
 yum -y install \
   docker \
   make \
-  git \
-   jq
-service docker start
+  git
 
-#test
-curl -LO https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+curl -sLO https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
 mv jq-linux64 /usr/bin/jq
 chmod +x /usr/bin/jq
+cp /usr/bin/jq ./jq
 
+service docker start
 
 function rebaseIfPR(){
-	# Fetch PR and rebase on master, if job runs from PR
-	cat jenkins-env \
-	    | grep -E "(ghprbSourceBranch|ghprbPullId)=" \
-	    | sed 's/^/export /g' \
-	    > /tmp/jenkins-env
-	source /tmp/jenkins-env
-	if [[ ! -z "${ghprbPullId:-}" ]] && [[ ! -z "${ghprbSourceBranch:-}" ]]; then
-	  echo 'Checking out to Github PR branch'
-	  git fetch origin pull/${ghprbPullId}/head:${ghprbSourceBranch}
-	  git checkout ${ghprbSourceBranch}
-	  git fetch origin master
-	  git rebase FETCH_HEAD
-	else
-	  echo 'Working on current branch of EE tests repo'
-	fi
+  # Fetch PR and rebase on master, if job runs from PR
+  cat jenkins-env \
+      | grep -E "(ghprbSourceBranch|ghprbPullId)=" \
+      | sed 's/^/export /g' \
+      > /tmp/jenkins-env
+  source /tmp/jenkins-env
+  if [[ ! -z "${ghprbPullId:-}" ]] && [[ ! -z "${ghprbSourceBranch:-}" ]]; then
+    echo 'Checking out to Github PR branch'
+    git fetch origin pull/${ghprbPullId}/head:${ghprbSourceBranch}
+    git checkout ${ghprbSourceBranch}
+    git fetch origin master
+    git rebase FETCH_HEAD
+  else
+    echo 'Working on current branch of EE tests repo'
+  fi
 }
 
 if [ "$DO_NOT_REBASE" = "true" ]; then
-	echo "Rebasing denied by variable DO_NOT_REBASE"
+  echo "Rebasing denied by variable DO_NOT_REBASE"
 else
-	rebaseIfPR
+  rebaseIfPR
 fi
 
 # Set credentials
@@ -48,18 +47,18 @@ set +x
 
 #prepend "export " and remove space after "="
 cat jenkins-env \
-    | grep -E "(OSIO|KEYCLOAK|BUILD_NUMBER|JOB_NAME)" \
+    | grep -E "(CUSTOM_CHE|OSIO|KEYCLOAK|BUILD_NUMBER|JOB_NAME)" \
     | sed 's/^/export /g' \
     | sed 's/= /=/g' \
     > export_env_variables
 
 source export_env_variables
 
-CURL_OUTPUT=$(curl -H "Content-Type: application/json" -X POST -d '{"refresh_token":"'$KEYCLOAK_TOKEN'"}' https://auth.${OSIO_URL_PART}/api/token/refresh)
-ACTIVE_TOKEN=$(echo $CURL_OUTPUT | jq --raw-output ".token | .access_token")
+CURL_OUTPUT=$(curl -sH "Content-Type: application/json" -X POST -d '{"refresh_token":"'$KEYCLOAK_TOKEN'"}' https://auth.${OSIO_URL_PART}/api/token/refresh)
+export ACTIVE_TOKEN=$(echo $CURL_OUTPUT | jq --raw-output ".token | .access_token")
 if [[ -z "${OSIO_USERNAME}" ]]; then
   empty_credentials="OSIO username is empty, "
-fi 
+fi
 if [[ -z "${OSIO_PASSWORD}" ]]; then
   empty_credentials=${empty_credentials}"OSIO password is empty, "
 fi
@@ -72,14 +71,22 @@ if [[ ! -z "${empty_credentials}" ]]; then
 else
   echo 'OpenShift username and password and Keycloak token are not empty.'
 fi
-if [[ $(curl -X GET -H "Authorization: Bearer ${ACTIVE_TOKEN}" https://auth.${OSIO_URL_PART}/api/token?for=${OSO_MASTER_URL} \
+./cico/validate_jwt_token.sh "${ACTIVE_TOKEN}"
+if [ ! ./cico/validate_jwt_token.sh ]; then
+  echo "Keycloak token is expired!"
+  exit 1
+else
+  echo "Keycloak token is valid."
+fi
+if [[ $(curl -sX GET -H "Authorization: Bearer ${ACTIVE_TOKEN}" https://auth.${OSIO_URL_PART}/api/token?for=${OSO_MASTER_URL} \
    |  grep access_token | wc -l) -ne 1 ]]; then
-  echo "Keycloak token is expired"
+  echo "Auth service returned error."
   exit 1
 else
   echo "Keycloak token is alive. Proceeding with EE tests."
 fi
 echo 'export OSIO_USERNAME='${OSIO_USERNAME} >> ./env-vars
 echo 'export OSIO_PASSWORD='${OSIO_PASSWORD} >> ./env-vars
+echo 'export CUSTOM_CHE_SERVER_FULL_URL='${CUSTOM_CHE_SERVER_FULL_URL} >> ./env-vars
 echo 'export KEYCLOAK_TOKEN='${ACTIVE_TOKEN} >> ./env-vars
 set -x

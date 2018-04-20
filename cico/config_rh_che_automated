@@ -1,0 +1,8 @@
+export OSO_MASTER_URL=https://api.starter-us-east-2a.openshift.com/
+export OSO_NAMESPACE=Eclipse_Che # doesn't matter
+export OSO_HOSTNAME=https://prod-preview.openshift.io # doesn't matter
+export DOCKER_HUB_NAMESPACE=registry.devshift.net/che/che
+export OPENSHIFT_TOKEN_URL=https://sso.prod-preview.openshift.io/auth/realms/fabric8/broker/openshift-v3/token
+export GITHUB_TOKEN_URL=https://auth.prod-preview.openshift.io/api/token?for=https://github.com
+export OSIO_URL_PART=prod-preview.openshift.io
+export TEST_SUITE=SmokeTestSuite

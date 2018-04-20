@@ -23,6 +23,9 @@
   
   <extension qualifier="screenshooter">
   	<property name="takeOnEveryAction">false</property>
+    <property name="takeBeforeTest">true</property>
+    <property name="takeAfterTest">true</property>
+    <property name="takeWhenTestFailed">true</property>
   </extension>
 	
 </arquillian>
