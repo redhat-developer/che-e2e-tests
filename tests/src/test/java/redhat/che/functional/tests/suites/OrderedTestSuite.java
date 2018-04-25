@@ -13,12 +13,7 @@ package redhat.che.functional.tests.suites;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import redhat.che.functional.tests.AnalyticsErrorMarkersTestCase;
-import redhat.che.functional.tests.GitTestCase;
-import redhat.che.functional.tests.MavenTestCase;
-import redhat.che.functional.tests.PackageJsonTestCase;
-import redhat.che.functional.tests.PomTestCase;
-import redhat.che.functional.tests.WorkspacesTestCase;
+import redhat.che.functional.tests.*;
 
 /**
  * @author kkanova
@@ -32,6 +27,7 @@ import redhat.che.functional.tests.WorkspacesTestCase;
         AnalyticsErrorMarkersTestCase.class,
         MavenTestCase.class,
         WorkspacesTestCase.class,
+        VertxPreviewUrlTestCase.class,
 
         //nodejs projects
         PackageJsonTestCase.class
