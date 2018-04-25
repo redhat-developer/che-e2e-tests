@@ -112,6 +112,9 @@
     description: null
     disabled: false
     publishers:
+      - email:
+          recipients: kkanova@redhat.com rhopp@redhat.com tdancs@redhat.com
+          notify-every-unstable-build: true
        - archive:
            artifacts: 'che-start-workspace/*.log,che-start-workspace/*.png,che-start-workspace/*.csv,che-start-workspace/*.html'
            allow-empty: 'true'
