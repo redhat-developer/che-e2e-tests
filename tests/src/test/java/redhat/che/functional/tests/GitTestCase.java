@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package redhat.che.functional.tests;
 
 import com.redhat.arquillian.che.annotations.Workspace;
@@ -19,9 +29,10 @@ import redhat.che.functional.tests.fragments.window.CommitToRepoWindow;
 import redhat.che.functional.tests.fragments.window.GitPushWindow;
 import redhat.che.functional.tests.fragments.window.PreferencesWindow;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
-@Workspace(stackID = Stack.VERTX)
+@Workspace(stackID = Stack.VERTX, requireNewWorkspace = true)
 public class GitTestCase extends AbstractCheFunctionalTest {
 	private static final Logger LOG = Logger.getLogger(GitTestCase.class);
 
@@ -47,9 +58,7 @@ public class GitTestCase extends AbstractCheFunctionalTest {
     private Popup popup;
     
 	private void waitUntilProjectImported() {
-		Graphene.waitGui().until().element(
-				infoPanel.getNotificationManager().getNotificationElement("Project vertx-http-booster imported")).is()
-				.present();
+        infoPanel.getNotificationManager().waitForNotification("Project vertx-http-booster imported", 60, TimeUnit.SECONDS);
 	}
 
     @After

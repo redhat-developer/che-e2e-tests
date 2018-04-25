@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2017 Red Hat, Inc.
+ * Distributed under license by Red Hat, Inc. All rights reserved.
+ * This program is made available under the terms of the
+ * Eclipse Public License v1.0 which accompanies this distribution,
+ * and is available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Red Hat, Inc. - initial API and implementation
+ ******************************************************************************/
 package redhat.che.functional.tests;
 
 import com.redhat.arquillian.che.annotations.Workspace;
@@ -23,7 +33,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
-@Workspace(stackID = Stack.VERTX, removeAfterTest = true)
+@Workspace(stackID = Stack.VERTX, removeAfterTest = true, requireNewWorkspace = true)
 public class VertxPreviewUrlTestCase extends AbstractCheFunctionalTest {
     private static final Logger LOG = Logger.getLogger(VertxPreviewUrlTestCase.class);
 
@@ -33,14 +43,12 @@ public class VertxPreviewUrlTestCase extends AbstractCheFunctionalTest {
     @FindByJQuery("pre:contains('Succeeded in deploying verticle')")
     private WebElement buildSuccess;
 
-    private void waitUntilProjectImported() {
-        Graphene.waitGui().until().element(
-                infoPanel.getNotificationManager().getNotificationElement("Project vertx-http-booster imported")).is()
-                .visible();
-    }
-
     private void waitUntilRunIsCompleted() {
         Graphene.waitGui().withTimeout(60, TimeUnit.SECONDS).until().element(buildSuccess).is().visible();
+    }
+
+    private void waitUntilProjectImported() {
+        infoPanel.getNotificationManager().waitForNotification("Project vertx-http-booster imported", 60, TimeUnit.SECONDS);
     }
 
     @Test
@@ -68,10 +76,10 @@ public class VertxPreviewUrlTestCase extends AbstractCheFunctionalTest {
                 try {
                     Assert.assertTrue(response.body().string().contains("Vert.x HTTP Booster"));
                 } catch (IOException e) {
-                    System.out.println("Can not parse body of response. Exception is:" + e.getStackTrace());
+                    LOG.info("Can not parse body of response. Exception is:" + e.getStackTrace());
                 }
             } else {
-                System.out.println("Request was not successfull: " + code);
+                LOG.info("Request was not successfull: " + code);
             }
             if (System.currentTimeMillis() - startTime > 60000) {
                 Assert.fail("Service is unavailable for more than a minute.");

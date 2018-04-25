@@ -13,6 +13,7 @@ package redhat.che.functional.tests.fragments.topmenu;
 import static redhat.che.functional.tests.utils.ActionUtils.click;
 
 import org.jboss.arquillian.drone.api.annotation.Drone;
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.findby.JQuery;
@@ -59,6 +60,7 @@ public class MainMenuPanel {
         WebElement command = driver.findElement(ByJQuery.selector("#commandsPopup > div > div > div > div:contains('" + commandLabel + "')"));
         //the div containing command name is not clickable -> selecting clickable parent.
         WebElement parentElement = command.findElement(By.xpath("./.."));
+        Graphene.waitGui().until().element(parentElement).is().clickable();
         parentElement.click();
     }
 }

@@ -26,9 +26,9 @@ import redhat.che.functional.tests.*;
     PomTestCase.class,
     AnalyticsErrorMarkersTestCase.class,
     MavenTestCase.class,
-    WorkspacesTestCase.class,
-//    PackageJsonTestCase.class
+//    WorkspacesTestCase.class,
     VertxPreviewUrlTestCase.class
+//    PackageJsonTestCase.class,
 })
 
 public class StableTestSuite {

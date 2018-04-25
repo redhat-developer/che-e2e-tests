@@ -12,10 +12,13 @@ package redhat.che.functional.tests.fragments.infoPanel;
 
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.drone.api.annotation.Drone;
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author rhopp
@@ -42,5 +45,8 @@ public class NotificationManager {
     public WebElement getRootElement() {
     	return root;
     }
-    
+
+    public void waitForNotification(String title, long duration, TimeUnit unit) {
+        Graphene.waitGui().withTimeout(duration, unit).until().element(ByJQuery.selector(String.format("div:contains('%s')", title))).is().present();
+    }
 }

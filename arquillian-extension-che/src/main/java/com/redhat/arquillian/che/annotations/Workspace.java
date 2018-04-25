@@ -23,4 +23,5 @@ public @interface Workspace {
 
     Stack stackID() default Stack.VERTX;
     boolean removeAfterTest() default false;
+    boolean requireNewWorkspace() default false;
 }

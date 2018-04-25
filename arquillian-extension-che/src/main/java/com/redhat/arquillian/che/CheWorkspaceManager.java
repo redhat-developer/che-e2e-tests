@@ -104,7 +104,7 @@ public class CheWorkspaceManager {
             } else { //provided workspace is null or deleted and there is no other workspace running
                 createWorkspace(workspaceAnnotation);
             }
-        } else if (!(createdWkspc.getStack().equals(workspaceAnnotation.stackID()))) { //provided workspace has another stack
+        } else if (!(createdWkspc.getStack().equals(workspaceAnnotation.stackID())) || workspaceAnnotation.requireNewWorkspace()) { //provided workspace has another stack or test requires new workspace
             CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
             waitingForDeletion.add(cheWorkspaceInstanceProducer.get());
             createWorkspace(workspaceAnnotation);
