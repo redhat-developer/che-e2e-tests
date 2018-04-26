@@ -136,7 +136,7 @@
           recipients: kkanova@redhat.com rhopp@redhat.com tdancs@redhat.com
           notify-every-unstable-build: true
       - archive:
-          artifacts: 'che-start-workspace/*.log,che-start-workspace/*.png,che-start-workspace/*.csv,che-start-workspace/*.html'
+          artifacts: 'che-start-workspace/${JOB_NAME}-${BUILD_NUMBER}'
           allow-empty: 'true'
           fingerprint: true
 

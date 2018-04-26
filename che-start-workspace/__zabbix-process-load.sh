@@ -9,7 +9,7 @@ if [ -z $ZABBIX_TIMESTAMP ]; then
   export ZABBIX_TIMESTAMP=`date +%s`;
 fi
 
-VALUES=(`cat $INPUT-report_requests.csv | grep -F "$ENDPOINT" | cut -d ',' -f 3-10 | tr ',' ' '`)
+VALUES=(`cat $LOG_DIR/csv/$INPUT-report_requests.csv | grep -F "$ENDPOINT" | cut -d ',' -f 3-10 | tr ',' ' '`)
 VAL_REQ=$((${VALUES[0]}+${VALUES[1]}))
 VAL_FAIL=${VALUES[1]}
 VAL_FAIL_RATE=`echo "100*$VAL_FAIL/$VAL_REQ" | bc -l`
@@ -25,7 +25,7 @@ echo "$ZABBIX_HOST $METRIC_PREFIX-rt_median $ZABBIX_TIMESTAMP $VAL_MED"
 echo "$ZABBIX_HOST $METRIC_PREFIX-rt_min $ZABBIX_TIMESTAMP $VAL_MIN"
 echo "$ZABBIX_HOST $METRIC_PREFIX-rt_max $ZABBIX_TIMESTAMP $VAL_MAX"
 
-DISTR=(`cat $INPUT-report_distribution.csv | sed -e 's/ /","/' | grep -F "$ENDPOINT" | tr ',' ' '`)
+DISTR=(`cat $LOG_DIR/csv/$INPUT-report_distribution.csv | sed -e 's/ /","/' | grep -F "$ENDPOINT" | tr ',' ' '`)
 #echo "$ZABBIX_HOST $METRIC_PREFIX-rt_50 $ZABBIX_TIMESTAMP ${DISTR[4]}" # median
 echo "$ZABBIX_HOST $METRIC_PREFIX-rt_66 $ZABBIX_TIMESTAMP ${DISTR[5]}"
 echo "$ZABBIX_HOST $METRIC_PREFIX-rt_75 $ZABBIX_TIMESTAMP ${DISTR[6]}"

@@ -3,13 +3,18 @@
 source ./_setenv.sh
 
 
+export LOG_DIR=$JOB_BASE_NAME-$BUILD_NUMBER
+mkdir $LOG_DIR
+mkdir $LOG_DIR/csv
+mkdir $LOG_DIR/png
+
 export COMMON="common.git"
 #rm -vf *.log
 #rm -vf *.csv
 #rm -vf *.png
 #exit 0
 
- git clone https://github.com/pmacik/openshiftio-performance-common $COMMON
+ git clone -b separate_logs https://github.com/Katka92/openshiftio-performance-common.git $COMMON
 
 echo " Wait for the server to become available"
 ./_wait-for-server.sh
@@ -26,9 +31,11 @@ cat $USERS_PROPERTIES_FILE > $LOGIN_USERS/target/classes/users.properties
 TOKENS_FILE_PREFIX=`readlink -f /tmp/osioperftest.tokens`
 
 echo "  OAuth2 friendly login..."
-MVN_LOG=$JOB_BASE_NAME-$BUILD_NUMBER-oauth2-mvn.log
-mvn -f $LOGIN_USERS/pom.xml -l $MVN_LOG exec:java -Dmax.users=$USERS -Dauth.server.address=$AUTH_SERVER_URL -Duser.tokens.file=$TOKENS_FILE_PREFIX.oauth2 -Duser.tokens.include.username=true -Poauth2
-LOGIN_USERS_OAUTH2_LOG=$JOB_BASE_NAME-$BUILD_NUMBER-login-users-oauth2.log
+
+MVN_LOG=$LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-oauth2-mvn.log
+mvn -f $LOGIN_USERS/pom.xml -l $MVN_LOG exec:java -Dmax.users=$USERS -Dauth.server.address=$AUTH_SERVER_URL -Duser.tokens.file=$TOKENS_FILE_PREFIX.oauth2 -Poauth2
+LOGIN_USERS_OAUTH2_LOG=$LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-login-users-oauth2.log
+
 cat $MVN_LOG | grep login-users-log > $LOGIN_USERS_OAUTH2_LOG
 
 export TOKENS_FILE=$TOKENS_FILE_PREFIX.oauth2
@@ -114,18 +121,18 @@ echo "Removing all workspaces from accounts"
 
 
 echo " Extract CSV data from logs:"
-$COMMON/_locust-log-to-csv.sh 'POST createWorkspace' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
-$COMMON/_locust-log-to-csv.sh 'GET getWorkspaceStatus' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
-$COMMON/_locust-log-to-csv.sh 'REPEATED_GET timeForStartingWorkspace' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
-$COMMON/_locust-log-to-csv.sh 'POST startWorkspace' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
-$COMMON/_locust-log-to-csv.sh 'DELETE stopWorkspace' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
-$COMMON/_locust-log-to-csv.sh 'DELETE deleteWorkspace' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
-$COMMON/_locust-log-to-csv.sh 'REPEATED_GET timeForStoppingWorkspace' $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
+$COMMON/_locust-log-to-csv.sh 'POST createWorkspace' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
+$COMMON/_locust-log-to-csv.sh 'GET getWorkspaceStatus' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
+$COMMON/_locust-log-to-csv.sh 'REPEATED_GET timeForStartingWorkspace' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
+$COMMON/_locust-log-to-csv.sh 'POST startWorkspace' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
+$COMMON/_locust-log-to-csv.sh 'DELETE stopWorkspace' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
+$COMMON/_locust-log-to-csv.sh 'DELETE deleteWorkspace' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
+$COMMON/_locust-log-to-csv.sh 'REPEATED_GET timeForStoppingWorkspace' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
 
 echo " Generate charts from CSV"
 export REPORT_CHART_WIDTH=1000
 export REPORT_CHART_HEIGHT=600
-for c in $(find *.csv | grep '\-POST_\+\|\-GET_\+\|\-REPEATED_GET_\+\|\-DELETE_\+'); do echo $c; $COMMON/_csv-response-time-to-png.sh $c; $COMMON/_csv-throughput-to-png.sh $c; $COMMON/_csv-failures-to-png.sh $c; done
+for c in $(find $LOG_DIR/csv/*.csv | grep '\-POST_\+\|\-GET_\+\|\-REPEATED_GET_\+\|\-DELETE_\+'); do echo $c; $COMMON/_csv-response-time-to-png.sh $c; $COMMON/_csv-throughput-to-png.sh $c; $COMMON/_csv-failures-to-png.sh $c; done
 function distribution_2_csv {
  	HEAD=(`cat $1 | head -n 1 | sed -e 's,",,g' | sed -e 's, ,_,g' | sed -e 's,%,,g' | tr "," " "`)
 	DATA=(`cat $1 | grep -F "$2" | sed -e 's,",,g' | sed -e 's, ,_,g' | tr "," " "`)
@@ -137,7 +144,7 @@ function distribution_2_csv {
 	done;
 }
 
- for c in $(find *.csv | grep '\-report_distribution.csv'); do
+ for c in $(find $LOG_DIR/csv/*.csv | grep '\-report_distribution.csv'); do
  	distribution_2_csv $c '"POST createWorkspace"';
  	distribution_2_csv $c '"GET getWorkspaceStatus"';
  	distribution_2_csv $c '"REPEATED_GET timeForStartingWorkspace"';
@@ -148,11 +155,11 @@ function distribution_2_csv {
  done
  export REPORT_CHART_WIDTH=1000
  export REPORT_CHART_HEIGHT=600
- for c in $(find *rt-histo.csv); do echo $c; $COMMON/_csv-rt-histogram-to-png.sh $c; done
+ for c in $(find $LOG_DIR/csv/*rt-histo.csv); do echo $c; $COMMON/_csv-rt-histogram-to-png.sh $c; done
 #
  echo " Prepare results for Zabbix"
- rm -rvf *-zabbix.log
- export ZABBIX_LOG=$JOB_BASE_NAME-$BUILD_NUMBER-zabbix.log
+ rm -rvf $LOG_DIR/*-zabbix.log
+ export ZABBIX_LOG=$LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-zabbix.log
  ./_zabbix-process-results.sh $ZABBIX_LOG
 
  if [[ "$ZABBIX_REPORT_ENABLED" = "true" ]]; then
@@ -160,7 +167,7 @@ function distribution_2_csv {
  	zabbix_sender -vv -i $ZABBIX_LOG -T -z $ZABBIX_SERVER -p $ZABBIX_PORT;
  fi
 
- RESULTS_FILE=$JOB_BASE_NAME-$BUILD_NUMBER-results.md
+ RESULTS_FILE=$LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-results.md
  sed -e "s,@@JOB_BASE_NAME@@,$JOB_BASE_NAME,g" results-template.md |
  sed -e "s,@@BUILD_NUMBER@@,$BUILD_NUMBER,g" > $RESULTS_FILE
 
@@ -200,7 +207,7 @@ function distribution_2_csv {
  REPORT_TIMESTAMP=`date '+%Y-%m-%d %H:%M:%S (%Z)'`
  sed -i -e "s,@@TIMESTAMP@@,$REPORT_TIMESTAMP,g" $RESULTS_FILE
 
- REPORT_FILE=$JOB_BASE_NAME-report.md
+ REPORT_FILE=$LOG_DIR/$JOB_BASE_NAME-report.md
  cat README.md $RESULTS_FILE > $REPORT_FILE
  if [ -z "$GRIP_USER" ]; then
  	grip --export $REPORT_FILE
@@ -219,10 +226,10 @@ done <$TOKENS_FILE
 
  echo "Check for errors in Locust master log"
 
- REPORT_COUNT=`wc -l < $JOB_BASE_NAME-$BUILD_NUMBER-report_distribution.csv`
+ REPORT_COUNT=`wc -l < $LOG_DIR/csv/$JOB_BASE_NAME-$BUILD_NUMBER-report_distribution.csv`
  EXPECTED_REPORT_COUNT=8
  EXIT_CODE=0
- if [[ "0" -ne `cat $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log | grep 'Error report' | wc -l` ]]; then
+ if [[ "0" -ne `cat $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log | grep 'Error report' | wc -l` ]]; then
     echo 'THERE WERE ERRORS OR FAILURES WHILE SENDING REQUESTS';
     EXIT_CODE=1;
  elif [[ REPORT_COUNT -ne $EXPECTED_REPORT_COUNT ]]; then
