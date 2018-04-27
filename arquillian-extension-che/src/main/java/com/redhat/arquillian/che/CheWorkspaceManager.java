@@ -179,6 +179,7 @@ public class CheWorkspaceManager {
                     ? "https://rhche." + configurationInstance.get().getOsioUrlPart()
                     : configurationInstance.get().getCustomCheServerFullURL()
             );
+            LOG.info(props.toString());
             EmbeddedMaven
                     .forProject(cheStarterDir.getAbsolutePath() + File.separator + "pom.xml")
                     .useMaven3Version("3.5.2")
