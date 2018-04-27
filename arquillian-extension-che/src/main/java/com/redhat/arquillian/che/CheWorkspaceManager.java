@@ -157,7 +157,7 @@ public class CheWorkspaceManager {
             props.setProperty("GITHUB_TOKEN_URL", "https://auth." + configurationInstance.get().getOsioUrlPart()
                     + "/api/token?for=https://github.com");
             props.setProperty(
-                    "MULTI_TENANT_CHE_SERVER_URL",
+                    "CHE_SERVER_URL",
                     configurationInstance.get().getCustomCheServerFullURL().isEmpty()
                     ? "https://rhche." + configurationInstance.get().getOsioUrlPart()
                     : configurationInstance.get().getCustomCheServerFullURL()
