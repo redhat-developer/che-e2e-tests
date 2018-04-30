@@ -8,7 +8,7 @@
                 password: GRIP_PASS
 
 - wrapper:
-    name: che-functional-perf-test-template-wrapper-prod-2
+    name: che-functional-perf-test-template-wrapper-us-east-2
     wrappers:
         - che-functional-perf-test-template-wrapper-grip-creds
         - credentials-binding:
@@ -17,14 +17,13 @@
                 variable: USERS_PROPERTIES_FILE
 
 - wrapper:
-    name: che-functional-perf-test-template-wrapper-prod-2a
+    name: che-functional-perf-test-template-wrapper-us-east-2a
     wrappers:
         - che-functional-perf-test-template-wrapper-grip-creds
         - credentials-binding:
             - file:
                 credential-id: devtools-automated-tests-osiotestX-2a
                 variable: USERS_PROPERTIES_FILE
-
 
 - che-functional-perf-test-template: &che-functional-perf-test-template
     name: 'che-functional-perf-test-template'
@@ -95,7 +94,7 @@
            description: A hatch rate (number of users to spawn per second).
        - string:
            name: DURATION
-           default: '1800'
+           default: '180'
            description: A number of seconds for how long the load test should run.
        - bool:
            name: ZABBIX_REPORT_ENABLED
@@ -111,8 +110,9 @@
            description: A port of Zabbix server used by zabbix_sender utility
        - string:
            name: ZABBIX_HOST
-           default: qa_che.openshift.io
+           default: '{cluster}'
            description: A hostname in Zabbix the report is for
+
     scm:
         - git:
             url: https://github.com/redhat-developer/che-functional-tests.git
@@ -121,6 +121,7 @@
     triggers:
         - timed: H 1 * * *
     wrappers:
+        - che-functional-perf-test-template-wrapper-{cluster}
         - workspace-cleanup:
             dirmatch: false
     builders:
@@ -134,23 +135,28 @@
       - email:
           recipients: kkanova@redhat.com rhopp@redhat.com tdancs@redhat.com
           notify-every-unstable-build: true
-       - archive:
-           artifacts: 'che-start-workspace/*.log,che-start-workspace/*.png,che-start-workspace/*.csv,che-start-workspace/*.html'
-           allow-empty: 'true'
-           fingerprint: true
+      - archive:
+          artifacts: 'che-start-workspace/*.log,che-start-workspace/*.png,che-start-workspace/*.csv,che-start-workspace/*.html'
+          allow-empty: 'true'
+          fingerprint: true
 
-- job:
+- job-template:
     name: 'che-start-workspace'
     project-type: freestyle
     node: osioperf-server-1-centos7-x86_64
-    wrappers:
-        - che-functional-perf-test-template-wrapper-prod-2
     <<: *che-functional-perf-test-template
 
-- job:
+- job-template:
     name: 'che-start-workspace-2a'
     project-type: freestyle
     node: osioperf-server-1-centos7-x86_64
-    wrappers:
-        - che-functional-perf-test-template-wrapper-prod-2a
     <<: *che-functional-perf-test-template
+
+- project:
+    name: devtools
+    disabled: false
+    jobs:
+        - 'che-start-workspace':
+            cluster: us-east-2
+        - 'che-start-workspace-2a':
+            cluster: us-east-2a
