@@ -14,7 +14,7 @@ export COMMON="common.git"
 #rm -vf *.png
 #exit 0
 
- git clone -b separate_logs https://github.com/Katka92/openshiftio-performance-common.git $COMMON
+ git clone https://github.com/pmacik/openshiftio-performance-common $COMMON
 
 echo " Wait for the server to become available"
 ./_wait-for-server.sh
