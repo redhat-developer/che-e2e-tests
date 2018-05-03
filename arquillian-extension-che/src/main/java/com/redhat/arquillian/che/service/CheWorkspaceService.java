@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.List;
 
 import com.redhat.arquillian.che.config.CheExtensionConfiguration;
-import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import com.redhat.arquillian.che.resource.Stack;
 import com.redhat.arquillian.che.resource.StackService;
 import com.redhat.arquillian.che.rest.QueryParam;
@@ -105,7 +104,7 @@ public class CheWorkspaceService {
     public static void deleteWorkspace(CheWorkspace workspace, String token) {
         logger.info("Deleting " + workspace);
         RestClient client = new RestClient(workspace.getSelfLink());
-        client.sentRequest(null, RequestType.DELETE, null, token).close();
+        client.sendRequest(null, RequestType.DELETE, null, token).close();
 
         int counter = 0;
         int maxCount = Math.round(WAIT_TIME / (SLEEP_TIME_TICK / 1000));
@@ -130,7 +129,7 @@ public class CheWorkspaceService {
     }
 
     public static boolean workspaceExists(RestClient client, CheWorkspace workspace) {
-        Response response = client.sentRequest(workspace.getSelfLink(), RequestType.GET);
+        Response response = client.sendRequest(workspace.getSelfLink(), RequestType.GET);
         boolean isSuccessful = response.isSuccessful();
         response.close();
         return isSuccessful;
@@ -153,7 +152,7 @@ public class CheWorkspaceService {
         CheExtensionConfiguration config = configurationInstance.get();
         RestClient client = new RestClient(config.getCheStarterUrl());
         String path = "/workspace/" + workspace.getName();
-        Response response = client.sentRequest(path, RequestType.PATCH, null, config.getKeycloakToken(),
+        Response response = client.sendRequest(path, RequestType.PATCH, null, config.getKeycloakToken(),
                 new QueryParam("masterUrl",
                         config.getCustomCheServerFullURL().isEmpty()
                         ? config.getOpenshiftMasterUrl()
@@ -187,7 +186,7 @@ public class CheWorkspaceService {
     }
 
     private static String getWorkspaceStatus(RestClient client, CheWorkspace workspace, String authorizationToken) {
-        Response response = client.sentRequest(null, RequestType.GET, null, authorizationToken);
+        Response response = client.sendRequest(null, RequestType.GET, null, authorizationToken);
         Object document = getDocumentFromResponse(response);
         response.close();
         return getWorkspaceStatus(document);
@@ -197,7 +196,7 @@ public class CheWorkspaceService {
     private static void operateWorkspaceState(CheWorkspace workspace, RequestType requestType, String resultState,
                                               String authorizationToken) {
         RestClient client = new RestClient(workspace.getRuntimeLink());
-        client.sentRequest(null, requestType, null, authorizationToken).close();
+        client.sendRequest(null, requestType, null, authorizationToken).close();
         client.close();
         try {
             waitUntilWorkspaceGetsToState(workspace, resultState, authorizationToken);
@@ -265,7 +264,7 @@ public class CheWorkspaceService {
         String path = "/workspace";
         RestClient client = new RestClient(config.getCheStarterUrl());
 
-        Response response = client.sentRequest(path, RequestType.GET, null, config.getKeycloakToken(),
+        Response response = client.sendRequest(path, RequestType.GET, null, config.getKeycloakToken(),
                 new QueryParam("masterUrl",
                         config.getCustomCheServerFullURL().isEmpty()
                         ? config.getOpenshiftMasterUrl()

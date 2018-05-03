@@ -27,7 +27,7 @@ public class RestClient {
 	
 	public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-	private OkHttpClient client = new OkHttpClient();
+	private OkHttpClient client;
 	private String serverURL;
 
 	public RestClient(String serverURL) {
@@ -50,16 +50,21 @@ public class RestClient {
 		}
 	}
 
-	public Response sentRequest(String path, RequestType requestType) {
-		return sentRequest(path, requestType, null, null);
+	public Response sendRequest(String path, RequestType requestType) {
+		return sendRequest(path, requestType, null, null);
 	}
 
-	public Response sentRequest(String path, RequestType requestType, String jsonRequestBody) {
-		return sentRequest(path, requestType, jsonRequestBody, null, (QueryParam[]) null);
+	public Response sendRequest(String path, RequestType requestType, String jsonRequestBody) {
+		return sendRequest(path, requestType, jsonRequestBody, null, (QueryParam[]) null);
 	}
 
-	public Response sentRequest(String path, RequestType requestType, String jsonRequestBody, String authorization,
-			QueryParam... queryParams) {
+	public Response sendRequest(
+			String path,
+			RequestType requestType,
+			String jsonRequestBody,
+			String authorization,
+			QueryParam... queryParams
+	) {
 		RequestBody body = jsonRequestBody != null ? RequestBody.create(JSON, jsonRequestBody)
 				: RequestBody.create(null, new byte[0]);
 		StringBuilder sb = new StringBuilder(serverURL);

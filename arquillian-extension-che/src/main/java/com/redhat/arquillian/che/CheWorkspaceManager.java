@@ -164,7 +164,7 @@ public class CheWorkspaceManager {
             );
             EmbeddedMaven
                     .forProject(cheStarterDir.getAbsolutePath() + File.separator + "pom.xml")
-                    .useMaven3Version("3.5.0")
+                    .useMaven3Version("3.5.2")
                     .setGoals("spring-boot:run")
                     .setProperties(props)
                     .useAsDaemon()
