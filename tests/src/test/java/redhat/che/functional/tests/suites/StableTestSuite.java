@@ -31,7 +31,7 @@ import redhat.che.functional.tests.WorkspacesTestCase;
 //    PomTestCase.class,
 //    AnalyticsErrorMarkersTestCase.class,
     MavenTestCase.class,
-//    WorkspacesTestCase.class,
+    WorkspacesTestCase.class,
 //    PackageJsonTestCase.class
 })
 
