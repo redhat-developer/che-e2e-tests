@@ -146,7 +146,7 @@ public class CheWorkspaceManager {
         
         //Cleanup preferences:
         RestClient restClient = new RestClient("https://rhche."+configurationInstance.get().getOsioUrlPart()+"/api/");
-        Response response = restClient.sentRequest("preferences", RequestType.DELETE, null, CheWorkspaceProvider.getConfiguration().getAuthorizationToken());
+        Response response = restClient.sendRequest("preferences", RequestType.DELETE, null, CheWorkspaceProvider.getConfiguration().getAuthorizationToken());
         if (response.code()!=204) {
         	throw new RuntimeException("Clearing preferences failed with response code: "+response.code());
         }
