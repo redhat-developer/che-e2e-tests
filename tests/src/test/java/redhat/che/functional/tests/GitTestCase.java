@@ -56,10 +56,6 @@ public class GitTestCase extends AbstractCheFunctionalTest {
     
     @FindBy(id = "gwt-debug-popup-container")
     private Popup popup;
-    
-	private void waitUntilProjectImported() {
-        infoPanel.getNotificationManager().waitForNotification("Project vertx-http-booster imported", 60, TimeUnit.SECONDS);
-	}
 
     @After
     public void closeTab(){
@@ -72,7 +68,7 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         // set commiter credentials
         LOG.info("Starting: " + this.getClass().getName());
         openBrowser();
-        waitUntilProjectImported();
+        waitUntilProjectImported("Project vertx-http-booster imported", 60);
         LOG.info("Test: test_load_ssh_key_and_set_commiter_information");
         mainMenuPanel.clickProfile();
         profileTopMenu.openPreferences();

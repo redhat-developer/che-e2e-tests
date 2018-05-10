@@ -47,16 +47,12 @@ public class VertxPreviewUrlTestCase extends AbstractCheFunctionalTest {
         Graphene.waitGui().withTimeout(60, TimeUnit.SECONDS).until().element(buildSuccess).is().visible();
     }
 
-    private void waitUntilProjectImported() {
-        infoPanel.getNotificationManager().waitForNotification("Project vertx-http-booster imported", 60, TimeUnit.SECONDS);
-    }
-
     @Test
     @InSequence(1)
     public void run_project() {
         LOG.info("Starting: " + this.getClass().getName());
         openBrowser();
-        waitUntilProjectImported();
+        waitUntilProjectImported("Project vertx-http-booster imported", 60);
         mainMenuPanel.clickRunButton();
         mainMenuPanel.selectCommand("run");
         waitUntilRunIsCompleted();
@@ -70,7 +66,7 @@ public class VertxPreviewUrlTestCase extends AbstractCheFunctionalTest {
         long startTime = System.currentTimeMillis();
         while (code == 503) {
             RestClient client = new RestClient(preview.get(1).getAttribute("href"));
-            Response response = client.sentRequest("", RequestType.GET);
+            Response response = client.sendRequest("", RequestType.GET);
             code = response.code();
             if (response.isSuccessful()) {
                 try {

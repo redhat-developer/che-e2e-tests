@@ -54,10 +54,12 @@ public class MainMenuPanel {
     	click(driver, workspaceItem);
     }
 
-    public void clickRunButton() { click(driver, runButton); }
+    public void clickRunButton() {
+        click(driver, runButton);
+    }
 
     public void selectCommand(String commandLabel) {
-        WebElement command = driver.findElement(ByJQuery.selector("#commandsPopup > div > div > div > div:contains('" + commandLabel + "')"));
+        WebElement command = driver.findElement(ByJQuery.selector("#commandsPopup div:contains('" + commandLabel + "'):last"));
         //the div containing command name is not clickable -> selecting clickable parent.
         WebElement parentElement = command.findElement(By.xpath("./.."));
         Graphene.waitGui().until().element(parentElement).is().clickable();

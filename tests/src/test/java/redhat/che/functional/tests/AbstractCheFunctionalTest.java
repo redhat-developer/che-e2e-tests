@@ -162,6 +162,10 @@ public abstract class AbstractCheFunctionalTest {
         return CheWorkspaceProvider.getConfiguration().getOsioUrlPart().equals(bayesianErrorExpectedURL);
     }
 
+    public void waitUntilProjectImported(String notification, int durationInSeconds) {
+        infoPanel.getNotificationManager().waitForNotification(notification, durationInSeconds, TimeUnit.SECONDS);
+    }
+
     /*===============================*
      * Screenshooter custom commands *
      *===============================*/
