@@ -34,7 +34,7 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
     private WebElement currentLine;
 
     private static final String jsonDependency = "\"serve-static\": \"1.7.1\" ,\n";
-    private static final String jsonExpectedError = "Package serve-static-1.7.1 is vulnerable: CVE-2015-1164 Open redirect vulnerability";
+    private static final String jsonExpectedError = "Package serve-static-1.7.1 is vulnerable: CVE-2015-1164. Recommendation: use version 1.7.2";
     private static final Integer jsonExpectedErrorLine = 12;
     private static final Integer jsonInjectionEntryPoint = 12;
 
