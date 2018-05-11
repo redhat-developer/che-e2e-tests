@@ -28,8 +28,8 @@ import redhat.che.functional.tests.WorkspacesTestCase;
 @RunWith(Suite.class)
 @SuiteClasses({
     GitTestCase.class,
-//    PomTestCase.class,
-//    AnalyticsErrorMarkersTestCase.class,
+    PomTestCase.class,
+    AnalyticsErrorMarkersTestCase.class,
     MavenTestCase.class,
     WorkspacesTestCase.class,
 //    PackageJsonTestCase.class
