@@ -7,6 +7,7 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.support.FindBy;
@@ -50,7 +51,12 @@ public class GitTestCase extends AbstractCheFunctionalTest {
 				infoPanel.getNotificationManager().getNotificationElement("Project vertx-http-booster imported")).is()
 				.present();
 	}
-	
+
+    @After
+    public void closeTab(){
+        editorPart.tabsPanel().closeActiveTab(driver);
+    }
+
     @Test
     @InSequence(1)
     public void test_load_ssh_key_and_set_commiter_information(){
