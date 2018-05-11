@@ -141,7 +141,7 @@ public abstract class AbstractCheFunctionalTest {
 		ConsolesPanel consolesPanel = infoPanel.getConsolesPanel();
 		consolesPanel.activateTab("Workspace Status");
 		WorkspaceStatusPage workspaceStatusPage = consolesPanel.getWorkspaceStatusPage();
-		Graphene.waitModel().withTimeout(15, TimeUnit.SECONDS).until(d -> workspaceStatusPage.isWorkspaceRunning());
+		Graphene.waitModel().withTimeout(25, TimeUnit.SECONDS).until(d -> workspaceStatusPage.isWorkspaceRunning());
 	}
 
 	private void waitUntilAllVisiblePopupsDisappear() {

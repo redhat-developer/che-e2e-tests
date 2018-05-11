@@ -35,6 +35,8 @@ import org.jboss.arquillian.test.spi.event.suite.BeforeSuite;
 import org.jboss.shrinkwrap.resolver.api.maven.embedded.EmbeddedMaven;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -57,8 +59,10 @@ public class CheWorkspaceManager {
     private Instance<CheExtensionConfiguration> configurationInstance;
 
     private String bearerToken;
+    List<CheWorkspace> waitingForDeletion;
 
     public void setupWorkspace(@Observes BeforeSuite event) {
+        waitingForDeletion = new ArrayList<>();
         CheExtensionConfiguration cheExtensionConfig = configurationInstance.get();
         checkRunParams(cheExtensionConfig);
 
@@ -102,7 +106,7 @@ public class CheWorkspaceManager {
             }
         } else if (!(createdWkspc.getStack().equals(workspaceAnnotation.stackID()))) { //provided workspace has another stack
             CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
-            CheWorkspaceService.deleteWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
+            waitingForDeletion.add(cheWorkspaceInstanceProducer.get());
             createWorkspace(workspaceAnnotation);
 
             LOG.info("Workspace " + createdWkspc.getName() + " created and started.");
@@ -132,7 +136,7 @@ public class CheWorkspaceManager {
         Workspace workspaceAnnotation = event.getTestClass().getAnnotation(Workspace.class);
         if (workspaceAnnotation.removeAfterTest()) {
             CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
-            CheWorkspaceService.deleteWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
+            waitingForDeletion.add(cheWorkspaceInstanceProducer.get());
         }
     }
 
@@ -142,6 +146,7 @@ public class CheWorkspaceManager {
         //creating and starting new workspace
         cheWorkspaceInstanceProducer.set(provider.createCheWorkspace(StackService.getPathOfJsonConfig(workspaceAnnotation.stackID())));
         CheWorkspaceService.waitUntilWorkspaceGetsToState(cheWorkspaceInstanceProducer.get(), CheWorkspaceStatus.RUNNING.getStatus(), bearerToken);
+
     }
 
     private void startCheStarter() {
@@ -228,8 +233,11 @@ public class CheWorkspaceManager {
                 LOG.info("Stopping " + workspace);
                 CheWorkspaceService.stopWorkspace(workspace, bearerToken);
             }
-            LOG.info("Deleting workspace.");
+            LOG.info("Deleting workspaces.");
             CheWorkspaceService.deleteWorkspace(workspace, bearerToken);
+            for(CheWorkspace wkspc : waitingForDeletion){
+                CheWorkspaceService.deleteWorkspace(wkspc, bearerToken);
+            }
         } else {
             LOG.info("Skipping workspace deletion - attribute preserve workspace is true.");
         }

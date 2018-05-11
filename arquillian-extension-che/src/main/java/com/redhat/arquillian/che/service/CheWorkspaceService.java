@@ -163,10 +163,9 @@ public class CheWorkspaceService {
         response.close();
         client.close();
 
-        CheWorkspaceService.waitUntilWorkspaceGetsToState(workspace, CheWorkspaceStatus.RUNNING.getStatus(), config.getKeycloakToken());
-        if (CheWorkspaceService.getWorkspaceStatus(workspace, config.getKeycloakToken()).equals(CheWorkspaceStatus.RUNNING.getStatus())) {
+        if(CheWorkspaceService.waitUntilWorkspaceGetsToState(workspace, CheWorkspaceStatus.RUNNING.getStatus(), config.getKeycloakToken()))
             return true;
-        }
+
         return false;
     }
 
@@ -206,7 +205,7 @@ public class CheWorkspaceService {
         }
     }
 
-    public static void waitUntilWorkspaceGetsToState(CheWorkspace workspace, String resultState,
+    public static boolean waitUntilWorkspaceGetsToState(CheWorkspace workspace, String resultState,
                                                      String authorizationToken) {
         RestClient client = new RestClient(workspace.getSelfLink());
         int counter = 0;
@@ -222,6 +221,10 @@ public class CheWorkspaceService {
                 //TODO: Why is this empty?
             }
             currentState = getWorkspaceStatus(client, workspace, authorizationToken);
+            if(currentState.equals(CheWorkspaceStatus.STOPPED.toString()) && resultState.equals(CheWorkspaceStatus.RUNNING.toString())){
+                logger.info("Workspace became STOPPED - trying to start it again.");
+                return false;
+            }
         }
 
         if (counter == maxCount && !resultState.equals(currentState)) {
@@ -230,6 +233,7 @@ public class CheWorkspaceService {
 			throw new RuntimeException("After waiting for " + WAIT_TIME + " seconds, workspace \""+workspace.getName()+"\" is still"
 					+ " not in state " + resultState);
 		}
+		return true;
 	}
 
     public static String getWorkspaceName(Object jsonDocument) {
