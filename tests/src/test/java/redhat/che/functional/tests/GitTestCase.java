@@ -17,7 +17,6 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.support.FindBy;
@@ -56,11 +55,6 @@ public class GitTestCase extends AbstractCheFunctionalTest {
     
     @FindBy(id = "gwt-debug-popup-container")
     private Popup popup;
-
-    @After
-    public void closeTab(){
-        editorPart.tabsPanel().closeActiveTab(driver);
-    }
 
     @Test
     @InSequence(1)
