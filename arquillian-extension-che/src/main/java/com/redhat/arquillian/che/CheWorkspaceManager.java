@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.redhat.arquillian.che;
 
+import com.jayway.jsonpath.JsonPath;
 import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.config.CheExtensionConfiguration;
 import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
@@ -144,13 +145,24 @@ public class CheWorkspaceManager {
             waitingForDeletion.add(cheWorkspaceInstanceProducer.get());
         }
         
-        //Cleanup preferences:
-        RestClient restClient = new RestClient("https://rhche."+configurationInstance.get().getOsioUrlPart()+"/api/");
-        Response response = restClient.sendRequest("preferences", RequestType.DELETE, null, CheWorkspaceProvider.getConfiguration().getAuthorizationToken());
-        if (response.code()!=204) {
-        	throw new RuntimeException("Clearing preferences failed with response code: "+response.code());
-        }
+        cleanupPreferences();
     }
+    
+    /**
+   	 * 
+   	 */
+   	private void cleanupPreferences() {
+   		// TODO Auto-generated method stub
+   		RestClient workspaceConnection = new RestClient(cheWorkspaceInstanceProducer.get().getSelfLink());
+   		Response response = workspaceConnection.sendRequest(null, RequestType.GET, null, CheWorkspaceProvider.getConfiguration().getAuthorizationToken());
+   		Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
+   		//$.runtime.machines.dev-machine.servers.wsagent/http.url
+   		String wsagentApiUrl = (String)JsonPath.read(jsonDocument, "$.runtime.machines.dev-machine.servers.wsagent/http.url");	
+   		String machineToken = (String)JsonPath.read(jsonDocument, "$.runtime.machineToken");
+   		RestClient wsAgentRestClient = new RestClient(wsagentApiUrl);
+   		wsAgentRestClient.sendRequest("/project/.che", RequestType.DELETE, null, machineToken);
+   		
+   	}
 
     private void createWorkspace(Workspace workspaceAnnotation) {
         CheWorkspaceProvider provider = cheWorkspaceProviderInstanceProducer.get();
