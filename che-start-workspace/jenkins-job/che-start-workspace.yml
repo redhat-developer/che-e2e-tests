@@ -94,7 +94,7 @@
            description: A hatch rate (number of users to spawn per second).
        - string:
            name: DURATION
-           default: '180'
+           default: '1800'
            description: A number of seconds for how long the load test should run.
        - bool:
            name: ZABBIX_REPORT_ENABLED
@@ -136,7 +136,7 @@
           recipients: kkanova@redhat.com rhopp@redhat.com tdancs@redhat.com
           notify-every-unstable-build: true
       - archive:
-          artifacts: 'che-start-workspace/${JOB_NAME}-${BUILD_NUMBER}'
+          artifacts: 'che-start-workspace/$JOB_NAME-$BUILD_NUMBER/*,che-start-workspace/$JOB_NAME-$BUILD_NUMBER/csv/*,che-start-workspace/$JOB_NAME-$BUILD_NUMBER/png/*'
           allow-empty: 'true'
           fingerprint: true
 

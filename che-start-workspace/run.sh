@@ -221,7 +221,7 @@ function distribution_2_csv {
  fi
 
 while read p; do
-  echo $p | cut -d';' -f 3 >> $JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
+  echo $p | cut -d';' -f 3 >> $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
 done <$TOKENS_FILE
 
  echo "Check for errors in Locust master log"
@@ -238,6 +238,10 @@ done <$TOKENS_FILE
  else
     echo 'NO ERRORS OR FAILURES DETECTED';
  fi
+
+ echo "Artifacts: https://osioperf-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/job/$JOB_BASE_NAME/$BUILD_NUMBER/artifact/che-start-workspace/$JOB_BASE_NAME-$BUILD_NUMBER/"
+
+
  exit $EXIT_CODE
 
 
