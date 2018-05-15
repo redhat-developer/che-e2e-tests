@@ -99,7 +99,7 @@ public class CheWorkspaceManager {
         CheWorkspace createdWkspc = cheWorkspaceInstanceProducer.get();
 
         if (createdWkspc == null || createdWkspc.isDeleted()) {
-            if (setRunningWorkspace(workspaceAnnotation)) { //running workspace was found and set to producer
+            if (setRunningWorkspace()) { //running workspace was found and set to producer
                 createdWkspc = cheWorkspaceInstanceProducer.get();
                 if (!(createdWkspc.getStack().equals(workspaceAnnotation.stackID()))) {
                     CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
@@ -127,7 +127,7 @@ public class CheWorkspaceManager {
         }
     }
 
-    private boolean setRunningWorkspace(Workspace annotation) {
+    private boolean setRunningWorkspace() {
         CheWorkspace workspace = CheWorkspaceService.getRunningWorkspace();
         if (workspace == null) {
             return false;
@@ -153,6 +153,7 @@ public class CheWorkspaceManager {
    	 */
    	private void cleanupPreferences() {
    		// TODO Auto-generated method stub
+   		setRunningWorkspace(); // We don't care about outcome of this. 
    		RestClient workspaceConnection = new RestClient(cheWorkspaceInstanceProducer.get().getSelfLink());
    		Response response = workspaceConnection.sendRequest(null, RequestType.GET, null, CheWorkspaceProvider.getConfiguration().getAuthorizationToken());
    		Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
