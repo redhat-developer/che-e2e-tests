@@ -124,6 +124,7 @@ echo " Extract CSV data from logs:"
 $COMMON/_locust-log-to-csv.sh 'POST createWorkspace' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
 $COMMON/_locust-log-to-csv.sh 'GET getWorkspaceStatus' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
 $COMMON/_locust-log-to-csv.sh 'REPEATED_GET timeForStartingWorkspace' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
+$COMMON/_locust-log-to-csv.sh 'REPEATED_GET timeForRemovingPod' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
 $COMMON/_locust-log-to-csv.sh 'POST startWorkspace' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
 $COMMON/_locust-log-to-csv.sh 'DELETE stopWorkspace' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
 $COMMON/_locust-log-to-csv.sh 'DELETE deleteWorkspace' $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
@@ -149,6 +150,7 @@ function distribution_2_csv {
  	distribution_2_csv $c '"GET getWorkspaceStatus"';
  	distribution_2_csv $c '"REPEATED_GET timeForStartingWorkspace"';
  	distribution_2_csv $c '"REPEATED_GET timeForStoppingWorkspace"';
+ 	distribution_2_csv $c '"REPEATED_GET timeForRemovingPod"';
  	distribution_2_csv $c '"POST startWorkspace"';
  	distribution_2_csv $c '"DELETE stopWorkspace"';
  	distribution_2_csv $c '"DELETE deleteWorkspace"';
@@ -196,6 +198,10 @@ function distribution_2_csv {
  filterZabbixValue $ZABBIX_LOG "timeForStoppingWorkspace-rt_median" "@@TIME_FOR_STOPPING_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
  filterZabbixValue $ZABBIX_LOG "timeForStoppingWorkspace-rt_max" "@@TIME_FOR_STOPPING_WORKSPACE_MAX@@" $RESULTS_FILE;
 
+ filterZabbixValue $ZABBIX_LOG "timeForRemovingPod-rt_min" "@@TIME_FOR_STOPPING_WORKSPACE_MIN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "timeForRemovingPod-rt_median" "@@TIME_FOR_STOPPING_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
+ filterZabbixValue $ZABBIX_LOG "timeForRemovingPod-rt_max" "@@TIME_FOR_STOPPING_WORKSPACE_MAX@@" $RESULTS_FILE;
+
  filterZabbixValue $ZABBIX_LOG "stopWorkspace-rt_min" "@@STOP_WORKSPACE_MIN@@" $RESULTS_FILE;
  filterZabbixValue $ZABBIX_LOG "stopWorkspace-rt_median" "@@STOP_WORKSPACE_MEDIAN@@" $RESULTS_FILE;
  filterZabbixValue $ZABBIX_LOG "stopWorkspace-rt_max" "@@STOP_WORKSPACE_MAX@@" $RESULTS_FILE;
@@ -227,7 +233,7 @@ done <$TOKENS_FILE
  echo "Check for errors in Locust master log"
 
  REPORT_COUNT=`wc -l < $LOG_DIR/csv/$JOB_BASE_NAME-$BUILD_NUMBER-report_distribution.csv`
- EXPECTED_REPORT_COUNT=8
+ EXPECTED_REPORT_COUNT=9
  EXIT_CODE=0
  if [[ "0" -ne `cat $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log | grep 'Error report' | wc -l` ]]; then
     echo 'THERE WERE ERRORS OR FAILURES WHILE SENDING REQUESTS';

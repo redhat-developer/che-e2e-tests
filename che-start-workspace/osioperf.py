@@ -107,6 +107,8 @@ class TokenBehavior(TaskSet):
 	taskUserToken = ""
 	taskUserRefreshToken = ""
 	id = ""
+	openshiftToken = ""
+	cluster = ""
 
 	def on_start(self):
 		global _currentUser, _users, _userLock, _userTokens, _userRefreshTokens, _userNames
@@ -120,9 +122,30 @@ class TokenBehavior(TaskSet):
 		self.taskUserToken = _userTokens[self.taskUser]
 		self.taskUserRefreshToken = _userRefreshTokens[self.taskUser]
 		self.taskUserName = _userNames[self.taskUser]
+		self.setOsTokenAndCluster()
+
+	def setOsTokenAndCluster(self):
+		print "Getting info about user " + self.taskUserName
+		username=self.taskUserName
+		if "@" in self.taskUserName:
+			userInfo=self.client.get("https://auth.openshift.io/api/userinfo",
+									 headers = {"Authorization" : "Bearer " + self.taskUserToken}, name = "getUsername", catch_response = True)
+			username=(userInfo.json())['preferred_username']
+		self.taskUserName=username
+		infoResponse = self.client.get("https://api.openshift.io/api/users?filter[username]=" + self.taskUserName,
+									   name = "getUserInfo", catch_response = True)
+		infoResponseJson = infoResponse.json()
+		self.cluster = infoResponseJson['data'][0]['attributes']['cluster']
+		os_token_response = self.client.get("https://auth.openshift.io/api/token?for=" + self.cluster,
+											headers = {"Authorization" : "Bearer " + self.taskUserToken}, name = "getOpenshiftToken", catch_response = True)
+		os_token_response_json = os_token_response.json()
+		self.openshiftToken = os_token_response_json["access_token"]
+
 
 	@task
 	def createStartDeleteWorkspace(self):
+		print "Checking if there are some removing pods before creating and running new workspace."
+		self.waitUntilDeletingIsDone()
 		id = self.createWorkspace()
 		self.id = id
 		print "TEST id="+id
@@ -140,13 +163,11 @@ class TokenBehavior(TaskSet):
 	def createWorkspace(self):
 		print "Creating workspace of user "+self.taskUserName
 		now_time_ms = "%.f" % (time.time()*1000)
-		print "now time:" + now_time_ms
 		json = bodyJson.replace("WORKSPACE_NAME", now_time_ms)
 		response = self.client.post("/api/workspace", headers = {"Authorization" : "Bearer " + self.taskUserToken, "Content-Type":"application/json"}, name = "createWorkspace", data = json, catch_response = True)
 
 		try:
 			resp_json = response.json()
-			print resp_json
 			if not response.ok:
 				response.failure("Can not create workspace: [" + response.content + "]")
 			else:
@@ -158,7 +179,8 @@ class TokenBehavior(TaskSet):
 
 	def startWorkspace(self, id):
 		print "Starting workspace id "+id+" of user "+self.taskUserName
-		response = self.client.post("/api/workspace/"+id+"/runtime", headers = {"Authorization" : "Bearer " + self.taskUserToken}, name = "startWorkspace", catch_response = True)
+		response = self.client.post("/api/workspace/"+id+"/runtime",
+									headers = {"Authorization" : "Bearer " + self.taskUserToken}, name = "startWorkspace", catch_response = True)
 		try:
 			content = response.content
 			if not response.ok:
@@ -173,7 +195,8 @@ class TokenBehavior(TaskSet):
 		while self.getWorkspaceStatus(id) != "RUNNING":
 			now = time.time()
 			if now - self.start > timeout_in_seconds:
-				events.request_failure.fire(request_type="REPEATED_GET", name="timeForStartingWorkspace",response_time=self._tick_timer(), exception="Workspace wasn't able to start in " + str(timeout_in_seconds) + " seconds.")
+				events.request_failure.fire(request_type="REPEATED_GET", name="timeForStartingWorkspace",response_time=self._tick_timer(),
+											exception="Workspace wasn't able to start in " + str(timeout_in_seconds) + " seconds.")
 				print "Workspace wasn't able to start in " + str(timeout_in_seconds) + " seconds."
 				return
 			print "Workspace id "+id+" is still not in state RUNNING"
@@ -192,6 +215,10 @@ class TokenBehavior(TaskSet):
 
 	def stopWorkspace(self, id):
 		print "Stopping workspace id "+id+" of user "+self.taskUserName
+		status=self.getWorkspaceStatus(id)
+		if status == "STOPPED":
+			print "Workspace is already stopped."
+			return
 		response = self.client.delete("/api/workspace/"+id+"/runtime", headers = {"Authorization" : "Bearer " + self.taskUserToken}, name = "stopWorkspace", catch_response = True)
 		try:
 			content = response.content
@@ -213,6 +240,24 @@ class TokenBehavior(TaskSet):
 				response.success()
 		except ValueError:
 			response.failure("Got wrong response: [" + content + "]")
+
+	def waitUntilDeletingIsDone(self):
+		self._reset_timer()
+		delay=10
+		clusterSubstring=(self.cluster.split("."))[1]
+		username=self.taskUserName
+		getPodsResponse = self.client.get("https://console." + clusterSubstring + ".openshift.com/api/v1/namespaces/"+ username +"-che/pods",
+										  headers = {"Authorization" : "Bearer " + self.openshiftToken}, name = "getPods", catch_response = True)
+		podsJson = getPodsResponse.json();
+		while "rm-" in str(podsJson):
+			print "There are still removing pods running. Trying again after " + str(delay) + " seconds."
+			time.sleep(delay)
+			getPodsResponse = self.client.get("https://console." + clusterSubstring + ".openshift.com/api/v1/namespaces/"+ username +"-che/pods",
+											  headers = {"Authorization" : "Bearer " + self.openshiftToken}, name = "getPods", catch_response = True)
+			podsJson = getPodsResponse.json();
+		events.request_success.fire(request_type="REPEATED_GET", name="timeForRemovingPod", response_time=self._tick_timer(), response_length=0)
+		print "All removing pods finished."
+
 
 	def getWorkspaceStatus(self, id):
 		response = self.client.get("/api/workspace/"+id, headers = {"Authorization" : "Bearer " + self.taskUserToken}, name = "getWorkspaceStatus", catch_response = True)
