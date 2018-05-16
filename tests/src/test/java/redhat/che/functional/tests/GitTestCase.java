@@ -119,6 +119,12 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         mainMenuPanel.clickGit();
         gitPopupTopMenu.push();
         gitPushWindow.push();
-        popup.waitForPopup("Pushed to origin");
+        try {
+        	popup.waitForPopup("Pushed to origin");
+        }catch (TimeoutException ex) {
+        	LOG.error("Popup didn't show up", ex); //open notification pane to see the error on screenshot
+        	infoPanel.getNotificationManager();
+        	throw ex;
+        }
     }
 }
