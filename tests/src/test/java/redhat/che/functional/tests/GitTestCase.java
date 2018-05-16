@@ -10,16 +10,22 @@
  ******************************************************************************/
 package redhat.che.functional.tests;
 
-import com.redhat.arquillian.che.annotations.Workspace;
-import com.redhat.arquillian.che.resource.Stack;
+import static org.junit.Assert.fail;
+
+import java.util.Date;
+
 import org.apache.log4j.Logger;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.FindBy;
+
+import com.redhat.arquillian.che.annotations.Workspace;
+import com.redhat.arquillian.che.resource.Stack;
+
 import redhat.che.functional.tests.fragments.BottomInfoPanel;
 import redhat.che.functional.tests.fragments.popup.Popup;
 import redhat.che.functional.tests.fragments.topmenu.GitPopupTopMenu;
@@ -27,8 +33,6 @@ import redhat.che.functional.tests.fragments.topmenu.ProfileTopMenu;
 import redhat.che.functional.tests.fragments.window.CommitToRepoWindow;
 import redhat.che.functional.tests.fragments.window.GitPushWindow;
 import redhat.che.functional.tests.fragments.window.PreferencesWindow;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
 @Workspace(stackID = Stack.VERTX, requireNewWorkspace = true)
@@ -77,12 +81,19 @@ public class GitTestCase extends AbstractCheFunctionalTest {
 
         vertxProject.getResource("README.md").open();
         editorPart.tabsPanel().waitUntilActiveTabHasName("README.md");
-        editorPart.codeEditor().writeIntoElementContainingString("changes added on: " + new Date().toInstant().toEpochMilli(), "changes added on:");
+        String stringToAdd = "changes added on: " + new Date().toInstant().toEpochMilli();
+        LOG.info("Writing string to README.md: \""+stringToAdd+"\"");
+        editorPart.codeEditor().writeIntoElementContainingString(stringToAdd, "changes added on:");
 
         mainMenuPanel.clickGit();
         gitPopupTopMenu.addToIndex();
         bottomInfoPanel.tabsPanel().waitUntilFocusedTabHasName(BottomInfoPanel.TabNames.TAB_GIT_ADD_TO_INDEX);
-        bottomInfoPanel.waitUntilConsolePartContains(BottomInfoPanel.FixedConsoleText.GIT_ADDED_TO_INDEX_TEXT);
+        try {
+        	bottomInfoPanel.waitUntilConsolePartContains(BottomInfoPanel.FixedConsoleText.GIT_ADDED_TO_INDEX_TEXT);
+        }catch (TimeoutException ex) {
+        	LOG.error("Failure to edit file", ex);
+        	fail();
+        }
     }
 
     @Test
