@@ -9,6 +9,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.fragments.BottomInfoPanel;
 import redhat.che.functional.tests.fragments.popup.Popup;
@@ -17,6 +18,9 @@ import redhat.che.functional.tests.fragments.topmenu.ProfileTopMenu;
 import redhat.che.functional.tests.fragments.window.CommitToRepoWindow;
 import redhat.che.functional.tests.fragments.window.GitPushWindow;
 import redhat.che.functional.tests.fragments.window.PreferencesWindow;
+
+import static org.junit.Assert.fail;
+
 import java.util.Date;
 
 @RunWith(Arquillian.class)
@@ -49,6 +53,8 @@ public class GitTestCase extends AbstractCheFunctionalTest {
 		Graphene.waitGui().until().element(
 				infoPanel.getNotificationManager().getNotificationElement("Project vertx-http-booster imported")).is()
 				.present();
+		vertxProject.getResource("README.md").open();
+		
 	}
 
     @Test
@@ -72,12 +78,19 @@ public class GitTestCase extends AbstractCheFunctionalTest {
 
         vertxProject.getResource("README.md").open();
         editorPart.tabsPanel().waitUntilActiveTabHasName("README.md");
-        editorPart.codeEditor().writeIntoElementContainingString("changes added on: " + new Date().toInstant().toEpochMilli(), "changes added on:");
+        String stringToAdd = "changes added on: " + new Date().toInstant().toEpochMilli();
+        LOG.info("Writing string to README.md: \""+stringToAdd+"\"");
+        editorPart.codeEditor().writeIntoElementContainingString(stringToAdd, "changes added on:");
 
         mainMenuPanel.clickGit();
         gitPopupTopMenu.addToIndex();
         bottomInfoPanel.tabsPanel().waitUntilFocusedTabHasName(BottomInfoPanel.TabNames.TAB_GIT_ADD_TO_INDEX);
-        bottomInfoPanel.waitUntilConsolePartContains(BottomInfoPanel.FixedConsoleText.GIT_ADDED_TO_INDEX_TEXT);
+        try {
+        	bottomInfoPanel.waitUntilConsolePartContains(BottomInfoPanel.FixedConsoleText.GIT_ADDED_TO_INDEX_TEXT);
+        }catch (TimeoutException ex) {
+        	LOG.error("Failure to edit file", ex);
+        	fail();
+        }
     }
 
     @Test
