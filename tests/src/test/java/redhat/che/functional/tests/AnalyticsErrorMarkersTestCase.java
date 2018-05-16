@@ -11,7 +11,13 @@
 package redhat.che.functional.tests;
 
 import com.redhat.arquillian.che.annotations.Workspace;
+import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import com.redhat.arquillian.che.resource.Stack;
+import com.redhat.arquillian.che.rest.RequestType;
+import com.redhat.arquillian.che.rest.RestClient;
+
+import okhttp3.Response;
+
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
@@ -23,6 +29,8 @@ import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
+
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
@@ -53,12 +61,13 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
     }
 
     @After
-    public void deleteDependency() {
+    public void deleteDependency() throws IOException {
         editorPart.codeEditor().hideErrors(pomExpectedErrorLine);
         editorPart.codeEditor().setCursorToLine(pomInjectionEntryPoint);
         editorPart.codeEditor().deleteNextLines(5);
         editorPart.codeEditor().waitUnitlPomDependencyIsNotVisible();
         editorPart.tabsPanel().waintUntilFocusedTabSaves();
+        
     }
 
     @Test

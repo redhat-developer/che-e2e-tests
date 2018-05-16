@@ -25,6 +25,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.Sleeper;
+
 import redhat.che.functional.tests.fragments.EditorPart;
 import redhat.che.functional.tests.fragments.Project;
 import redhat.che.functional.tests.fragments.infoPanel.ConsolesPanel;
@@ -141,7 +143,7 @@ public abstract class AbstractCheFunctionalTest {
 		ConsolesPanel consolesPanel = infoPanel.getConsolesPanel();
 		consolesPanel.activateTab("Workspace Status");
 		WorkspaceStatusPage workspaceStatusPage = consolesPanel.getWorkspaceStatusPage();
-		Graphene.waitModel().withTimeout(25, TimeUnit.SECONDS).until(d -> workspaceStatusPage.isWorkspaceRunning());
+		Graphene.waitModel().withTimeout(60, TimeUnit.SECONDS).until(d -> workspaceStatusPage.isWorkspaceRunning());
 	}
 
 	private void waitUntilAllVisiblePopupsDisappear() {
