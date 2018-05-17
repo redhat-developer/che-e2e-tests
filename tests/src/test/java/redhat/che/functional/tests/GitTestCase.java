@@ -13,14 +13,18 @@ package redhat.che.functional.tests;
 import static org.junit.Assert.fail;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.By.ById;
 import org.openqa.selenium.support.FindBy;
 
 import com.redhat.arquillian.che.annotations.Workspace;
@@ -59,6 +63,9 @@ public class GitTestCase extends AbstractCheFunctionalTest {
     
     @FindBy(id = "gwt-debug-popup-container")
     private Popup popup;
+    
+    @FindBy(id = "gwt-debug-loader-message")
+    private WebElement updatingPopup;
 
     @Test
     @InSequence(1)
@@ -68,6 +75,14 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         openBrowser();
         waitUntilProjectImported("Project vertx-http-booster imported", 60);
         vertxProject.getResource("README.md").open();
+        //get the "Updating project..." popup out of the way
+        try {
+	        Graphene.waitGui().withTimeout(30, TimeUnit.SECONDS).until().element(updatingPopup).is().visible();
+	        Graphene.waitGui().withTimeout(30, TimeUnit.SECONDS).until().element(updatingPopup).is().not().visible();
+        }catch(TimeoutException ex) {
+        	//Updating projects popup didn't show up. Nothing happens
+        }
+        
         LOG.info("Test: test_load_ssh_key_and_set_commiter_information");
         mainMenuPanel.clickProfile();
         profileTopMenu.openPreferences();
