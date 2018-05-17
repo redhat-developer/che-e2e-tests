@@ -35,7 +35,7 @@ import redhat.che.functional.tests.fragments.window.GitPushWindow;
 import redhat.che.functional.tests.fragments.window.PreferencesWindow;
 
 @RunWith(Arquillian.class)
-@Workspace(stackID = Stack.VERTX, requireNewWorkspace = true)
+@Workspace(stackID = Stack.VERTX)
 public class GitTestCase extends AbstractCheFunctionalTest {
 	private static final Logger LOG = Logger.getLogger(GitTestCase.class);
 
@@ -83,8 +83,9 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         editorPart.tabsPanel().waitUntilActiveTabHasName("README.md");
         String stringToAdd = "changes added on: " + new Date().toInstant().toEpochMilli();
         LOG.info("Writing string to README.md: \""+stringToAdd+"\"");
+        takeScreenshot("beforeWritingText");
         editorPart.codeEditor().writeIntoElementContainingString(stringToAdd, "changes added on:");
-
+        takeScreenshot("afterWritingText");
         mainMenuPanel.clickGit();
         gitPopupTopMenu.addToIndex();
         bottomInfoPanel.tabsPanel().waitUntilFocusedTabHasName(BottomInfoPanel.TabNames.TAB_GIT_ADD_TO_INDEX);

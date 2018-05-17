@@ -108,9 +108,12 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
     private void openPomXml() {
         vertxProject.getResource("pom.xml").open();
         try {
+        	takeScreenshot("beforeCurrentLine");
 	        Graphene.waitGui().withTimeout(5, TimeUnit.SECONDS).until().element(currentLine).is().visible();
+	        takeScreenshot("afterCurrentLine-success");
 	        LOG.info("CURRENT LINE: "+currentLine.getText());
         }catch (TimeoutException ex) {
+        	takeScreenshot("afterCurrentLine-failure");
         	takeScreenshot("uanbleToFindCurrentLine");
         	LOG.error("Unable to find currentLine element", ex);
         }
