@@ -11,6 +11,7 @@
 package com.redhat.arquillian.che;
 
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.config.CheExtensionConfiguration;
 import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
@@ -158,7 +159,13 @@ public class CheWorkspaceManager {
    		Response response = workspaceConnection.sendRequest(null, RequestType.GET, null, CheWorkspaceProvider.getConfiguration().getAuthorizationToken());
    		Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
    		//$.runtime.machines.dev-machine.servers.wsagent/http.url
-   		String wsagentApiUrl = (String)JsonPath.read(jsonDocument, "$.runtime.machines.dev-machine.servers.wsagent/http.url");	
+   		String wsagentApiUrl;
+   		try {
+   		wsagentApiUrl = (String)JsonPath.read(jsonDocument, "$.runtime.machines.dev-machine.servers.wsagent/http.url");
+   		}catch(PathNotFoundException ex) {
+   			LOG.error("Path not found", ex);
+   			throw ex;
+   		}
    		String machineToken = (String)JsonPath.read(jsonDocument, "$.runtime.machineToken");
    		RestClient wsAgentRestClient = new RestClient(wsagentApiUrl);
    		wsAgentRestClient.sendRequest("/project/.che", RequestType.DELETE, null, machineToken);

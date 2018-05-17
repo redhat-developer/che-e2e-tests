@@ -67,6 +67,7 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         LOG.info("Starting: " + this.getClass().getName());
         openBrowser();
         waitUntilProjectImported("Project vertx-http-booster imported", 60);
+        vertxProject.getResource("README.md").open();
         LOG.info("Test: test_load_ssh_key_and_set_commiter_information");
         mainMenuPanel.clickProfile();
         profileTopMenu.openPreferences();
@@ -78,7 +79,6 @@ public class GitTestCase extends AbstractCheFunctionalTest {
     @InSequence(2)
     public void test_change_file_and_add_into_index() {
         //openBrowser(driver);
-
         vertxProject.getResource("README.md").open();
         editorPart.tabsPanel().waitUntilActiveTabHasName("README.md");
         String stringToAdd = "changes added on: " + new Date().toInstant().toEpochMilli();
