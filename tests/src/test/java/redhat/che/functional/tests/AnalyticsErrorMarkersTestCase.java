@@ -109,7 +109,7 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
         vertxProject.getResource("pom.xml").open();
         try {
         	takeScreenshot("beforeCurrentLine");
-	        Graphene.waitGui().withTimeout(5, TimeUnit.SECONDS).until().element(currentLine).is().visible();
+	        Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS).until().element(currentLine).is().visible();
 	        takeScreenshot("afterCurrentLine-success");
 	        LOG.info("CURRENT LINE: "+currentLine.getText());
         }catch (TimeoutException ex) {
