@@ -73,7 +73,7 @@ public class CheWorkspaceManager {
 
         cheWorkspaceProviderInstanceProducer.set(new CheWorkspaceProvider(cheExtensionConfig));
         if (isNotEmpty(cheExtensionConfig.getCheWorkspaceName())) {
-            CheWorkspace w = cheWorkspaceProviderInstanceProducer.get().getCreatedWorkspace();
+            CheWorkspace w = cheWorkspaceProviderInstanceProducer.get().getCreatedWorkspace(cheExtensionConfig.getCheWorkspaceName());
             if (w != null) {
                 cheWorkspaceInstanceProducer.set(w);
             } else {

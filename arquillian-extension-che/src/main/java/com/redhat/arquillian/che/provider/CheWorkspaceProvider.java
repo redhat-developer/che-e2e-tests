@@ -10,18 +10,23 @@
 */
 package com.redhat.arquillian.che.provider;
 
+import com.jayway.jsonpath.JsonPath;
 import com.redhat.arquillian.che.config.CheExtensionConfiguration;
 import com.redhat.arquillian.che.resource.CheWorkspace;
+import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.rest.QueryParam;
 import com.redhat.arquillian.che.rest.RequestType;
 import com.redhat.arquillian.che.rest.RestClient;
 import com.redhat.arquillian.che.service.CheWorkspaceService;
 import com.redhat.arquillian.che.util.Constants;
 import com.redhat.arquillian.che.util.Utils;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 import okhttp3.Response;
 import org.apache.log4j.Logger;
 
 import java.io.InputStream;
+import java.util.HashMap;
 
 import static com.redhat.arquillian.che.util.Constants.CREATE_WORKSPACE_REQUEST_VERTX_JSON;
 
@@ -99,7 +104,7 @@ public class CheWorkspaceProvider {
         return workspace;
     }
 
-    public CheWorkspace getCreatedWorkspace() {
+    public CheWorkspace getCreatedWorkspace(String cheWorkspaceName) {
         String path = "/workspace";
         RestClient cheStarterClient = new RestClient(cheStarterURL);
 
@@ -114,8 +119,19 @@ public class CheWorkspaceProvider {
         Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
         response.close();
         cheStarterClient.close();
-        CheWorkspace workspace = CheWorkspaceService.getWorkspaceFromDocument(jsonDocument);
-        startWorkspace(workspace);
+        //json containes all workspaces - need to select corresponding one
+        JSONArray wholeJson = (JSONArray) jsonDocument;
+        CheWorkspace workspace = null;
+        for(int i = 0; i < wholeJson.size(); i++){
+            String name = JsonPath.read(wholeJson, "$["+i+"].config.name");
+            if(name.equals(cheWorkspaceName)){
+                workspace = CheWorkspaceService.getWorkspaceFromDocument(((Object) wholeJson.get(i)));
+            }
+
+        }
+        if(!CheWorkspaceService.getWorkspaceStatus(workspace, keycloakToken).equals(CheWorkspaceStatus.RUNNING.toString())){
+            startWorkspace(workspace);
+        }
         return workspace;
     }
 

@@ -55,4 +55,17 @@ public class ActionUtils {
     public static void moveCursorToElement(WebDriver driver, WebElement element){
         new Actions(driver).moveToElement(element).perform();
     }
+
+    public static void findClassDialog(WebDriver driver){
+        new Actions(driver).sendKeys(Keys.chord(Keys.CONTROL, Keys.ALT, "n")).perform();
+    }
+
+    public static void openGitCommit(WebDriver driver) {
+        new Actions(driver).sendKeys(Keys.chord(Keys.ALT, "c")).perform();
+    }
+
+    public static void pressEnter(WebDriver driver){
+        new Actions(driver).sendKeys(Keys.ENTER).perform();
+    }
+
 }
