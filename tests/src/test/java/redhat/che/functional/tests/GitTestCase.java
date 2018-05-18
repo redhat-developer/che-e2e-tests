@@ -22,6 +22,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.By.ById;
@@ -79,7 +80,7 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         try {
 	        Graphene.waitGui().withTimeout(30, TimeUnit.SECONDS).until().element(updatingPopup).is().visible();
 	        Graphene.waitGui().withTimeout(30, TimeUnit.SECONDS).until().element(updatingPopup).is().not().visible();
-        }catch(TimeoutException ex) {
+        }catch(NoSuchElementException ex) {
         	//Updating projects popup didn't show up. Nothing happens
         }
         
