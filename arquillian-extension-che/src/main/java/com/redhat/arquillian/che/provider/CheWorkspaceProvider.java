@@ -10,6 +10,7 @@
 */
 package com.redhat.arquillian.che.provider;
 
+import com.jayway.jsonpath.JsonPath;
 import com.redhat.arquillian.che.config.CheExtensionConfiguration;
 import com.redhat.arquillian.che.resource.CheWorkspace;
 import com.redhat.arquillian.che.rest.QueryParam;
@@ -139,6 +140,18 @@ public class CheWorkspaceProvider {
             LOG.info("Start request sent successfully:" + response.message());
         }
         cheServerClient.close();
+    }
+    
+    public void reimportGithubToken() {
+    	RestClient authClient = new RestClient("https://auth."+configuration.getOsioUrlPart()+"/");
+    	Response authResponse = authClient.sendRequest("api/token?for=https://github.com", RequestType.GET, null, keycloakToken, null);
+    	Object jsonObject = CheWorkspaceService.getDocumentFromResponse(authResponse);
+    	String githubToken = JsonPath.read(jsonObject, "$.access_token");
+    	RestClient cheClient = new RestClient("https://rhche."+configuration.getOsioUrlPart()+"/");
+    	String jsonRequestBody = "{\"token\":\""+githubToken+"\"}";
+    	Response cheResponse = cheClient.sendRequest("api/token/github", RequestType.POST, jsonRequestBody, keycloakToken, null);
+    	LOG.info("Setting new github token response: " +cheResponse.code());
+    	
     }
 
 }

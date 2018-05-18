@@ -30,6 +30,7 @@ import org.openqa.selenium.support.FindBy;
 
 import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.resource.Stack;
+import com.redhat.arquillian.che.rest.RestClient;
 
 import redhat.che.functional.tests.fragments.BottomInfoPanel;
 import redhat.che.functional.tests.fragments.popup.Popup;
@@ -142,9 +143,13 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         try {
         	popup.waitForPopup("Pushed to origin");
         }catch (TimeoutException ex) {
-        	LOG.error("Popup didn't show up", ex); //open notification pane to see the error on screenshot
-        	infoPanel.getNotificationManager();
+        	LOG.error("Popup didn't show up", ex); 
+        	infoPanel.getNotificationManager();//open notification pane to see the error on screenshot
         	//try it again:
+        	
+        	//Try to reimport github token:
+        	provider.reimportGithubToken();
+        	
             mainMenuPanel.clickGit();
             gitPopupTopMenu.push();
             gitPushWindow.push();
