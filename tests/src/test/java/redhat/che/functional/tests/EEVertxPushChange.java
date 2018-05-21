@@ -56,6 +56,9 @@ public class EEVertxPushChange extends AbstractCheFunctionalTest {
     @FindByJQuery("#gwt-debug-navigateToFile-suggestionPanel tr[selected='SELECTED'")
     private WebElement selectedItem;
 
+    @FindByJQuery("#gwt-debug-git-commit-window-windowFrameButtonBar option:contains('origin/master')")
+    private WebElement masterBranch;
+
     private void openClass(String fileName, String extension){
         ActionUtils.findClassDialog(driver);
         ActionUtils.writeIntoElement(driver, findClassDialogInput, fileName+extension);
@@ -85,8 +88,10 @@ public class EEVertxPushChange extends AbstractCheFunctionalTest {
         ActionUtils.openGitCommit(driver);
         commitToRepoWindow.addCommitMessage("Hello changed to Bonjour on " + new Date());
         commitToRepoWindow.checkPushCheckbox();
+        masterBranch.click();
         commitToRepoWindow.commit();
         bottomInfoPanel.tabsPanel().waitUntilFocusedTabHasName(BottomInfoPanel.TabNames.TAB_GIT_COMMIT);
         bottomInfoPanel.waitUntilConsolePartContains(BottomInfoPanel.FixedConsoleText.GIT_COMMITED_WITH_REVISION);
+        popup.waitForPopup("Pushed to origin");
     }
 }
