@@ -250,7 +250,9 @@ class TokenBehavior(TaskSet):
 										  headers = {"Authorization" : "Bearer " + self.openshiftToken}, name = "getPods", catch_response = True)
 		podsJson = getPodsResponse.json();
 		while "rm-" in str(podsJson):
+			rmpods = str(podsJson).count("rm-")/7
 			print "There are still removing pods running. Trying again after " + str(delay) + " seconds."
+			print "Number of removing pods running: "+str(rmpods)
 			time.sleep(delay)
 			getPodsResponse = self.client.get("https://console." + clusterSubstring + ".openshift.com/api/v1/namespaces/"+ username +"-che/pods",
 											  headers = {"Authorization" : "Bearer " + self.openshiftToken}, name = "getPods", catch_response = True)
