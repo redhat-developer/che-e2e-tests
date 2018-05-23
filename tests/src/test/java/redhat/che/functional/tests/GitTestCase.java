@@ -149,19 +149,22 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         	//Try to reimport github token:
         	provider.reimportGithubToken();
         	//wait for 10 seconds
-        	LOG.info("Sleeping for 10 seconds");
-        	try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        	LOG.info("Sleeping for 10 seconds ended");
-            mainMenuPanel.clickGit();
-            gitPopupTopMenu.push();
-            gitPushWindow.push();
-            popup.waitForPopup("Pushed to origin");
-            throw new RuntimeException("Second try PUSH was successfull");
+        	int n=0;
+        	while (true) {
+        		LOG.info("Sleeping for "+n+" seconds...");
+        		n++;
+        		try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        	}
+//            mainMenuPanel.clickGit();
+//            gitPopupTopMenu.push();
+//            gitPushWindow.push();
+//            popup.waitForPopup("Pushed to origin");
+//            throw new RuntimeException("Second try PUSH was successfull");
         }
     }
 }
