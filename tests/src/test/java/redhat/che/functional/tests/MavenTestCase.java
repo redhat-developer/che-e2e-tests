@@ -24,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
@@ -100,7 +101,9 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
         //wait for end - if build first time, it last longer -> increasing timeout
         //further increased timeout. test failed just because build took longer.
         Graphene.waitModel().withTimeout(3, TimeUnit.MINUTES).until().element(consoleEnds).is().visible();
-        if (!buildSuccess.isDisplayed()) {
+        try {
+        	buildSuccess.getText();
+        }catch (NoSuchElementException ex) {
         	int n=0;
         	while (true) {
         		LOG.info("Sleeping for "+n+" seconds... (mavenTestCase)");
