@@ -10,6 +10,7 @@
  ******************************************************************************/
 package redhat.che.functional.tests;
 
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.resource.Stack;
 import org.apache.log4j.Logger;
@@ -99,7 +100,19 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
         //wait for end - if build first time, it last longer -> increasing timeout
         //further increased timeout. test failed just because build took longer.
         Graphene.waitModel().withTimeout(3, TimeUnit.MINUTES).until().element(consoleEnds).is().visible();
-
+        if (!buildSuccess.isDisplayed()) {
+        	int n=0;
+        	while (true) {
+        		LOG.info("Sleeping for "+n+" seconds... (mavenTestCase)");
+        		n++;
+        		try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        	}
+        }
         Assert.assertTrue(buildSuccess.isDisplayed());
     }
     
