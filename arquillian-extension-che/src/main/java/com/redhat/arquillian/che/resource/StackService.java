@@ -20,20 +20,13 @@ public class StackService {
 		if (stack == Stack.NODEJS)
 			return Constants.CREATE_WORKSPACE_REQUEST_NODEJS_JSON;
 		return null;
+
 	}
 
 	public static Stack getStackType(String projectType){
 		if(projectType.equals("maven")) return Stack.VERTX;
 		if(projectType.equals("node-js")) return Stack.NODEJS;
-		return null;
-	}
-
-	public static Stack getStackTypeFromJson(String json){
-		if(json.contains(Stack.NODEJS.toString())){
-			return  Stack.NODEJS;
-		} else if(json.contains(Stack.VERTX.toString())){
-			return Stack.VERTX;
-		}
+		if(projectType.equals("none")) return Stack.NONE;
 		return null;
 	}
 }

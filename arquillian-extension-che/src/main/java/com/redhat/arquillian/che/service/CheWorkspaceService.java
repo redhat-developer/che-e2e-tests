@@ -92,7 +92,13 @@ public class CheWorkspaceService {
     }
 
     private static Stack getWorkspaceStack(Object jsonDocument, String path) {
-        String type = JsonPath.read(jsonDocument, path);
+        String type;
+        try{
+             type = JsonPath.read(jsonDocument, path);
+        }catch (RuntimeException e){
+            //no stack type setted
+            type = "none";
+        }
         return StackService.getStackType(type);
     }
 

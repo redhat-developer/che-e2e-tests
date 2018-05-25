@@ -15,6 +15,7 @@ import com.redhat.arquillian.che.config.CheExtensionConfiguration;
 import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
 import com.redhat.arquillian.che.resource.CheWorkspace;
 import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
+import com.redhat.arquillian.che.resource.Stack;
 import com.redhat.arquillian.che.resource.StackService;
 import com.redhat.arquillian.che.service.CheWorkspaceService;
 import org.apache.log4j.Logger;
@@ -97,7 +98,7 @@ public class CheWorkspaceManager {
                 createdWkspc = cheWorkspaceInstanceProducer.get();
                 if (!(createdWkspc.getStack().equals(workspaceAnnotation.stackID()))) {
                     CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
-                    CheWorkspaceService.deleteWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
+                    waitingForDeletion.add(cheWorkspaceInstanceProducer.get());
                     createWorkspace(workspaceAnnotation);
                     LOG.info("Workspace " + createdWkspc.getName() + " created and started.");
                 }
@@ -123,7 +124,8 @@ public class CheWorkspaceManager {
 
     private boolean setRunningWorkspace(Workspace annotation) {
         CheWorkspace workspace = CheWorkspaceService.getRunningWorkspace();
-        if (workspace == null) {
+        if (workspace == null || workspace.getStack().equals(Stack.NONE)) {
+            LOG.info("None suitable running workspace found - creating new one.");
             return false;
         } else {
             LOG.info("Running workspace found - reusing.");

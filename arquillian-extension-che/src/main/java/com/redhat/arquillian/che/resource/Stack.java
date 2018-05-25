@@ -13,7 +13,8 @@ package com.redhat.arquillian.che.resource;
 public enum Stack {
 
 	VERTX("vert.x"),
-	NODEJS("nodejs-centos");
+	NODEJS("nodejs-centos"),
+	NONE("none");
 
 	private String stack;
 
