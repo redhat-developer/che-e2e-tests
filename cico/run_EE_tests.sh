@@ -13,10 +13,6 @@ if [[ -z "${OSO_MASTER_URL}" ]]; then
   echo "OSO Master URL env var is empty"
   exit 1
 fi
-if [[ -z "${OSO_NAMESPACE}" ]]; then
-  echo "OSO namespac env var is empty"
-  exit 1
-fi
 if [[ -z "${OSIO_USERNAME}" ]] || [[ -z "${OSIO_PASSWORD}" ]]; then
   echo "One or more credentials is not set, cannot proceed with tests"
   exit 1

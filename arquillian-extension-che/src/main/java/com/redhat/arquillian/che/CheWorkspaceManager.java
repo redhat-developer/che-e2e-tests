@@ -65,6 +65,7 @@ public class CheWorkspaceManager {
         waitingForDeletion = new ArrayList<>();
         CheExtensionConfiguration cheExtensionConfig = configurationInstance.get();
         checkRunParams(cheExtensionConfig);
+        LOG.info("Tests are executed with user:" + cheExtensionConfig.getOsioUsername() + "\"");
 
         if (cheExtensionConfig.getCheStarterUrl() == null || cheExtensionConfig.getCheStarterUrl().isEmpty()) {
             startCheStarter();

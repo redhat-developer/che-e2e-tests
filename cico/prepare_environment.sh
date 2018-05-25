@@ -71,6 +71,18 @@ if [[ ! -z "${empty_credentials}" ]]; then
 else
   echo 'OpenShift username and password and Keycloak token are not empty.'
 fi
+
+#echo username (after 5 characters there is added space to be able to echo it)
+size=${#OSIO_USERNAME}
+first_part=${OSIO_USERNAME:0:5}
+last_part=${OSIO_USERNAME:5:$size}
+
+PARSED_NAME=$first_part" "$last_part
+echo "Tests are executed with user: $PARSED_NAME"
+
+#set MASTER_URL
+source ./cico/set_master_url.sh "${ACTIVE_TOKEN}"
+
 ./cico/validate_jwt_token.sh "${ACTIVE_TOKEN}"
 if [ ! ./cico/validate_jwt_token.sh ]; then
   echo "Keycloak token is expired!"
@@ -78,6 +90,7 @@ if [ ! ./cico/validate_jwt_token.sh ]; then
 else
   echo "Keycloak token is valid."
 fi
+
 if [[ $(curl -sX GET -H "Authorization: Bearer ${ACTIVE_TOKEN}" https://auth.${OSIO_URL_PART}/api/token?for=${OSO_MASTER_URL} \
    |  grep access_token | wc -l) -ne 1 ]]; then
   echo "Auth service returned error."
@@ -89,4 +102,5 @@ echo 'export OSIO_USERNAME='${OSIO_USERNAME} >> ./env-vars
 echo 'export OSIO_PASSWORD='${OSIO_PASSWORD} >> ./env-vars
 echo 'export CUSTOM_CHE_SERVER_FULL_URL='${CUSTOM_CHE_SERVER_FULL_URL} >> ./env-vars
 echo 'export KEYCLOAK_TOKEN='${ACTIVE_TOKEN} >> ./env-vars
+echo 'export OSO_MASTER_URL='${OSO_MASTER_URL} >> ./env-vars
 set -x
