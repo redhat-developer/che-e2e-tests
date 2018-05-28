@@ -13,6 +13,7 @@ package com.redhat.arquillian.che.service;
 import java.io.IOException;
 import java.util.List;
 
+import com.jayway.jsonpath.JsonPathException;
 import com.redhat.arquillian.che.config.CheExtensionConfiguration;
 import com.redhat.arquillian.che.resource.Stack;
 import com.redhat.arquillian.che.resource.StackService;
@@ -95,8 +96,8 @@ public class CheWorkspaceService {
         String type;
         try{
              type = JsonPath.read(jsonDocument, path);
-        }catch (RuntimeException e){
-            //no stack type setted
+        }catch (JsonPathException e){
+            //no stack type set
             type = "none";
         }
         return StackService.getStackType(type);

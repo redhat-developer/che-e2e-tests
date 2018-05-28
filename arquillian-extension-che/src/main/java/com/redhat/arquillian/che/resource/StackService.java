@@ -15,18 +15,26 @@ import com.redhat.arquillian.che.util.Constants;
 public class StackService {
 
 	public static String getPathOfJsonConfig(Stack stack){
-		if (stack == Stack.VERTX)
+		if (stack == Stack.VERTX){
 			return Constants.CREATE_WORKSPACE_REQUEST_VERTX_JSON;
-		if (stack == Stack.NODEJS)
+		}
+		if (stack == Stack.NODEJS){
 			return Constants.CREATE_WORKSPACE_REQUEST_NODEJS_JSON;
+		}
 		return null;
 
 	}
 
 	public static Stack getStackType(String projectType){
-		if(projectType.equals("maven")) return Stack.VERTX;
-		if(projectType.equals("node-js")) return Stack.NODEJS;
-		if(projectType.equals("none")) return Stack.NONE;
+		if(projectType.equals("maven")) {
+			return Stack.VERTX;
+		}
+		if(projectType.equals("node-js")) {
+			return Stack.NODEJS;
+		}
+		if(projectType.equals("none")) {
+			return Stack.NONE;
+		}
 		return null;
 	}
 }

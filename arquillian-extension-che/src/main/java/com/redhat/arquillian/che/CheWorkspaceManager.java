@@ -97,8 +97,8 @@ public class CheWorkspaceManager {
             if (setRunningWorkspace(workspaceAnnotation)) { //running workspace was found and set to producer
                 createdWkspc = cheWorkspaceInstanceProducer.get();
                 if (!(createdWkspc.getStack().equals(workspaceAnnotation.stackID()))) {
+                    LOG.info("Running workspace has wrong stack. Creating new workspace.");
                     CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
-                    waitingForDeletion.add(cheWorkspaceInstanceProducer.get());
                     createWorkspace(workspaceAnnotation);
                     LOG.info("Workspace " + createdWkspc.getName() + " created and started.");
                 }
@@ -124,11 +124,11 @@ public class CheWorkspaceManager {
 
     private boolean setRunningWorkspace(Workspace annotation) {
         CheWorkspace workspace = CheWorkspaceService.getRunningWorkspace();
-        if (workspace == null || workspace.getStack().equals(Stack.NONE)) {
+        if (workspace == null) {
             LOG.info("None suitable running workspace found - creating new one.");
             return false;
         } else {
-            LOG.info("Running workspace found - reusing.");
+            LOG.info("Running workspace found.");
             cheWorkspaceInstanceProducer.set(workspace);
         }
         return true;
@@ -220,28 +220,26 @@ public class CheWorkspaceManager {
     public void cleanUp(@Observes AfterSuite event) {
         LOG.info("All tests were executed, cleaning up.");
         CheExtensionConfiguration config = configurationInstance.get();
-        //if run with created workspace - will not delete it in the end
-        if (isNotEmpty(config.getCheWorkspaceName())) {
-            return;
-        }
         CheWorkspace workspace = cheWorkspaceInstanceProducer.get();
         if (workspace.isDeleted()) {
             LOG.info("Skipping workspace deletion - workspace is already deleted.");
             return;
         }
-        if (workspace != null && !config.getPreserveWorkspace()) {
-            String workspaceStatus = CheWorkspaceService.getWorkspaceStatus(workspace, bearerToken);
-            if (workspaceStatus.equals(CheWorkspaceStatus.RUNNING.getStatus())) {
-                LOG.info("Stopping " + workspace);
-                CheWorkspaceService.stopWorkspace(workspace, bearerToken);
+        if (!config.getPreserveWorkspace()) {
+            if(workspace != null) {
+                String workspaceStatus = CheWorkspaceService.getWorkspaceStatus(workspace, bearerToken);
+                if (workspaceStatus.equals(CheWorkspaceStatus.RUNNING.getStatus())) {
+                    LOG.info("Stopping " + workspace);
+                    CheWorkspaceService.stopWorkspace(workspace, bearerToken);
+                    waitingForDeletion.add(workspace);
+                }
             }
             LOG.info("Deleting workspaces.");
-            CheWorkspaceService.deleteWorkspace(workspace, bearerToken);
             for(CheWorkspace wkspc : waitingForDeletion){
                 CheWorkspaceService.deleteWorkspace(wkspc, bearerToken);
             }
         } else {
-            LOG.info("Skipping workspace deletion - attribute preserve workspace is true.");
+            LOG.info("Skipping workspaces deletion - attribute preserve workspace is true.");
         }
     }
 
