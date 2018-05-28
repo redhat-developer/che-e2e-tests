@@ -24,8 +24,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.ui.Sleeper;
 
 import redhat.che.functional.tests.fragments.EditorPart;
 import redhat.che.functional.tests.fragments.Project;
@@ -106,7 +106,6 @@ public abstract class AbstractCheFunctionalTest {
     private void openBrowser(CheWorkspace wkspc) {
         LOG.info("Opening browser");
         driver.get(wkspc.getIdeLink());
-//        driver.manage().window().maximize(); // Causes crash with Selenium on Xvfb - no window manager present
         try {
             Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS).until().element(usernameField).is().visible();
             login();

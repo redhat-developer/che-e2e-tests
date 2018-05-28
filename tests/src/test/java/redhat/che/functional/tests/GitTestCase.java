@@ -100,9 +100,7 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         editorPart.tabsPanel().waitUntilActiveTabHasName("README.md");
         String stringToAdd = "changes added on: " + new Date().toInstant().toEpochMilli();
         LOG.info("Writing string to README.md: \""+stringToAdd+"\"");
-        takeScreenshot("beforeWritingText");
         editorPart.codeEditor().writeIntoElementContainingString(stringToAdd, "changes added on:");
-        takeScreenshot("afterWritingText");
         mainMenuPanel.clickGit();
         gitPopupTopMenu.addToIndex();
         bottomInfoPanel.tabsPanel().waitUntilFocusedTabHasName(BottomInfoPanel.TabNames.TAB_GIT_ADD_TO_INDEX);
@@ -110,7 +108,7 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         	bottomInfoPanel.waitUntilConsolePartContains(BottomInfoPanel.FixedConsoleText.GIT_ADDED_TO_INDEX_TEXT);
         }catch (TimeoutException ex) {
         	LOG.error("Failure to edit file", ex);
-        	fail();
+        	fail("Failure to edit file");
         }
     }
 
@@ -142,29 +140,23 @@ public class GitTestCase extends AbstractCheFunctionalTest {
         try {
         	popup.waitForPopup("Pushed to origin");
         }catch (TimeoutException ex) {
+        	// Push failed. Try to reimport github token and try again
         	LOG.error("Popup didn't show up", ex); 
-        	infoPanel.getNotificationManager();//open notification pane to see the error on screenshot
-        	//try it again:
-        	
-        	//Try to reimport github token:
+        	infoPanel.getNotificationManager(); //open notification pane to see the error on screenshot
+      
         	provider.reimportGithubToken();
         	//wait for 10 seconds
-        	int n=0;
-        	while (true) {
-        		LOG.info("Sleeping for "+n+" seconds...");
-        		n++;
-        		try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-        	}
-//            mainMenuPanel.clickGit();
-//            gitPopupTopMenu.push();
-//            gitPushWindow.push();
-//            popup.waitForPopup("Pushed to origin");
-//            throw new RuntimeException("Second try PUSH was successfull");
+        	try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+        	// Push again
+            mainMenuPanel.clickGit();
+            gitPopupTopMenu.push();
+            gitPushWindow.push();
+            popup.waitForPopup("Pushed to origin");
+            throw new RuntimeException("Second try PUSH was successfull");
         }
     }
 }

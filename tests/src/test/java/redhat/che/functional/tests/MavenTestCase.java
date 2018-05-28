@@ -59,9 +59,6 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
 
     @FindBy(id = "ask-dialog-ok")
     private WebElement okButton;
-
-//    @ArquillianResource
-//    private Recorder recorder;
     
     private final String testName = "buildTest";
     private final String command = "cd ${current.project.path} && scl enable rh-maven33 'mvn clean install'";
@@ -76,7 +73,6 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     public void deleteCommand(){
         commandsManager.removeCommand(testName);
         new Actions(driver).click(okButton).perform();
-//        recorder.stopRecording();
     }
 
     /**
@@ -85,18 +81,14 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
     @Test
     public void test_maven_build() {
         //creating build command in left commands panel
-//    	recorder.startRecording();
     	takeScreenshot("startMavenBuild");
         if (!commandsManager.isCommandsExplorerOpen()) {
             leftBar.openCommandsPart();
         }
-        takeScreenshot("commandsPartOpened");
         commandsManager.openEditPanelForAddingBuildCommand();
         commandsEditor.waitTillEditorVisible();
-        takeScreenshot("editorShouldBeVisible");
         commandsEditor.addNewCommand(testName, command);
         commandsEditor.runOpenedCommand();
-//        recorder.stopRecording();
 
         //wait for end - if build first time, it last longer -> increasing timeout
         //further increased timeout. test failed just because build took longer.
@@ -104,17 +96,7 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
         try {
         	buildSuccess.getText();
         }catch (NoSuchElementException ex) {
-        	int n=0;
-        	while (true) {
-        		LOG.info("Sleeping for "+n+" seconds... (mavenTestCase)");
-        		n++;
-        		try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-        	}
+        	LOG.error("Unable to obtain element.", ex);
         }
         Assert.assertTrue(buildSuccess.isDisplayed());
     }

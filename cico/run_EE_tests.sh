@@ -22,28 +22,6 @@ if [[ -z "${OSIO_USERNAME}" ]] || [[ -z "${OSIO_PASSWORD}" ]]; then
   exit 1
 fi
 
-#check token
-TOKEN=$KEYCLOAK_TOKEN
-TOKEN_PARTS_INDEX=0
-IFS='.' read -ra TOKEN_PARTS <<< "${TOKEN}"
-for i in "${TOKEN_PARTS[@]}"; do
-    TOKEN_PARTS_INDEX=$((TOKEN_PARTS_INDEX + 1))
-done
-echo "Active token has $TOKEN_PARTS_INDEX sections."
-if [[ ! TOKEN_PARTS_INDEX -eq 3 ]]; then
-  echo "JWT token parse failed!"
-  exit 1
-fi
-echo "MD5:$(echo -n "${TOKEN}" | md5sum | awk '{print $1}')"
-TOKEN_EXP=$(echo "${TOKEN_PARTS[1]}" | base64 -d - 2>/dev/null | ./jq .exp)
-EMAIL=$(echo "${TOKEN_PARTS[1]}" | base64 -d - 2>/dev/null | ./jq .email)
-CURRENT_UNIX_TIME=$(date +%s)
-echo "Active token exp:${TOKEN_EXP}"
-echo "Active token exp:${EMAIL}"
-echo "Current time in mils:${CURRENT_UNIX_TIME}"
-
-#end check token
-
 cd /home/fabric8/che
 export DISPLAY=:99
 mvn clean install -DskipTests

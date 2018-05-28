@@ -16,7 +16,6 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.graphene.fragment.Root;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -42,22 +41,7 @@ public class TabsPanel {
     		LOG.info("Requested tab is already active");
     	}else {
     		String selector = String.format(">div:contains('%s')", tabTitle);
-    		try {
     		Graphene.waitGui().until().element(ByJQuery.selector(selector)).is().clickable();
-    		}catch(TimeoutException ex) {
-    			LOG.info("Timeout",ex);
-            	int n=0;
-            	while (true) {
-            		LOG.info("Sleeping for "+n+" seconds... Timeout switching to tab "+tabTitle);
-            		n++;
-            		try {
-    					Thread.sleep(1000);
-    				} catch (InterruptedException e) {
-    					// TODO Auto-generated catch block
-    					e.printStackTrace();
-    				}
-            	}
-    		}
     		WebElement requestedTab = driver.findElement(ByJQuery.selector(selector));
     		Graphene.guardAjax(requestedTab).click();
     	}

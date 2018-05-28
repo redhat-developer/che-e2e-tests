@@ -10,13 +10,7 @@
  */
 package redhat.che.functional.tests;
 
-import com.redhat.arquillian.che.annotations.Workspace;
-import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
-import com.redhat.arquillian.che.resource.Stack;
-import com.redhat.arquillian.che.rest.RequestType;
-import com.redhat.arquillian.che.rest.RestClient;
-
-import okhttp3.Response;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
@@ -26,15 +20,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+
+import com.redhat.arquillian.che.annotations.Workspace;
+import com.redhat.arquillian.che.resource.Stack;
+
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
-
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
 @Workspace(stackID = Stack.VERTX)
@@ -64,13 +56,12 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
     }
 
     @After
-    public void deleteDependency() throws IOException {
+    public void deleteDependency() {
         editorPart.codeEditor().hideErrors(pomExpectedErrorLine);
         editorPart.codeEditor().setCursorToLine(pomInjectionEntryPoint);
         editorPart.codeEditor().deleteNextLines(5);
         editorPart.codeEditor().waitUnitlPomDependencyIsNotVisible();
         editorPart.tabsPanel().waintUntilFocusedTabSaves();
-        
     }
 
     @Test
@@ -84,10 +75,6 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
         if (isProdPreview()) {
             Assert.assertFalse(bayesianErrorNotVisible, annotationFound);
         } else {
-        	if (!annotationFound) {
-        		LOG.info("Annotation not found");
-        		fail("Annotation not found");
-        	}
             Assert.assertTrue("Annotation error is not visible.", annotationFound);
         }
 
@@ -105,18 +92,9 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
         }
     }
 
-    private void openPomXml() {
-        vertxProject.getResource("pom.xml").open();
-        try {
-        	takeScreenshot("beforeCurrentLine");
-	        Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS).until().element(currentLine).is().visible();
-	        takeScreenshot("afterCurrentLine-success");
-	        LOG.info("CURRENT LINE: "+currentLine.getText());
-        }catch (TimeoutException ex) {
-        	takeScreenshot("afterCurrentLine-failure");
-        	takeScreenshot("uanbleToFindCurrentLine");
-        	LOG.error("Unable to find currentLine element", ex);
-        }
-    }
+	private void openPomXml() {
+		vertxProject.getResource("pom.xml").open();
+		Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS).until().element(currentLine).is().visible();
+	}
 
 }

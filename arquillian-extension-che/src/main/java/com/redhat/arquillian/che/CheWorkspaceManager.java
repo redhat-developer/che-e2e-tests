@@ -148,29 +148,33 @@ public class CheWorkspaceManager {
         
         cleanupPreferences();
     }
-    
-    /**
-   	 * 
-   	 */
-   	private void cleanupPreferences() {
-   		// TODO Auto-generated method stub
-   		setRunningWorkspace(); // We don't care about outcome of this. 
-   		RestClient workspaceConnection = new RestClient(cheWorkspaceInstanceProducer.get().getSelfLink());
-   		Response response = workspaceConnection.sendRequest(null, RequestType.GET, null, CheWorkspaceProvider.getConfiguration().getAuthorizationToken());
-   		Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
-   		//$.runtime.machines.dev-machine.servers.wsagent/http.url
-   		String wsagentApiUrl;
-   		try {
-   		wsagentApiUrl = (String)JsonPath.read(jsonDocument, "$.runtime.machines.dev-machine.servers.wsagent/http.url");
-   		}catch(PathNotFoundException ex) {
-   			LOG.error("Path not found", ex);
-   			throw ex;
-   		}
-   		String machineToken = (String)JsonPath.read(jsonDocument, "$.runtime.machineToken");
-   		RestClient wsAgentRestClient = new RestClient(wsagentApiUrl);
-   		wsAgentRestClient.sendRequest("/project/.che", RequestType.DELETE, null, machineToken);
-   		
-   	}
+
+	/**
+	 * Obtains machine token (using wsmaster API) and then uses that to delete
+	 * /project/.che directory (where preferences are stored)
+	 * 
+	 */
+	private void cleanupPreferences() {
+		// TODO Auto-generated method stub
+		setRunningWorkspace(); // We don't care about outcome of this, we just need current workspace to be set.
+		RestClient workspaceConnection = new RestClient(cheWorkspaceInstanceProducer.get().getSelfLink());
+		Response response = workspaceConnection.sendRequest(null, RequestType.GET, null,
+				CheWorkspaceProvider.getConfiguration().getAuthorizationToken());
+		Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
+		// $.runtime.machines.dev-machine.servers.wsagent/http.url
+		String wsagentApiUrl;
+		try {
+			wsagentApiUrl = (String) JsonPath.read(jsonDocument,
+					"$.runtime.machines.dev-machine.servers.wsagent/http.url");
+		} catch (PathNotFoundException ex) {
+			LOG.error("Path not found", ex);
+			throw ex;
+		}
+		String machineToken = (String) JsonPath.read(jsonDocument, "$.runtime.machineToken");
+		RestClient wsAgentRestClient = new RestClient(wsagentApiUrl);
+		wsAgentRestClient.sendRequest("/project/.che", RequestType.DELETE, null, machineToken);
+
+	}
 
     private void createWorkspace(Workspace workspaceAnnotation) {
         CheWorkspaceProvider provider = cheWorkspaceProviderInstanceProducer.get();
@@ -199,7 +203,6 @@ public class CheWorkspaceManager {
                     ? "https://rhche." + configurationInstance.get().getOsioUrlPart()
                     : configurationInstance.get().getCustomCheServerFullURL()
             );
-            LOG.info(props.toString());
             EmbeddedMaven
                     .forProject(cheStarterDir.getAbsolutePath() + File.separator + "pom.xml")
                     .useMaven3Version("3.5.2")
