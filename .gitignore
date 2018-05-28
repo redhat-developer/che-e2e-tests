@@ -8,3 +8,4 @@ che-functional-tests-parent.iml
 tests/che-functional-tests.iml
 arquillian-extension-che/arquillian-extension-che.iml
 che-start-workspace/jenkins-job/jenkins_jobs.ini
+/.vscode/

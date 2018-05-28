@@ -85,6 +85,7 @@ if [[ $(curl -sX GET -H "Authorization: Bearer ${ACTIVE_TOKEN}" https://auth.${O
 else
   echo "Keycloak token is alive. Proceeding with EE tests."
 fi
+
 echo 'export OSIO_USERNAME='${OSIO_USERNAME} >> ./env-vars
 echo 'export OSIO_PASSWORD='${OSIO_PASSWORD} >> ./env-vars
 echo 'export CUSTOM_CHE_SERVER_FULL_URL='${CUSTOM_CHE_SERVER_FULL_URL} >> ./env-vars

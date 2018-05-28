@@ -36,10 +36,10 @@ public class CheWorkspaceProvider {
 
     private static String cheStarterURL;
     private static String openShiftMasterURL;
-    private static String openshiftToken;
+//    private static String openshiftToken;
     private static String keycloakToken;
     private static String namespace;
-    private static String cheWorkspaceName;
+//    private static String cheWorkspaceName;
 
     private static CheExtensionConfiguration configuration;
 
@@ -49,10 +49,10 @@ public class CheWorkspaceProvider {
         openShiftMasterURL = config.getCustomCheServerFullURL().isEmpty()
                 ? config.getOpenshiftMasterUrl()
                 : config.getCustomCheServerFullURL();
-        openshiftToken = config.getOpenshiftToken();
+//        openshiftToken = config.getOpenshiftToken();
         keycloakToken = config.getKeycloakToken();
         namespace = config.getOpenshiftNamespace();
-        cheWorkspaceName = config.getCheWorkspaceName();
+//        cheWorkspaceName = config.getCheWorkspaceName();
     }
 
     /**
@@ -156,5 +156,21 @@ public class CheWorkspaceProvider {
         }
         cheServerClient.close();
     }
+    
+    /**
+     * Uses auth API to obtain github token, which is consequently set using che-server API.
+     */
+	public void reimportGithubToken() {
+		RestClient authClient = new RestClient("https://auth." + configuration.getOsioUrlPart() + "/");
+		Response authResponse = authClient.sendRequest("api/token?for=https://github.com", RequestType.GET, null,
+				keycloakToken, (QueryParam[]) null);
+		Object jsonObject = CheWorkspaceService.getDocumentFromResponse(authResponse);
+		String githubToken = JsonPath.read(jsonObject, "$.access_token");
+		RestClient cheClient = new RestClient("https://rhche." + configuration.getOsioUrlPart() + "/");
+		String jsonRequestBody = "{\"token\":\"" + githubToken + "\"}";
+		Response cheResponse = cheClient.sendRequest("api/token/github", RequestType.POST, jsonRequestBody,
+				keycloakToken, (QueryParam[]) null);
+		LOG.info("Setting new github token response: " + cheResponse.code());
+	}
 
 }

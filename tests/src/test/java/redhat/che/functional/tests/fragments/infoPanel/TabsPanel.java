@@ -40,7 +40,9 @@ public class TabsPanel {
     	if (focusedTab.getText().equals(tabTitle)) {
     		LOG.info("Requested tab is already active");
     	}else {
-    		WebElement requestedTab = driver.findElement(ByJQuery.selector(String.format(">div:contains('%s')", tabTitle)));
+    		String selector = String.format(">div:contains('%s')", tabTitle);
+    		Graphene.waitGui().until().element(ByJQuery.selector(selector)).is().clickable();
+    		WebElement requestedTab = driver.findElement(ByJQuery.selector(selector));
     		Graphene.guardAjax(requestedTab).click();
     	}
     }

@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
-@Workspace(stackID = Stack.VERTX, removeAfterTest = true, requireNewWorkspace = true)
+@Workspace(stackID = Stack.VERTX, requireNewWorkspace = true)
 public class VertxPreviewUrlTestCase extends AbstractCheFunctionalTest {
     private static final Logger LOG = Logger.getLogger(VertxPreviewUrlTestCase.class);
 

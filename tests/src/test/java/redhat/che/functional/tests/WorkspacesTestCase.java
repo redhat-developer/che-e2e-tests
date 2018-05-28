@@ -71,7 +71,7 @@ public class WorkspacesTestCase extends AbstractCheFunctionalTest{
         LOG.info("Creating second workspace");
         secondWorkspace = provider.createCheWorkspace(null);
         CheWorkspaceService.waitUntilWorkspaceGetsToState(secondWorkspace, runningState, token);
-        LOG.info("Second workspace should be started");
+        LOG.info("Second workspace is running");
 
         status = CheWorkspaceService.getWorkspaceStatus(secondWorkspace, token);
         Assert.assertEquals("Second workspace status should be RUNNING but is" + status, runningState, status);

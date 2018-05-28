@@ -42,6 +42,7 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
     public void setEnvironment(){
         LOG.info("Starting: " + this.getClass().getName());
         openBrowser();
+        waitUntilProjectImported("Project web-nodejs-sample imported", 30);
     }
 
     @After

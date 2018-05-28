@@ -24,7 +24,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.FindBy;
+
 import redhat.che.functional.tests.fragments.EditorPart;
 import redhat.che.functional.tests.fragments.Project;
 import redhat.che.functional.tests.fragments.infoPanel.ConsolesPanel;
@@ -104,7 +106,6 @@ public abstract class AbstractCheFunctionalTest {
     private void openBrowser(CheWorkspace wkspc) {
         LOG.info("Opening browser");
         driver.get(wkspc.getIdeLink());
-//        driver.manage().window().maximize(); // Causes crash with Selenium on Xvfb - no window manager present
         try {
             Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS).until().element(usernameField).is().visible();
             login();
@@ -141,7 +142,7 @@ public abstract class AbstractCheFunctionalTest {
 		ConsolesPanel consolesPanel = infoPanel.getConsolesPanel();
 		consolesPanel.activateTab("Workspace Status");
 		WorkspaceStatusPage workspaceStatusPage = consolesPanel.getWorkspaceStatusPage();
-		Graphene.waitModel().withTimeout(25, TimeUnit.SECONDS).until(d -> workspaceStatusPage.isWorkspaceRunning());
+		Graphene.waitModel().withTimeout(120, TimeUnit.SECONDS).until(d -> workspaceStatusPage.isWorkspaceRunning());
 	}
 
 	private void waitUntilAllVisiblePopupsDisappear() {

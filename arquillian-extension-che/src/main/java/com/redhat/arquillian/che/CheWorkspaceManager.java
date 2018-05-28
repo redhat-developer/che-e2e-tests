@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.redhat.arquillian.che;
 
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import com.redhat.arquillian.che.annotations.Workspace;
 import com.redhat.arquillian.che.config.CheExtensionConfiguration;
 import com.redhat.arquillian.che.provider.CheWorkspaceProvider;
@@ -17,7 +19,12 @@ import com.redhat.arquillian.che.resource.CheWorkspace;
 import com.redhat.arquillian.che.resource.CheWorkspaceStatus;
 import com.redhat.arquillian.che.resource.Stack;
 import com.redhat.arquillian.che.resource.StackService;
+import com.redhat.arquillian.che.rest.RequestType;
+import com.redhat.arquillian.che.rest.RestClient;
 import com.redhat.arquillian.che.service.CheWorkspaceService;
+
+import okhttp3.Response;
+
 import org.apache.log4j.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -94,7 +101,7 @@ public class CheWorkspaceManager {
         CheWorkspace createdWkspc = cheWorkspaceInstanceProducer.get();
 
         if (createdWkspc == null || createdWkspc.isDeleted()) {
-            if (setRunningWorkspace(workspaceAnnotation)) { //running workspace was found and set to producer
+            if (setRunningWorkspace()) { //running workspace was found and set to producer
                 createdWkspc = cheWorkspaceInstanceProducer.get();
                 if (!(createdWkspc.getStack().equals(workspaceAnnotation.stackID()))) {
                     LOG.info("Running workspace has wrong stack. Creating new workspace.");
@@ -122,7 +129,7 @@ public class CheWorkspaceManager {
         }
     }
 
-    private boolean setRunningWorkspace(Workspace annotation) {
+    private boolean setRunningWorkspace() {
         CheWorkspace workspace = CheWorkspaceService.getRunningWorkspace();
         if (workspace == null) {
             LOG.info("None suitable running workspace found - creating new one.");
@@ -140,7 +147,36 @@ public class CheWorkspaceManager {
             CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
             waitingForDeletion.add(cheWorkspaceInstanceProducer.get());
         }
+        
+        cleanupPreferences();
     }
+
+	/**
+	 * Obtains machine token (using wsmaster API) and then uses that to delete
+	 * /project/.che directory (where preferences are stored)
+	 * 
+	 */
+	private void cleanupPreferences() {
+		// TODO Auto-generated method stub
+		setRunningWorkspace(); // We don't care about outcome of this, we just need current workspace to be set.
+		RestClient workspaceConnection = new RestClient(cheWorkspaceInstanceProducer.get().getSelfLink());
+		Response response = workspaceConnection.sendRequest(null, RequestType.GET, null,
+				CheWorkspaceProvider.getConfiguration().getAuthorizationToken());
+		Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
+		// $.runtime.machines.dev-machine.servers.wsagent/http.url
+		String wsagentApiUrl;
+		try {
+			wsagentApiUrl = (String) JsonPath.read(jsonDocument,
+					"$.runtime.machines.dev-machine.servers.wsagent/http.url");
+		} catch (PathNotFoundException ex) {
+			LOG.error("Path not found", ex);
+			throw ex;
+		}
+		String machineToken = (String) JsonPath.read(jsonDocument, "$.runtime.machineToken");
+		RestClient wsAgentRestClient = new RestClient(wsagentApiUrl);
+		wsAgentRestClient.sendRequest("/project/.che", RequestType.DELETE, null, machineToken);
+
+	}
 
     private void createWorkspace(Workspace workspaceAnnotation) {
         CheWorkspaceProvider provider = cheWorkspaceProviderInstanceProducer.get();

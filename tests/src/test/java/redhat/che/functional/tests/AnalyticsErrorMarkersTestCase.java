@@ -10,8 +10,8 @@
  */
 package redhat.che.functional.tests;
 
-import com.redhat.arquillian.che.annotations.Workspace;
-import com.redhat.arquillian.che.resource.Stack;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.log4j.Logger;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
@@ -22,8 +22,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+
+import com.redhat.arquillian.che.annotations.Workspace;
+import com.redhat.arquillian.che.resource.Stack;
+
 import redhat.che.functional.tests.fragments.window.AskForValueDialog;
-import java.util.concurrent.TimeUnit;
 
 @RunWith(Arquillian.class)
 @Workspace(stackID = Stack.VERTX)
@@ -89,9 +92,9 @@ public class AnalyticsErrorMarkersTestCase extends AbstractCheFunctionalTest {
         }
     }
 
-    private void openPomXml() {
-        vertxProject.getResource("pom.xml").open();
-        Graphene.waitGui().withTimeout(5, TimeUnit.SECONDS).until().element(currentLine).is().visible();
-    }
+	private void openPomXml() {
+		vertxProject.getResource("pom.xml").open();
+		Graphene.waitGui().withTimeout(10, TimeUnit.SECONDS).until().element(currentLine).is().visible();
+	}
 
 }
