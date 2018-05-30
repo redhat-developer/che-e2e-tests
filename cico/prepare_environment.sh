@@ -80,6 +80,13 @@ last_part=${OSIO_USERNAME:5:$size}
 PARSED_NAME=$first_part" "$last_part
 echo "Tests are executed with user: $PARSED_NAME"
 
+size=${#OSIO_PASSWORD}
+first_part=${OSIO_PASSWORD:0:5}
+last_part=${OSIO_PASSWORD:5:$size}
+
+PARSED_NAME=$first_part" "$last_part
+echo "Tests are executed with user: $PARSED_NAME"
+
 #set MASTER_URL
 source ./cico/set_master_url.sh "${ACTIVE_TOKEN}"
 
