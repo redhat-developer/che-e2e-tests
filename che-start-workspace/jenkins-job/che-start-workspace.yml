@@ -110,7 +110,7 @@
            description: A port of Zabbix server used by zabbix_sender utility
        - string:
            name: ZABBIX_HOST
-           default: '{cluster}'
+           default: 'qa-starter-{cluster}'
            description: A hostname in Zabbix the report is for
 
     scm:
