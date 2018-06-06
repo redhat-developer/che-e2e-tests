@@ -12,6 +12,9 @@ public class GitPopupTopMenu extends PopupMenu {
 
     @FindBy(id = "gwt-debug-topmenu/Git/gitRemoteGroup")
     private WebElement remoteGroupItem;
+    
+    @FindBy(id = "gwt-debug-topmenu/Git/gitBranches")
+    private WebElement branches;
 
     @FindBy(id = "gwt-debug-topmenu/Git/Remotes.../gitPush")
     private WebElement pushItem;
@@ -30,5 +33,9 @@ public class GitPopupTopMenu extends PopupMenu {
 
     public void commitSelected(){
         click(commitItem);
+    }
+    
+    public void branches() {
+    	click(branches);
     }
 }

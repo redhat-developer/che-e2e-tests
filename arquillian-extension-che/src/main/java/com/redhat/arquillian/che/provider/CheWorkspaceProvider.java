@@ -151,20 +151,10 @@ public class CheWorkspaceProvider {
         cheServerClient.close();
     }
     
-    /**
-     * Uses auth API to obtain github token, which is consequently set using che-server API.
-     */
-	public void reimportGithubToken() {
-		RestClient authClient = new RestClient("https://auth." + configuration.getOsioUrlPart() + "/");
+    public Object callGetGithubTokenEndpoint() {
+    	RestClient authClient = new RestClient("https://auth." + configuration.getOsioUrlPart() + "/");
 		Response authResponse = authClient.sendRequest("api/token?for=https://github.com", RequestType.GET, null,
 				keycloakToken, (QueryParam[]) null);
-		Object jsonObject = CheWorkspaceService.getDocumentFromResponse(authResponse);
-		String githubToken = JsonPath.read(jsonObject, "$.access_token");
-		RestClient cheClient = new RestClient("https://rhche." + configuration.getOsioUrlPart() + "/");
-		String jsonRequestBody = "{\"token\":\"" + githubToken + "\"}";
-		Response cheResponse = cheClient.sendRequest("api/token/github", RequestType.POST, jsonRequestBody,
-				keycloakToken, (QueryParam[]) null);
-		LOG.info("Setting new github token response: " + cheResponse.code());
-	}
-
+		return CheWorkspaceService.getDocumentFromResponse(authResponse);
+    }
 }
