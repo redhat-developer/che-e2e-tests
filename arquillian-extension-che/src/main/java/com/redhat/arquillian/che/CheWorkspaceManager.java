@@ -159,6 +159,7 @@ public class CheWorkspaceManager {
 	 */
 	private void cleanupPreferences() {
 		// TODO Auto-generated method stub
+		LOG.info("Cleaning up preferences");
 		RestClient workspaceConnection = new RestClient(cheWorkspaceInstanceProducer.get().getSelfLink());
 		Response response = workspaceConnection.sendRequest(null, RequestType.GET, null,
 				CheWorkspaceProvider.getConfiguration().getAuthorizationToken());

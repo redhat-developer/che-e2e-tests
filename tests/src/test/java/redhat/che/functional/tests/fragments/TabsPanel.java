@@ -10,25 +10,26 @@
 */
 package redhat.che.functional.tests.fragments;
 
-import com.google.common.base.Function;
-
-import redhat.che.functional.tests.utils.ActionUtils;
-
-import org.jboss.arquillian.graphene.Graphene;
-import org.jboss.arquillian.graphene.findby.FindByJQuery;
-import org.jboss.arquillian.graphene.fragment.Root;
-import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
-
 import static org.jboss.arquillian.graphene.Graphene.waitGui;
 import static org.jboss.arquillian.graphene.Graphene.waitModel;
 
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
+import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.FindByJQuery;
+import org.jboss.arquillian.graphene.fragment.Root;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+
+import com.google.common.base.Function;
+
 public class TabsPanel {
+	
+	private static final Logger LOG = Logger.getLogger(TabsPanel.class);
 
 	@Root
 	private WebElement rootElement;
@@ -67,6 +68,13 @@ public class TabsPanel {
 	}
 	
 	public void closeAllTabs(WebDriver driver) {
+		LOG.info("Closing all tabs");
+		try {
+			Graphene.waitGui().until().element(activeTab).is().clickable();
+		}catch (NoSuchElementException ex) {
+			LOG.info("No tabs opened.");
+			return;
+		}
 		new Actions(driver).contextClick(activeTab).perform();;
 		WebElement menu = driver.findElement(By.id("menu-lock-layer-id"));
 		menu.findElement(By.id("gwt-debug-contextMenu/closeAllEditors")).click();

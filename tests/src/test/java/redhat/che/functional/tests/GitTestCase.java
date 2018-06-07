@@ -30,6 +30,7 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -91,6 +92,11 @@ public class GitTestCase extends AbstractCheFunctionalTest {
 	public static void setupClass() {
 		branchName = "Branch" + String.valueOf(new Date().getTime());
 		LOG.info("Branch name: " + branchName);
+	}
+	
+	@After
+	public void after() {
+		editorPart.tabsPanel().closeAllTabs(driver);
 	}
 
 	@AfterClass
