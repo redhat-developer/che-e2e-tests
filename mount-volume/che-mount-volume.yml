@@ -1,0 +1,77 @@
+- job:
+    name: 'che-mount-volume'
+    project-type: freestyle
+    node: osioperf-server-1-centos7-x86_64
+    description: "Automated once-a-day performance test against production clusters"
+    properties:
+       - ownership:
+           owner: kkanova
+           co-owners:
+               - rhopp
+               - pmacik
+       - authorization:
+           anonymous:
+               - job-read
+               - job-discover
+       - build-discarder:
+           days-to-keep: 28
+
+    scm:
+        - git:
+            url: https://github.com/redhat-developer/che-functional-tests.git
+            branches:
+                - '*/master'
+    triggers:
+        - timed: H/30 * * * *
+    wrappers:
+        - credentials-binding:
+            - file:
+                credential-id: devtools-automated-tests-osiotestX
+                variable: USERS_PROPERTIES_FILE
+            - username-password-separated:
+                credential-id: osio-ci-preview-testper
+                username: USERNAME
+                password: PASSWORD
+        - workspace-cleanup:
+            dirmatch: false
+    builders:
+        - shell: |-
+            #Install oc
+            wget https://github.com/openshift/origin/releases/download/v3.7.2/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit.tar.gz
+
+            tar -xvf openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit.tar.gz
+            PATH=$PATH:$(pwd)/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit
+
+            # Install jq
+            wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+
+            mv jq-linux64 $(pwd)/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit/jq
+            chmod +x $(pwd)/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit/jq
+            cd mount-volume
+            chmod +x simple-pod.sh
+            set +e
+            ./simple-pod.sh $USERNAME $PASSWORD
+            RESULT=$?
+            set -e
+            oc get events
+            
+            #get logs
+            wget --no-check-certificate -O console-output.log ${BUILD_URL}/consoleText
+
+            #try delete pod just for sure
+            oc get pod simple-pod -o json || true
+            oc delete pod simple-pod || true
+
+            exit $RESULT
+
+    concurrent: false
+    description: null
+    disabled: false
+    publishers:
+      - email:
+          recipients: kkanova@redhat.com rhopp@redhat.com tdancs@redhat.com
+          notify-every-unstable-build: true
+      - archive:
+          artifacts: 'che-start-workspace/$JOB_NAME-$BUILD_NUMBER/*,che-start-workspace/$JOB_NAME-$BUILD_NUMBER/csv/*,che-start-workspace/$JOB_NAME-$BUILD_NUMBER/png/*'
+          allow-empty: 'true'
+          fingerprint: true
