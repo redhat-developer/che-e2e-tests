@@ -9,7 +9,6 @@
 	<modules>
 		<module>tests</module>
 		<module>arquillian-extension-che</module>
-		<module>che-server-performance</module>
 	</modules>
 
 	<properties>
