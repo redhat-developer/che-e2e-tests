@@ -1,8 +1,32 @@
-- job:
-    name: 'che-mount-volume'
-    project-type: freestyle
-    node: osioperf-server-1-centos7-x86_64
-    description: "Automated once-a-day performance test against production clusters"
+- wrapper:
+    name: user-properties-wrapper
+    wrappers:
+       - credentials-binding:
+          - file:
+              credential-id: devtools-automated-tests-osiotestX
+              variable: USERS_PROPERTIES_FILE
+
+- wrapper:
+    name: user-credentials-2a-wrapper
+    wrappers:
+       - credentials-binding:
+          - username-password-separated:
+              credential-id: osio-ci-preview-testper
+              username: USERNAME
+              password: PASSWORD
+
+- wrapper:
+    name: user-credentials-2-wrapper
+    wrappers:
+       - credentials-binding:
+          - username-password-separated:
+              credential-id: kkanova-osiotest1-2
+              username: USERNAME
+              password: PASSWORD
+
+- mount-volume-template: &mount-volume-template
+    name: 'mount-volume-template'
+    description: "Automated once-an-hour mount volume test of {cluster} cluster"
     properties:
        - ownership:
            owner: kkanova
@@ -15,7 +39,6 @@
                - job-discover
        - build-discarder:
            days-to-keep: 28
-
     scm:
         - git:
             url: https://github.com/redhat-developer/che-functional-tests.git
@@ -24,20 +47,14 @@
     triggers:
         - timed: H/30 * * * *
     wrappers:
-        - credentials-binding:
-            - file:
-                credential-id: devtools-automated-tests-osiotestX
-                variable: USERS_PROPERTIES_FILE
-            - username-password-separated:
-                credential-id: osio-ci-preview-testper
-                username: USERNAME
-                password: PASSWORD
+        - user-properties-wrapper
+        - user-credentials-{cluster}-wrapper
         - workspace-cleanup:
             dirmatch: false
     builders:
         - shell: |
             cd mount-volume
-            ./run_test.sh $USERNAME $PASSWORD
+            ./run_test.sh $USERNAME $PASSWORD $URL
     concurrent: false
     description: null
     disabled: false
@@ -49,3 +66,27 @@
           artifacts: 'mount-volume/console-output.log'
           allow-empty: 'true'
           fingerprint: true
+
+
+- job-template:
+    name: 'che-mount-volume-2'
+    project-type: freestyle
+    node: osioperf-server-1-centos7-x86_64
+    <<: *mount-volume-template
+
+- job-template:
+    name: 'che-mount-volume-2a'
+    project-type: freestyle
+    node: osioperf-server-1-centos7-x86_64
+    <<: *mount-volume-template
+
+- project:
+    name: devtools
+    disabled: false
+    jobs:
+        - 'che-mount-volume-2':
+            URL: https://api.starter-us-east-2.openshift.com:443
+            cluster: 2
+        - 'che-mount-volume-2a':
+            URL: https://api.starter-us-east-2a.openshift.com:443
+            cluster: 2a

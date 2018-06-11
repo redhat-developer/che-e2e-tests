@@ -60,7 +60,7 @@ function waitForPodToStop {
 COUNTER=1
 MAX_TRIES=5
 
-oc login https://api.starter-us-east-2.openshift.com:443 -u $1 -p $2
+oc login $3 -u $1 -p $2
 oc project $1
 
 while [[ $COUNTER -le $MAX_TRIES ]]; do
