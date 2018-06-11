@@ -35,35 +35,9 @@
         - workspace-cleanup:
             dirmatch: false
     builders:
-        - shell: |-
-            #Install oc
-            wget https://github.com/openshift/origin/releases/download/v3.7.2/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit.tar.gz
-
-            tar -xvf openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit.tar.gz
-            PATH=$PATH:$(pwd)/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit
-
-            # Install jq
-            wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
-
-            mv jq-linux64 $(pwd)/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit/jq
-            chmod +x $(pwd)/openshift-origin-client-tools-v3.7.2-282e43f-linux-64bit/jq
+        - shell: |
             cd mount-volume
-            chmod +x simple-pod.sh
-            set +e
-            ./simple-pod.sh $USERNAME $PASSWORD
-            RESULT=$?
-            set -e
-            oc get events
-            
-            #get logs
-            wget --no-check-certificate -O console-output.log ${BUILD_URL}/consoleText
-
-            #try delete pod just for sure
-            oc get pod simple-pod -o json || true
-            oc delete pod simple-pod || true
-
-            exit $RESULT
-
+            ./run_test.sh $USERNAME $PASSWORD
     concurrent: false
     description: null
     disabled: false
@@ -72,6 +46,6 @@
           recipients: kkanova@redhat.com rhopp@redhat.com tdancs@redhat.com
           notify-every-unstable-build: true
       - archive:
-          artifacts: 'che-start-workspace/$JOB_NAME-$BUILD_NUMBER/*,che-start-workspace/$JOB_NAME-$BUILD_NUMBER/csv/*,che-start-workspace/$JOB_NAME-$BUILD_NUMBER/png/*'
+          artifacts: 'mount-volume/console-output.log'
           allow-empty: 'true'
           fingerprint: true
