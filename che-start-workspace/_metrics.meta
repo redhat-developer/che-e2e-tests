@@ -1,0 +1,8 @@
+POST;createWorkspace
+DELETE;deleteWorkspace
+GET;getWorkspaceStatus
+POST;startWorkspace
+DELETE;stopWorkspace
+REPEATED_GET;timeForStartingWorkspace
+REPEATED_GET;timeForStoppingWorkspace
+REPEATED_GET;timeForRemovingPod

@@ -164,7 +164,6 @@ class TokenBehavior(TaskSet):
 		now_time_ms = "%.f" % (time.time()*1000)
 		json = bodyJson.replace("WORKSPACE_NAME", now_time_ms)
 		response = self.client.post("/api/workspace", headers = {"Authorization" : "Bearer " + self.taskUserToken, "Content-Type":"application/json"}, name = "createWorkspace", data = json, catch_response = True)
-
 		try:
 			resp_json = response.json()
 			if not response.ok:
@@ -177,7 +176,7 @@ class TokenBehavior(TaskSet):
 			response.failure("Got wrong response: [" + response.content + "]")
 
 	def startWorkspace(self, id):
-		self.log("Starting workspace id "+id)
+		self.log("Starting workspace id "+str(id))
 		response = self.client.post("/api/workspace/"+id+"/runtime",
 									headers = {"Authorization" : "Bearer " + self.taskUserToken}, name = "startWorkspace", catch_response = True)
 		try:
