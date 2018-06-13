@@ -71,13 +71,13 @@
 - job-template:
     name: 'che-mount-volume-2'
     project-type: freestyle
-    node: osioperf-server-1-centos7-x86_64
+    node: osioperf-master1
     <<: *mount-volume-template
 
 - job-template:
     name: 'che-mount-volume-2a'
     project-type: freestyle
-    node: osioperf-server-1-centos7-x86_64
+    node: osioperf-master1
     <<: *mount-volume-template
 
 - project:

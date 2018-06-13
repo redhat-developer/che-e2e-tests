@@ -56,15 +56,15 @@
            description: Che server machine address.
        - string:
            name: SSH_USER
-           default: centos
+           default: jenkins
            description: 'Locust SSH user'
        - string:
            name: SSH_WORKDIR
-           default: /home/centos
+           default: /var/lib/jenkins/osioperf
            description: 'Locust SSH workdir'
        - string:
            name: MASTER_HOST
-           default: osioperf-server-2
+           default: osioperf-master2
            description: 'Locust MASTER node'
        - choice:
            name: SLAVES
@@ -82,7 +82,7 @@
            description: A number of Locust slaves to use.
        - string:
            name: SLAVE_PREFIX
-           default: osioperf-client-
+           default: osioperf-slave
            description: A prefix for a Locust slave node address.
        - string:
            name: USERS
@@ -143,13 +143,13 @@
 - job-template:
     name: 'che-start-workspace'
     project-type: freestyle
-    node: osioperf-server-1-centos7-x86_64
+    node: osioperf-master1
     <<: *che-functional-perf-test-template
 
 - job-template:
     name: 'che-start-workspace-2a'
     project-type: freestyle
-    node: osioperf-server-1-centos7-x86_64
+    node: osioperf-master1
     <<: *che-functional-perf-test-template
 
 - project:
