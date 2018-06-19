@@ -39,6 +39,19 @@
                - job-discover
        - build-discarder:
            days-to-keep: 28
+    parameters:
+       - string:
+           name: ZABBIX_SERVER
+           default: zabbix.devshift.net
+           description: An address of Zabbix server
+       - string:
+           name: ZABBIX_PORT
+           default: '10051'
+           description: A port of Zabbix server used by zabbix_sender utility
+       - string:
+           name: MAX_TRIES
+           default: '5'
+           description: A port of Zabbix server used by zabbix_sender utility
     scm:
         - git:
             url: https://github.com/redhat-developer/che-functional-tests.git
@@ -54,7 +67,7 @@
     builders:
         - shell: |
             cd mount-volume
-            ./run_test.sh $USERNAME $PASSWORD $URL
+            ./run_test.sh $USERNAME $PASSWORD {URL}
     concurrent: false
     description: null
     disabled: false
@@ -63,7 +76,7 @@
           recipients: kkanova@redhat.com rhopp@redhat.com tdancs@redhat.com
           notify-every-unstable-build: true
       - archive:
-          artifacts: 'mount-volume/console-output.log'
+          artifacts: 'mount-volume/zabbix.log'
           allow-empty: 'true'
           fingerprint: true
 
@@ -71,13 +84,13 @@
 - job-template:
     name: 'che-mount-volume-2'
     project-type: freestyle
-    node: osioperf-master1
+    node: osioperf-master3
     <<: *mount-volume-template
 
 - job-template:
     name: 'che-mount-volume-2a'
     project-type: freestyle
-    node: osioperf-master1
+    node: osioperf-master3
     <<: *mount-volume-template
 
 - project:
