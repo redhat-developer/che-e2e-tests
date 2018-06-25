@@ -2,19 +2,18 @@
 These tests are intended to measure performance of the REST endpoints of creating/starting/stopping/deleting workspace. It serves as monitoring of service on daily basis.
 
 ## Environment
-The tested server is the OSIO (https://che.openshift.io or temporarily rhche.openshift.io).
-The clients to the tested server are deployed on the client nodes 
-of the [OsioPerf Lab](https://github.com/redhat-developer/che-functional-tests/che-start-workspace/README.md).
+The tested server is the OSIO (https://che.openshift.io or https://rhche.openshift.io).
+
 
 ## Test setup
 The test in the environment is executed with 2 tested OSIO user accounts that has a GitHub account linked.
-The user accounts are evenly spread between 2 individual client nodes of the OsioPerf Lab
-from whose the requests are sent via 2 simultaneous clients. Each simulated user sends request for creating workspace,
+Although user accounts can be spread between individual client nodes of the OsioPerf Lab, for two users it is sufficient to run the test only on master node.
+Each simulated user sends request for creating workspace,
 waits until the workspace is running, then stops the workspace and deletes it.
 
 The whole performance test suite is executed regularly once a day
-while a single run takes approximately 1.5 minutes. The summary results of each run
-are archived for 28 days by the [Jenkins](https://osioperf-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/Che/job/che-start-workspace/<build_number>/artifact/che-start-workspace/) monitoring system
+while a run of single loop (create/start/wait/stop/delete) takes approximately 1.5 minutes. The summary results of each run
+are archived for 28 days by the private Jenkins monitoring system
 to track the results' history. 
 
 ## Scenarios
@@ -32,7 +31,10 @@ From
 ```
 GET /api/authorize?response_type=code&client_id=740650a2-9c44-4db5-b067-a3d1b2cd2d01&scope=user:email&state=<STATE>&redirect_uri=https://<AUTH_SERVER_HOST>/api/status
 ```
-where `state` is generated unique UUID v4 wait for the `LOG IN` button to be clickable which indicates that the page is loaded. (in `/login` it is upto us to generate `state`, thus we use uuid, but in `/authorize` state is generated and sent by client, we don't have a restriction on that. `state` sent by client could be any string, but since state is supposed to be random enough and unique, uuid would be a good choice. But it is upto client to use it or not)
+where `state` is generated unique UUID v4 wait for the `LOG IN` button to be clickable which indicates that the page is loaded.
+(in `/login` it is upto us to generate `state`, thus we use uuid, but in `/authorize` state is generated and sent by client,
+we don't have a restriction on that. `state` sent by client could be any string, but since state is supposed to be random enough and unique,
+uuid would be a good choice. But it is upto client to use it or not)
 
 ##### *Get code*
 From clicking on the `LOG IN` button wait to be redirected to the `https://<AUTH_SERVER_HOST>/api/status?code=<CODE>&state=<STATE>`.
@@ -50,12 +52,9 @@ grant_type=authorization_code&client_id=740650a2-9c44-4db5-b067-a3d1b2cd2d01&cod
 
 From the response JSON extract the `auth_token` and `refresh_token`.
 
-##### *Login the user* (`oauth2-login-time`)
-This is computed as a sum of `oauth2-get-code-time` and `oauth2-get-token-time` values.
-
 ### Load phase
 Users try to create workspace specified by json. If workspace is created, user waits until it is started and running. Then the workspace is
-stopped and deleted. Whole proces is repeated. When time for tests runs out, all remaining workspaces are deleted.
+stopped and deleted. Whole process is repeated. When time for tests runs out, all remaining workspaces are deleted.
 
 #### *Creating workspace* (`createWorkspace`)
 Using HTTP client send:
@@ -81,7 +80,7 @@ GET /api/worksapce/<worksapce_id>
 Waiting until workspace status changes to RUNNING.
 
 HTTP client keeps sending these requests until the status of workspace is running. Time of each GET request is measured
-(getWorksapceStatus metrics) and time needed to start worksapce is measured too (timeForStartingWorksapce metrics).
+(getWorksapceStatus metrics) and time needed to start workspace is measured too (timeForStartingWorksapce metrics).
 
 #### *Stopping workspace* (`stopWorkspace`)
 Using HTTP client send:
@@ -113,4 +112,25 @@ To update jenkins job use this syntax (not working for last version of jenkins j
 ```
 sudo PYTHONHTTPSVERIFY=0 jenkins-jobs --conf jenkins_jobs.ini update job.yml
 ```
-and update jenkins_job.ini with your credentials. 
+and update jenkins_job.ini with your credentials.
+
+## Results
+
+Results of tests are sent to zabbix to create graphs. Artifacts as csv, png and log files are saved for each job on private Jenkins.
+
+## Dependencies
+
+There are two subproject which are cloned from git: common.git and openshift.loginusers.git
+
+### common
+
+This repo is responsible for test execution and environment preparation. It handles locust and generate logs and send logs to zabbix.
+
+Located here: https://github.com/pmacik/openshiftio-performance-common/
+
+### openshift.loginuser
+
+At the begining of test users have to be logged in to obtain their active/refresh tokens. This repo contains two possible approaches
+to login users. Each generates file with needed credentials.
+
+Located here: https://github.com/pmacik/openshiftio-loginusers
