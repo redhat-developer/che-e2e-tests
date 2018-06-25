@@ -124,6 +124,10 @@
            name: REPORT_CHART_HEIGHT
            default: '600'
            description: File with metrics stored.
+       - string:
+           name: ZABBIX_TESTSUITE_PREFIX
+           default: 'che-start-workspace'
+           description: Prefix of metrics
 
     scm:
         - git:
