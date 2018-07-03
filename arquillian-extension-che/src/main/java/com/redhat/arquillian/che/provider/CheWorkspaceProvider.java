@@ -94,7 +94,7 @@ public class CheWorkspaceProvider {
         response.close();
         cheStarterClient.close();
         CheWorkspace workspace = CheWorkspaceService.getWorkspaceFromDocument(jsonDocument);
-        startWorkspace(workspace);
+        CheWorkspaceService.startWorkspace(workspace);
         return workspace;
     }
 
@@ -124,7 +124,7 @@ public class CheWorkspaceProvider {
 
         }
         if(!CheWorkspaceService.getWorkspaceStatus(workspace, keycloakToken).equals(CheWorkspaceStatus.RUNNING.toString())){
-            startWorkspace(workspace);
+            CheWorkspaceService.startWorkspace(workspace);
         }
         return workspace;
     }
@@ -133,24 +133,6 @@ public class CheWorkspaceProvider {
         return configuration;
     }
 
-    private void startWorkspace(CheWorkspace workspace) {
-        Response response;
-        LOG.info("Workspace self link:" + workspace.getSelfLink());
-        RestClient cheServerClient = new RestClient(workspace.getSelfLink());
-        response = cheServerClient.sendRequest(
-                "/runtime",
-                RequestType.POST,
-                null,
-                keycloakToken
-        );
-        if (!response.isSuccessful()) {
-            throw new IllegalStateException("Che server failed to start workspace:" + response.message());
-        } else {
-            LOG.info("Start request sent successfully:" + response.message());
-        }
-        cheServerClient.close();
-    }
-    
     public Object callGetGithubTokenEndpoint() {
     	RestClient authClient = new RestClient("https://auth." + configuration.getOsioUrlPart() + "/");
 		Response authResponse = authClient.sendRequest("api/token?for=https://github.com", RequestType.GET, null,

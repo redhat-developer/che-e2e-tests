@@ -120,15 +120,8 @@ public class CheWorkspaceManager {
 
             LOG.info("Workspace " + createdWkspc.getName() + " created and started.");
         } else if (!CheWorkspaceService.getWorkspaceStatus(createdWkspc, bearerToken).equals(CheWorkspaceStatus.RUNNING.toString())) { //provided workspace is stopped
-            boolean isStarted = CheWorkspaceService.startWorkspace(createdWkspc);
-            if (isStarted) {
-                LOG.info("Workspace " + createdWkspc.getName() + " started.");
-            } else {
-                LOG.info("Can not start given workspace! Creating new one.");
-                createWorkspace(workspaceAnnotation);
-            }
+            CheWorkspaceService.startWorkspace(createdWkspc);
         }
-        
         cleanupPreferences();
     }
 
@@ -184,8 +177,6 @@ public class CheWorkspaceManager {
 
         //creating and starting new workspace
         cheWorkspaceInstanceProducer.set(provider.createCheWorkspace(StackService.getPathOfJsonConfig(workspaceAnnotation.stackID())));
-        CheWorkspaceService.waitUntilWorkspaceGetsToState(cheWorkspaceInstanceProducer.get(), CheWorkspaceStatus.RUNNING.getStatus(), bearerToken);
-
     }
 
     private void startCheStarter() {

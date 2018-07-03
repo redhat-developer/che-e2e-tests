@@ -155,25 +155,25 @@ public class CheWorkspaceService {
         return false;
     }
 
-    public static boolean startWorkspace(CheWorkspace workspace) {
+    public static void startWorkspace(CheWorkspace workspace) {
         CheExtensionConfiguration config = configurationInstance.get();
-        RestClient client = new RestClient(config.getCheStarterUrl());
-        String path = "/workspace/" + workspace.getName();
-        Response response = client.sendRequest(path, RequestType.PATCH, null, config.getKeycloakToken(),
-                new QueryParam("masterUrl",
-                        config.getCustomCheServerFullURL().isEmpty()
-                        ? config.getOpenshiftMasterUrl()
-                        : config.getCustomCheServerFullURL()),
-                new QueryParam("namespace", config.getOpenshiftNamespace())
+        Response response;
+        logger.info("Workspace self link:" + workspace.getSelfLink());
+        RestClient cheServerClient = new RestClient(workspace.getSelfLink());
+        response = cheServerClient.sendRequest(
+                "/runtime",
+                RequestType.POST,
+                null,
+                config.getKeycloakToken()
         );
-        Object jsonDocument = CheWorkspaceService.getDocumentFromResponse(response);
-        response.close();
-        client.close();
+        if (!response.isSuccessful()) {
+            throw new IllegalStateException("Che server failed to start workspace:" + response.message());
+        } else {
+            logger.info("Start request sent successfully:" + response.message());
+        }
+        cheServerClient.close();
 
-        if(CheWorkspaceService.waitUntilWorkspaceGetsToState(workspace, CheWorkspaceStatus.RUNNING.getStatus(), config.getKeycloakToken()))
-            return true;
-
-        return false;
+        CheWorkspaceService.waitUntilWorkspaceGetsToState(workspace, CheWorkspaceStatus.RUNNING.getStatus(), config.getKeycloakToken());
     }
 
     /**
@@ -212,7 +212,7 @@ public class CheWorkspaceService {
         }
     }
 
-    public static boolean waitUntilWorkspaceGetsToState(CheWorkspace workspace, String resultState,
+    public static void waitUntilWorkspaceGetsToState(CheWorkspace workspace, String resultState,
                                                      String authorizationToken) {
         RestClient client = new RestClient(workspace.getSelfLink());
         int counter = 0;
@@ -228,9 +228,11 @@ public class CheWorkspaceService {
                 //TODO: Why is this empty?
             }
             currentState = getWorkspaceStatus(client, workspace, authorizationToken);
+            logger.info("Current state: "+currentState+"     wanted: "+resultState);
             if(currentState.equals(CheWorkspaceStatus.STOPPED.toString()) && resultState.equals(CheWorkspaceStatus.RUNNING.toString())){
-                logger.info("Workspace became STOPPED - trying to start it again.");
-                return false;
+                logger.error("Workspace "+workspace.getName()+" becames "+currentState+" while starting.");
+                throw new RuntimeException("Workspace \"" + workspace.getName() + " became "+currentState+" while starting.");
+
             }
         }
 
@@ -240,7 +242,6 @@ public class CheWorkspaceService {
 			throw new RuntimeException("After waiting for " + WAIT_TIME + " seconds, workspace \""+workspace.getName()+"\" is still"
 					+ " not in state " + resultState);
 		}
-		return true;
 	}
 
     public static String getWorkspaceName(Object jsonDocument) {
