@@ -85,6 +85,9 @@ public abstract class AbstractCheFunctionalTest {
     @FindBy(id = "codenvyIdeWorkspaceViewImpl")
     private WebElement ideElement;
 
+    @FindBy(id = "gwt-debug-loaderView-iconPanel")
+    private WebElement resolvingProject;
+
     @ArquillianResource
     private static CheWorkspace workspace;
 
@@ -95,6 +98,7 @@ public abstract class AbstractCheFunctionalTest {
     private static Screenshooter screenshooter;
 
     public static final String bayesianErrorNotVisible = "Known expected bug : https://github.com/openshiftio/openshift.io/issues/2063";
+    public static final String bayesianErrorNotVisibleProd = "Known expected bug : https://github.com/openshiftio/openshift.io/issues/3878";
     public static final String bayesianErrorExpectedURL = "prod-preview.openshift.io";
     private static final String SCREENSHOTS_DIRECTORY_PATH = "./target/screenshots/";
 
@@ -128,7 +132,7 @@ public abstract class AbstractCheFunctionalTest {
 		waitForWorkspaceIsRunning();
 		waitUntilAllVisiblePopupsDisappear();
 	}
-    
+
 	private void waitForLoaderToDisappear() {
 		System.out.println(loaderProgressBar.isDisplayed());
 		Graphene.waitModel().until().element(loaderProgressBar).is().visible();
@@ -164,6 +168,14 @@ public abstract class AbstractCheFunctionalTest {
 
     public void waitUntilProjectImported(String notification, int durationInSeconds) {
         infoPanel.getNotificationManager().waitForNotification(notification, durationInSeconds, TimeUnit.SECONDS);
+    }
+
+    public void waitUntilProjectIsResolved(){
+        LOG.info("Waiting for project to be resolved.");
+        Graphene.waitModel().until().element(resolvingProject).is().visible();
+        LOG.info("Workspace resolving started.");
+        Graphene.waitModel().until().element(resolvingProject).is().not().visible();
+        LOG.info("Workspace is successfuly resolved.");
     }
 
     /*===============================*

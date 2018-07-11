@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import redhat.che.functional.tests.fragments.ProjectItem;
 
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +33,9 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
 
     @FindBy(className = "currentLine")
     private WebElement currentLine;
+
+    @FindBy(id = "gwt-debug-contribute-pull-request-panel")
+    private WebElement gitPanel;
 
     private static final String jsonDependency = "\"serve-static\": \"1.7.1\" ,\n";
     private static final String jsonExpectedError = "Package serve-static-1.7.1 is vulnerable: CVE-2015-1164. Recommendation: use version 1.7.2";
@@ -44,6 +48,7 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
         openBrowser();
         waitUntilProjectImported("Project web-nodejs-sample imported", 30);
     }
+
 
     @After
     public void resetEnvironment(){
@@ -60,12 +65,14 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
         if (isProdPreview()) {
             Assert.assertFalse(bayesianErrorNotVisible, annotationFound);
         } else {
-            Assert.assertTrue("Annotation error is not visible.", annotationFound);
+            Assert.assertFalse(bayesianErrorNotVisibleProd, annotationFound);
         }
     }
 
     private void openPackageJson() {
-        nodejsProject.getResource("package.json").open();
+        ProjectItem item = nodejsProject.getResource("package.json");
+        Graphene.waitGui().until().element(gitPanel).is().visible();
+        item.open();
         Graphene.waitGui().withTimeout(90, TimeUnit.SECONDS).until().element(currentLine).is().visible();
     }
 

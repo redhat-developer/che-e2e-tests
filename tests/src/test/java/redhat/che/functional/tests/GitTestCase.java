@@ -128,7 +128,7 @@ public class GitTestCase extends AbstractCheFunctionalTest {
 		// set commiter credentials
 		LOG.info("Starting: " + this.getClass().getName());
 		openBrowser();
-		waitUntilProjectImported("Project vertx-http-booster imported", 60);
+		waitUntilProjectIsResolved();
 		vertxProject.getResource("README.md").open();
 		// get the "Updating project..." popup out of the way
 		try {
