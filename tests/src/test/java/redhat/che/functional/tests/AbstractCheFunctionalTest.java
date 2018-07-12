@@ -172,7 +172,7 @@ public abstract class AbstractCheFunctionalTest {
 
     public void waitUntilProjectIsResolved(){
         LOG.info("Waiting for project to be resolved.");
-        Graphene.waitModel().until().element(resolvingProject).is().visible();
+        Graphene.waitModel().withTimeout(60, TimeUnit.SECONDS).until().element(resolvingProject).is().visible();
         LOG.info("Workspace resolving started.");
         Graphene.waitModel().until().element(resolvingProject).is().not().visible();
         LOG.info("Workspace is successfuly resolved.");

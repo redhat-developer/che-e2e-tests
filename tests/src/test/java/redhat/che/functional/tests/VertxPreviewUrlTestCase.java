@@ -52,7 +52,7 @@ public class VertxPreviewUrlTestCase extends AbstractCheFunctionalTest {
     public void run_project() {
         LOG.info("Starting: " + this.getClass().getName());
         openBrowser();
-        waitUntilProjectIsResolved();
+        //waitUntilProjectIsResolved();
         mainMenuPanel.clickRunButton();
         mainMenuPanel.selectCommand("run");
         waitUntilRunIsCompleted();
