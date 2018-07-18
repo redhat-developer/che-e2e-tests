@@ -6,7 +6,6 @@ min=0
 avg=0
 count=0
 
-
 function processItem {
     time_taken=$1
     if [[ $count == 0 ]]; then

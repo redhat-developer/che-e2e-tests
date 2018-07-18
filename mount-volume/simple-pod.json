@@ -39,7 +39,6 @@
       {
         "name":"che-pvc",
         "persistentVolumeClaim": {
-          "claimName": "claim-che-workspace"
         }
       }
     ],

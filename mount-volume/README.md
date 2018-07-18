@@ -10,15 +10,16 @@ Both Jenkins and zabbix are in private network.
 ## Test execution
 There is file run_test.sh which is executing tests. Tests are run against openshift so you need to pass variables specifying login details.
 
-`./run_test.sh <username> <user_password> <url of openshift>`
+`./run_test.sh <username> <user_password> <url of openshift> {volume_name}`
 
-This script expects three environment variables set:
+This script expects four environment variables set:
 
-| Variable | description |
-| ------------- |-------------|
-| MAX_COUNT | maximum count of tries for mounting pod |
-| ZABBIX_SERVER | server of zabbix where results are stored |
-| ZABBIX_HOST | zabbix host for storing results |
+| Variable | description | mandatory |
+| ------------- | ------------- | ------------- |
+| MAX_COUNT | maximum count of tries for mounting pod | true |
+| ZABBIX_SERVER | server of zabbix where results are stored | true |
+| ZABBIX_HOST | zabbix host for storing results | true |
+| VOLUMENAME | name of the volume claim for PVC | false |
 
 
 After test run, the file zabbix.log is generated. This file includes metrics which are sent to zabbix. This file is also saved as an artifact of the jenkins job.

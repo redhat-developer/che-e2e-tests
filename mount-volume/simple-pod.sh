@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # First parameter either "Start" or "Stop"
 function podHasStatus {
     #pod status is not accessible - pod was stopped and deleted
@@ -71,9 +71,11 @@ oc login $3 -u $USER -p $2
 oc project $USER
 echo "max tries: $MAX_TRIES"
 
+SIMPLE_POD_CONFIGURATION_JSON=$(jq ".spec.volumes[].persistentVolumeClaim.claimName |= \"$VOLUME_NAME\"" simple-pod.json)
+
 while [[ $COUNTER -le $MAX_TRIES ]]; do
     echo "ITERATION #$COUNTER"
-    oc apply -f simple-pod.json
+    echo "$SIMPLE_POD_CONFIGURATION_JSON" | oc apply -f -
     waitForPodToBeRunning
 
     oc delete pod simple-pod
