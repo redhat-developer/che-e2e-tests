@@ -63,18 +63,22 @@ function waitForPodToStop {
 }
 
 COUNTER=1
-USER=$1
+USERNAME=$1
+PASSWORD=$2
+URL=$3
+VOLUME_NAME=$4
 
-chrlen=$((${#USER}-3))
-echo "running tests with user: ${USER:0:3} ${USER:3:$chrlen}"
-oc login $3 -u $USER -p $2
-oc project $USER
+chrlen=$((${#USERNAME}-3))
+echo "running tests with user: ${USERNAME:0:3} ${USERNAME:3:$chrlen}"
+oc login $URL -u $USERNAME -p $PASSWORD
+oc project $USERNAME
 echo "max tries: $MAX_TRIES"
 
 SIMPLE_POD_CONFIGURATION_JSON=$(jq ".spec.volumes[].persistentVolumeClaim.claimName |= \"$VOLUME_NAME\"" simple-pod.json)
 
 while [[ $COUNTER -le $MAX_TRIES ]]; do
     echo "ITERATION #$COUNTER"
+    echo "$SIMPLE_POD_CONFIGURATION_JSON" | oc apply -f -
     echo "$SIMPLE_POD_CONFIGURATION_JSON" | oc apply -f -
     waitForPodToBeRunning
 
