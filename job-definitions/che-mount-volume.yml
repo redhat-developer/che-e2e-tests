@@ -24,6 +24,15 @@
               username: USERNAME
               password: PASSWORD
 
+- wrapper:
+    name: user-credentials-large-2a-wrapper
+    wrappers:
+       - credentials-binding:
+          - username-password-separated:
+              credential-id: rh-che-us-east-2a
+              username: USERNAME
+              password: PASSWORD
+
 - mount-volume-template: &mount-volume-template
     name: 'mount-volume-template'
     description: "Automated once-an-hour mount volume test of {cluster} cluster"
@@ -61,13 +70,12 @@
         - timed: H * * * *
     wrappers:
         - user-properties-wrapper
-        - user-credentials-{cluster}-wrapper
         - workspace-cleanup:
             dirmatch: false
     builders:
         - shell: |
             cd mount-volume
-            ./run_test.sh $USERNAME $PASSWORD {URL}
+            ./run_test.sh $USERNAME $PASSWORD {URL} {VOLUME_NAME} {ZABBIX_PREFIX}
     concurrent: false
     description: null
     disabled: false
@@ -85,12 +93,24 @@
     name: 'che-mount-volume-2'
     project-type: freestyle
     node: osioperf-master3
+    wrappers:
+        - user-credentials-2-wrapper
     <<: *mount-volume-template
 
 - job-template:
     name: 'che-mount-volume-2a'
     project-type: freestyle
     node: osioperf-master3
+    wrappers:
+        - user-credentials-2a-wrapper
+    <<: *mount-volume-template
+
+- job-template:
+    name: 'che-mount-volume-large-2a'
+    project-type: freestyle
+    node: osioperf-master3
+    wrappers:
+        - user-credentials-large-2a-wrapper
     <<: *mount-volume-template
 
 - project:
@@ -100,6 +120,15 @@
         - 'che-mount-volume-2':
             URL: https://api.starter-us-east-2.openshift.com:443
             cluster: 2
+            VOLUME_NAME: "claim-che-workspace"
+            ZABBIX_PREFIX: "mount_volume-"
         - 'che-mount-volume-2a':
             URL: https://api.starter-us-east-2a.openshift.com:443
             cluster: 2a
+            VOLUME_NAME: "claim-che-workspace"
+            ZABBIX_PREFIX: "mount_volume-"
+        - 'che-mount-volume-large-2a':
+            URL: https://api.starter-us-east-2a.openshift.com:443
+            cluster: 2a
+            VOLUME_NAME: "mount-volume-test-large"
+            ZABBIX_PREFIX: "mount_volume_large-"

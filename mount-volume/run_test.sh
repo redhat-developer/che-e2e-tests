@@ -8,6 +8,7 @@ PASSWORD=$2
 URL=$3
 VOLUME_NAME=$4
 VOLUME_NAME=${VOLUME_NAME:-"claim-che-workspace"}
+ZABBIX_PREFIX=$5
 
 echo "Initializing environment"
 ./init-env.sh
@@ -16,7 +17,7 @@ PATH=$PATH:$(pwd)/
 
 echo "Running tests"
 ./simple-pod.sh $USERNAME $PASSWORD $URL $VOLUME_NAME
-./zabbix.sh $URL
+./zabbix.sh $URL $ZABBIX_PREFIX
 
 RESULT=$?
 set -e

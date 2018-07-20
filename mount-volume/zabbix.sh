@@ -58,13 +58,14 @@ function generateLogs {
 
 ZABBIX_TIMESTAMP=`date +%s`
 URL=$1
+ZABBIX_PREFIX=$2
 logfile=zabbix.log
 
 if [ -f $logfile ]; then
     rm $logfile
 fi
 
-PREFIX=mount_volume-
+PREFIX=${ZABBIX_PREFIX:-"mount_volume-"}
 if [[ $URL = *"2a"* ]]; then
     HOST=qa-starter-us-east-2a
 else
