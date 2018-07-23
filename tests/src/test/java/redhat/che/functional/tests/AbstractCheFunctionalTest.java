@@ -174,8 +174,14 @@ public abstract class AbstractCheFunctionalTest {
         LOG.info("Waiting for project to be resolved.");
         Graphene.waitModel().withTimeout(60, TimeUnit.SECONDS).until().element(resolvingProject).is().visible();
         LOG.info("Workspace resolving started.");
-        Graphene.waitModel().until().element(resolvingProject).is().not().visible();
+        try {
+            Graphene.waitModel().withTimeout(60, TimeUnit.SECONDS).until().element(resolvingProject).is().not().visible();
+        } catch (Exception e){
+            LOG.warn("The project resolving didn't stop. Continuing test.");
+            return;
+        }
         LOG.info("Workspace is successfuly resolved.");
+
     }
 
     /*===============================*

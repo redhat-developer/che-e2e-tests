@@ -71,7 +71,9 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
 
     private void openPackageJson() {
         ProjectItem item = nodejsProject.getResource("package.json");
-        Graphene.waitGui().until().element(gitPanel).is().visible();
+        if(isProdPreview()){
+            Graphene.waitGui().until().element(gitPanel).is().visible();
+        }
         item.open();
         Graphene.waitGui().withTimeout(90, TimeUnit.SECONDS).until().element(currentLine).is().visible();
     }
