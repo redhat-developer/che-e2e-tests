@@ -29,7 +29,7 @@
     wrappers:
        - credentials-binding:
           - username-password-separated:
-              credential-id: rh-che-us-east-2a
+              credential-id: 0cbd90a1-3d3b-4424-8ddb-b0f1ae3c66ac
               username: USERNAME
               password: PASSWORD
 
@@ -63,9 +63,9 @@
            description: A port of Zabbix server used by zabbix_sender utility
     scm:
         - git:
-            url: https://github.com/redhat-developer/che-functional-tests.git
+            url: https://github.com/ScrewTSW/che-functional-tests.git
             branches:
-                - '*/master'
+                - '*/feature-custom-volume-name'
     triggers:
         - timed: H * * * *
     wrappers:
@@ -75,7 +75,7 @@
     builders:
         - shell: |
             cd mount-volume
-            ./run_test.sh $USERNAME $PASSWORD {URL} {VOLUME_NAME} {ZABBIX_PREFIX}
+            ./run_test.sh $USERNAME $PASSWORD {URL} {VOLUME_NAME} {ZABBIX_PREFIX} {ATTEMPT_TIMEOUT}
     concurrent: false
     description: null
     disabled: false
@@ -122,13 +122,16 @@
             cluster: 2
             VOLUME_NAME: "claim-che-workspace"
             ZABBIX_PREFIX: "mount_volume-"
+            ATTEMPT_TIMEOUT: 120
         - 'che-mount-volume-2a':
             URL: https://api.starter-us-east-2a.openshift.com:443
             cluster: 2a
             VOLUME_NAME: "claim-che-workspace"
             ZABBIX_PREFIX: "mount_volume-"
+            ATTEMPT_TIMEOUT: 120
         - 'che-mount-volume-large-2a':
             URL: https://api.starter-us-east-2a.openshift.com:443
             cluster: 2a
             VOLUME_NAME: "mount-volume-test-large"
             ZABBIX_PREFIX: "mount_volume_large-"
+            ATTEMPT_TIMEOUT: 1200
