@@ -68,16 +68,17 @@ PASSWORD=$2
 URL=$3
 VOLUME_NAME=$4
 ATTEMPT_TIMEOUT=$5
+ITERATIONS=$6
 
 chrlen=$((${#USERNAME}-3))
 echo "running tests with user: ${USERNAME:0:3} ${USERNAME:3:$chrlen}"
 oc login ${URL} -u ${USERNAME} -p ${PASSWORD}
 oc project ${USERNAME}
-echo "max tries: ${MAX_TRIES}"
+echo "max tries: ${ITERATIONS}"
 
 SIMPLE_POD_CONFIGURATION_JSON=$(jq ".spec.volumes[].persistentVolumeClaim.claimName |= \"$VOLUME_NAME\"" simple-pod.json)
 
-while [[ ${COUNTER} -le ${MAX_TRIES} ]]; do
+while [[ ${COUNTER} -le ${ITERATIONS} ]]; do
     echo "ITERATION #${COUNTER}"
     echo "$SIMPLE_POD_CONFIGURATION_JSON" | oc apply -f -
     echo "$SIMPLE_POD_CONFIGURATION_JSON" | oc apply -f -

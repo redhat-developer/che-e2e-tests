@@ -11,6 +11,8 @@ VOLUME_NAME=${VOLUME_NAME:-"claim-che-workspace"}
 ZABBIX_PREFIX=$5
 ATTEMPT_TIMEOUT=$6
 ATTEMPT_TIMEOUT=${ATTEMPT_TIMEOUT:-120}
+ITERATIONS=$7
+ITERATIONS=${ITERATIONS:-5}
 
 echo "Initializing environment"
 ./init-env.sh
@@ -18,9 +20,9 @@ echo "Initializing environment"
 PATH=$PATH:$(pwd)/
 
 echo "Running tests"
-./simple-pod.sh $USERNAME $PASSWORD $URL $VOLUME_NAME $ATTEMPT_TIMEOUT
+./simple-pod.sh $USERNAME $PASSWORD $URL $VOLUME_NAME $ATTEMPT_TIMEOUT $ITERATIONS
 if [ $? == 0 ]; then
-  ./zabbix.sh $URL $ZABBIX_PREFIX
+  ./zabbix.sh $URL $ZABBIX_PREFIX $ITERATIONS
 else
   echo "Tests have failed. Not reporting data."
 fi
