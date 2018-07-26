@@ -57,6 +57,11 @@ function generateLogs {
       echo "actual: $med for ${PREFIX_CURRENT}"
       text="$HOST $PREFIX_CURRENT"
       echo "$text $ZABBIX_TIMESTAMP $max" >> ${logfile}
+      med=0
+      max=0
+      min=0
+      avg=0
+      count=0
     else
       echo "median: $med   minimum: $min   maximum: $max   average:$((avg/count))"
       PREFIX_CURRENT="${PREFIX}$(echo ${METRICS,,})"
