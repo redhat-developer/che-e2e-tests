@@ -36,7 +36,7 @@ if [ ! "${DO_NOT_REBASE}" = "true" ]; then
   cat /tmp/jenkins-env >> ./env-vars # File doesn't exist if rebase wasn't done.
 fi
 chown -R 1000:1000 ./*
-docker run -d --user=fabric8 --cap-add SYS_ADMIN --name=che-selenium -t -v $(pwd):/home/fabric8/che:Z rhopp/che-selenium:latest
+docker run -d --user=fabric8 --cap-add SYS_ADMIN --name=che-selenium -t -v $(pwd):/home/fabric8/che:Z quay.io/openshiftio/rhchestage-rh-che-functional-tests-dep:latest
 
 ## Exec tests
 docker exec --user=fabric8 che-selenium /home/fabric8/che/cico/run_EE_tests.sh $CONFIG_FILE || RETURN_CODE=$? && true
