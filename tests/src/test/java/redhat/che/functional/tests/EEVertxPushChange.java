@@ -71,6 +71,7 @@ public class EEVertxPushChange extends AbstractCheFunctionalTest {
     public void change_hello_to_bonjour(){
         LOG.info("Starting: " + this.getClass().getName());
         openBrowser();
+        waitUntilProjectIsResolved();
         String fileName = "HttpApplication", extension = ".java";
         openClass(fileName, extension);
         editorPart.tabsPanel().waitUntilActiveTabHasName(fileName);
