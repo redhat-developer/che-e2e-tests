@@ -22,6 +22,7 @@ function rebaseIfPR(){
   # Fetch PR and rebase on master, if job runs from PR
   cat jenkins-env \
       | grep -E "(ghprbSourceBranch|ghprbPullId)=" \
+      | sed 's/ //g' \
       | sed 's/^/export /g' \
       > /tmp/jenkins-env
   source /tmp/jenkins-env
@@ -48,8 +49,8 @@ set +x
 #prepend "export " and remove space after "="
 cat jenkins-env \
     | grep -E "(CUSTOM_CHE|OSIO|KEYCLOAK|BUILD_NUMBER|JOB_NAME)" \
+    | sed 's/ //g' \
     | sed 's/^/export /g' \
-    | sed 's/= /=/g' \
     > export_env_variables
 
 source export_env_variables
