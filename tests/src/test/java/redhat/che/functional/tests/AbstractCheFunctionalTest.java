@@ -149,10 +149,23 @@ public abstract class AbstractCheFunctionalTest {
 	}
 
 	private void waitUntilAllVisiblePopupsDisappear() {
+		try {
+		Graphene.waitGui().withTimeout(1, TimeUnit.MINUTES).until(webDriver -> {
+            List<WebElement> children = getNumberOfPopupsVisible();
+            if(children.size() == 56) return true;
+            LOG.info("Size: " + children.size());
+            return false;
+        });
+		LOG.info("All pop-ups were shown, waiting for closing.");}
+		catch (Exception e) {
+			LOG.info("All pop ups were not displayed in expected way. Try to run test anyway.");
+			return;
+		}
         Graphene.waitGui().withTimeout(1, TimeUnit.MINUTES).until(webDriver -> {
             List<WebElement> children = getNumberOfPopupsVisible();
             return children.isEmpty();
         });
+        LOG.info("All pop-ups were closed successfully.");
     }
 
     private List<WebElement> getNumberOfPopupsVisible() {
