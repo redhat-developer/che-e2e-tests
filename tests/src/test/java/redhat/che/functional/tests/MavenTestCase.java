@@ -56,7 +56,7 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
 
     @FindBy(id = "ask-dialog-ok")
     private WebElement okButton;
-    
+        
     private final String testName = "buildTest";
     private final String command = "cd ${current.project.path} && scl enable rh-maven33 'mvn clean install'";
 
@@ -84,6 +84,7 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
         commandsManager.openEditPanelForAddingBuildCommand();
         commandsEditor.waitTillEditorVisible();
         commandsEditor.addNewCommand(testName, command);
+		editorPart.tabsPanel().waitUntilActiveTabHasName(testName);
         commandsEditor.runOpenedCommand();
 
         //wait for end - if build first time, it last longer -> increasing timeout
@@ -95,5 +96,4 @@ public class MavenTestCase extends AbstractCheFunctionalTest{
         	LOG.error("Unable to obtain element.", ex);
         }
     }
-    
 }

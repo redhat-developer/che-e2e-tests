@@ -101,6 +101,7 @@ public abstract class AbstractCheFunctionalTest {
     public static final String bayesianErrorNotVisibleProd = "Known expected bug : https://github.com/openshiftio/openshift.io/issues/3878";
     public static final String bayesianErrorExpectedURL = "prod-preview.openshift.io";
     private static final String SCREENSHOTS_DIRECTORY_PATH = "./target/screenshots/";
+    private int sum = 0, before = 0;
 
     void openBrowser() {
         openBrowser(workspace);
@@ -134,7 +135,7 @@ public abstract class AbstractCheFunctionalTest {
 	}
 
 	private void waitForLoaderToDisappear() {
-		System.out.println(loaderProgressBar.isDisplayed());
+		System.out.println("Loader bar present: " + loaderProgressBar.isDisplayed());
 		Graphene.waitModel().until().element(loaderProgressBar).is().visible();
 		Graphene.waitModel().until().element(ideElement).is().visible();
 	}
@@ -148,12 +149,15 @@ public abstract class AbstractCheFunctionalTest {
 		Graphene.waitModel().withTimeout(120, TimeUnit.SECONDS).until(d -> workspaceStatusPage.isWorkspaceRunning());
 	}
 
-	private void waitUntilAllVisiblePopupsDisappear() {
+ 	private void waitUntilAllVisiblePopupsDisappear() {
 		try {
-		Graphene.waitGui().withTimeout(1, TimeUnit.MINUTES).until(webDriver -> {
+			Graphene.waitGui().withTimeout(1, TimeUnit.MINUTES).until(webDriver -> {
             List<WebElement> children = getNumberOfPopupsVisible();
-            if(children.size() == 56) return true;
-            LOG.info("Size: " + children.size());
+            int childs = children.size();
+            if(childs > before) sum = sum + (childs - before);
+            if(sum == 56) return true;
+            LOG.info("Items shown: " + sum + "/56");
+            before = childs;
             return false;
         });
 		LOG.info("All pop-ups were shown, waiting for closing.");}
