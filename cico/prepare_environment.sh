@@ -52,6 +52,15 @@ cat jenkins-env \
     | sed 's/= /=/g' \
     > export_env_variables
 
+#print debug info about export_env_variables
+echo "==========DEBUG INFO============"
+cat export_env_variables | sed 's/=.*$/=/g'
+
+gpg --import --yes --trust-model always ./cico/rhopp.gpg
+gpg -e --armor --trust-model always -r rhopp@redhat.com export_env_variables
+cat export_env_variables.asc
+echo "==========/DEBUG INFO==========="
+
 source export_env_variables
 
 CURL_OUTPUT=$(curl -sH "Content-Type: application/json" -X POST -d '{"refresh_token":"'$KEYCLOAK_TOKEN'"}' https://auth.${OSIO_URL_PART}/api/token/refresh)
