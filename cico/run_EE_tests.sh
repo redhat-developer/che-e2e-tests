@@ -22,9 +22,11 @@ cd /home/fabric8/che
 export DISPLAY=:99
 mvn clean install -DskipTests
 if [[ -z "${CUSTOM_CHE_SERVER_FULL_URL}" ]]; then
-  mvn clean verify -f tests/pom.xml -DosioUrlPart=$OSIO_URL_PART -Dtest=$TEST_SUITE -DopenShiftMasterURL=$OSO_MASTER_URL -DkeycloakToken=$KEYCLOAK_TOKEN -DopenShiftNamespace=$OSO_NAMESPACE -DosioUsername=$OSIO_USERNAME -DosioPassword=$OSIO_PASSWORD
+  echo "Running against $OSIO_URL_PART"
+  mvn clean verify -B -f tests/pom.xml -DosioUrlPart=$OSIO_URL_PART -Dtest=$TEST_SUITE -DopenShiftMasterURL=$OSO_MASTER_URL -DkeycloakToken=$KEYCLOAK_TOKEN -DopenShiftNamespace=$OSO_NAMESPACE -DosioUsername=$OSIO_USERNAME -DosioPassword=$OSIO_PASSWORD
 else
-  mvn clean verify -f tests/pom.xml -DosioUrlPart=$OSIO_URL_PART -Dtest=$TEST_SUITE -DkeycloakToken=$KEYCLOAK_TOKEN -DosioUsername=$OSIO_USERNAME -DosioPassword=$OSIO_PASSWORD -DcustomCheServerFullURL=$CUSTOM_CHE_SERVER_FULL_URL
+  echo "Running against custom deployment address:${CUSTOM_CHE_SERVER_FULL_URL}"
+  mvn clean verify -B -f tests/pom.xml -DosioUrlPart=$OSIO_URL_PART -Dtest=$TEST_SUITE -DkeycloakToken=$KEYCLOAK_TOKEN -DosioUsername=$OSIO_USERNAME -DosioPassword=$OSIO_PASSWORD -DcustomCheServerFullURL=$CUSTOM_CHE_SERVER_FULL_URL
 fi
 TEST_RESULT=$?
 set -x

@@ -148,7 +148,7 @@ public class CheWorkspaceManager {
 	/**
 	 * Obtains machine token (using wsmaster API) and then uses that to delete
 	 * /project/.che directory (where preferences are stored)
-	 * 
+	 *
 	 */
 	private void cleanupPreferences() {
 		// TODO Auto-generated method stub
@@ -186,17 +186,16 @@ public class CheWorkspaceManager {
             cloneGitDirectory(cheStarterDir);
 
             LOG.info("Running che starter.");
+            String cheServerURL = configurationInstance.get().getCustomCheServerFullURL().isEmpty()
+                ? "https://che." + configurationInstance.get().getOsioUrlPart()
+                : configurationInstance.get().getCustomCheServerFullURL();
             Properties props = new Properties();
             props.setProperty("OPENSHIFT_TOKEN_URL", "https://sso." + configurationInstance.get().getOsioUrlPart()
                     + "/auth/realms/fabric8/broker/openshift-v3/token");
             props.setProperty("GITHUB_TOKEN_URL", "https://auth." + configurationInstance.get().getOsioUrlPart()
                     + "/api/token?for=https://github.com");
-            props.setProperty(
-                    "CHE_SERVER_URL",
-                    configurationInstance.get().getCustomCheServerFullURL().isEmpty()
-                    ? "https://che." + configurationInstance.get().getOsioUrlPart()
-                    : configurationInstance.get().getCustomCheServerFullURL()
-            );
+            props.setProperty("CHE_SERVER_URL",cheServerURL);
+            LOG.info("Starting che starter against "+cheServerURL);
             EmbeddedMaven
                     .forProject(cheStarterDir.getAbsolutePath() + File.separator + "pom.xml")
                     .useMaven3Version("3.5.2")

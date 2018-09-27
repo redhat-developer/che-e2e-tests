@@ -148,11 +148,11 @@ public class CheExtensionConfiguration {
     public void setOsioPassword(String osioPassword) {
         this.osioPassword = osioPassword;
     }
-    
+
 	public String getOsioUrlPart() {
 		return osioUrlPart;
 	}
-	
+
 	public void setOsioUrlPart(String osioUrlPart) {
 		this.osioUrlPart = osioUrlPart;
 	}
