@@ -1,3 +1,5 @@
+tokens=$1
+
 while IFS= read -r tokens
 do
   token=$(echo $tokens| cut -d';' -f 1)
@@ -8,7 +10,6 @@ do
   idarr=($ids)
   statusarr=($statuses)
   counter=0
-
   for i in "${!idarr[@]}"; do
     if [[ "${statusarr[$i]}" = "STOPPED" ]]; then
         echo "Deleting workspace: ${idarr[$i]}"
@@ -30,4 +31,4 @@ do
         curl -H "Authorization: Bearer $token" -X DELETE $CHE_SERVER_URL/api/workspace/${idarr[$i]}
     fi
   done
-done < "$TOKENS_FILE"
+done < "$tokens"

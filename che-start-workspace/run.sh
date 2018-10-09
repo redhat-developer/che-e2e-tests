@@ -35,12 +35,12 @@ cat $MVN_LOG | grep login-users-log > $LOGIN_USERS_OAUTH2_LOG
 chmod +r $TOKENS_FILE
 
 endtime=$(date -d "+$DURATION seconds" +%X)
-echo " Tests will end approximately at $endtime)"
+echo " Tests will end approximately at $endtime"
 
 $COMMON/_execute.sh
 
 echo "Removing all workspaces from accounts"
-./removeWorkspaces.sh
+./removeWorkspaces.sh $TOKENS_FILE
 
 while read p; do
   echo $p | cut -d';' -f 3 >> $LOG_DIR/$JOB_BASE_NAME-$BUILD_NUMBER-locust-master.log
