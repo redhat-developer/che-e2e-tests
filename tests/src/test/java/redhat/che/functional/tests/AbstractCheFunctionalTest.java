@@ -21,6 +21,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -124,7 +125,7 @@ public abstract class AbstractCheFunctionalTest {
         LOG.info("Logging in");
         usernameField.sendKeys(Constants.OSIO_USERNAME);
         passwordField.sendKeys(Constants.OSIO_PASSWORD);
-        loginButton.click();
+        passwordField.sendKeys(Keys.ENTER);
     }
 
 	private void waitForWorkspaceToLoad() {
