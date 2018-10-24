@@ -102,17 +102,17 @@ public class CheWorkspaceManager {
         CheWorkspace createdWkspc = cheWorkspaceInstanceProducer.get();
 
         if (createdWkspc == null || createdWkspc.isDeleted()) {
-            if (setRunningWorkspace()) { //running workspace was found and set to producer
-                createdWkspc = cheWorkspaceInstanceProducer.get();
-                if (!(createdWkspc.getStack().equals(workspaceAnnotation.stackID()))) {
-                    LOG.info("Running workspace has wrong stack. Creating new workspace.");
-                    CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
-                    createWorkspace(workspaceAnnotation);
-                    LOG.info("Workspace " + createdWkspc.getName() + " created and started.");
-                }
-            } else { //provided workspace is null or deleted and there is no other workspace running
+//            if (setRunningWorkspace()) { //running workspace was found and set to producer
+//                createdWkspc = cheWorkspaceInstanceProducer.get();
+//                if (!(createdWkspc.getStack().equals(workspaceAnnotation.stackID()))) {
+//                    LOG.info("Running workspace has wrong stack. Creating new workspace.");
+//                    CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
+//                    createWorkspace(workspaceAnnotation);
+//                    LOG.info("Workspace " + createdWkspc.getName() + " created and started.");
+//                }
+//            } else { //provided workspace is null or deleted and there is no other workspace running
                 createWorkspace(workspaceAnnotation);
-            }
+//            }
         } else if (!(createdWkspc.getStack().equals(workspaceAnnotation.stackID())) || workspaceAnnotation.requireNewWorkspace()) { //provided workspace has another stack or test requires new workspace
             CheWorkspaceService.stopWorkspace(cheWorkspaceInstanceProducer.get(), bearerToken);
             waitingForDeletion.add(cheWorkspaceInstanceProducer.get());

@@ -65,7 +65,7 @@ public class PackageJsonTestCase extends AbstractCheFunctionalTest {
         if (isProdPreview()) {
             Assert.assertFalse(bayesianErrorNotVisible, annotationFound);
         } else {
-            Assert.assertFalse(bayesianErrorNotVisibleProd, annotationFound);
+            Assert.assertTrue(annotationFound);
         }
     }
 

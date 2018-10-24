@@ -151,13 +151,13 @@ public abstract class AbstractCheFunctionalTest {
 	}
 
  	private void waitUntilAllVisiblePopupsDisappear() {
+ 		LOG.info("Waiting for all popups to display and disappear.");
 		try {
-			Graphene.waitGui().withTimeout(1, TimeUnit.MINUTES).until(webDriver -> {
+			Graphene.waitGui().withTimeout(40, TimeUnit.SECONDS).until(webDriver -> {
             List<WebElement> children = getNumberOfPopupsVisible();
             int childs = children.size();
             if(childs > before) sum = sum + (childs - before);
             if(sum == 56) return true;
-            LOG.info("Items shown: " + sum + "/56");
             before = childs;
             return false;
         });
