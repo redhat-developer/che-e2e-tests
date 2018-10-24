@@ -1,0 +1,72 @@
+- wrapper:
+    name: che-clean-workspaces-template-wrapper-grip-creds
+    wrappers:
+        - credentials-binding:
+            - username-password-separated:
+                credential-id: grip-creds
+                username: GRIP_USER
+                password: GRIP_PASS
+
+- wrapper:
+    name: che-functional-remove-workspaces-creds-wrapper
+    wrappers:
+        - che-clean-workspaces-template-wrapper-grip-creds
+        - credentials-binding:
+            - file:
+                credential-id: che-remove-workspaces-creds
+                variable: USERS_PROPERTIES_FILE
+
+- che-clean-workspaces-template: &che-clean-workspaces-template
+    name: 'che-clean-workspaces-template'
+    description: "Automated once-a-day cleaning job removing workspaces"
+    properties:
+       - ownership:
+           owner: kkanova
+           co-owners:
+               - rhopp
+               - pmacik
+       - authorization:
+           anonymous:
+               - job-read
+               - job-discover
+       - build-discarder:
+           days-to-keep: 28
+    
+    scm:
+        - git:
+            url: https://github.com/redhat-developer/che-functional-tests.git
+            branches:
+                - '*/master'
+    triggers:
+        - timed: H 2 * * *
+    wrappers:
+        - che-functional-remove-workspaces-creds-wrapper
+        - workspace-cleanup:
+            dirmatch: false
+    builders:
+        - shell: |-
+            cd remove-all-workspaces
+            ./run.sh
+    concurrent: false
+    description: null
+    disabled: false
+    publishers:
+      - email:
+          recipients: kkanova@redhat.com rhopp@redhat.com tdancs@redhat.com
+          notify-every-unstable-build: true
+      - archive:
+          artifacts: 'remove-all-workspaces/report.txt'
+          allow-empty: 'true'
+          fingerprint: true
+
+- job-template:
+    name: 'che-clean-workspaces'
+    project-type: freestyle
+    node: osioperf-master3
+    <<: *che-clean-workspaces-template
+
+- project:
+    name: devtools
+    disabled: false
+    jobs:
+        - 'che-clean-workspaces'
