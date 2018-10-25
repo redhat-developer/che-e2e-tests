@@ -1,16 +1,6 @@
 - wrapper:
-    name: che-clean-workspaces-template-wrapper-grip-creds
-    wrappers:
-        - credentials-binding:
-            - username-password-separated:
-                credential-id: grip-creds
-                username: GRIP_USER
-                password: GRIP_PASS
-
-- wrapper:
     name: che-functional-remove-workspaces-creds-wrapper
     wrappers:
-        - che-clean-workspaces-template-wrapper-grip-creds
         - credentials-binding:
             - file:
                 credential-id: che-remove-workspaces-creds

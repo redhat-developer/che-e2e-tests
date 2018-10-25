@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 tokens_file="tokens.txt"
-#cat $USERS_PROPERTIES_FILE > users.properties
+cat $USERS_PROPERTIES_FILE > users.properties
 
 # get tokens for users defined in users.properties
 echo "GETTING TOKENS"
