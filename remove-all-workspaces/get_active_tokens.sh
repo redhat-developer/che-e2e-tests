@@ -6,26 +6,27 @@ NC='\033[0m' # No Color
 
 tokens_file=$1
 IFS=$'\n'       # make newlines the only separator
-for j in $(cat ./users.properties)    
+
+while read -r line || [[ -n $line ]]
 do
-    username=$(echo "$j" | cut -d";" -f 1)
-    password=$(echo "$j" | cut -d";" -f 2)
-    env=$(echo "$j" | cut -d";" -f 3)
+    username=$(echo "$line" | cut -d";" -f 1)
+    password=$(echo "$line" | cut -d";" -f 2)
+    env=$(echo "$line" | cut -d";" -f 3)
     echo "Trying to find token for $username"  
     
     #verify environment - if production or prod-preview
     #variable preview is used differ between prod and prod-preview urls
 	if [ "$env" == "prod" ]; then
     	response=$(curl -s --header 'Accept: application/json' -X GET "https://api.openshift.io/api/users?filter[username]=$username")
-		data=$(echo $response | jq .data)
+		data=$(echo "$response" | jq .data)
 		if [ "$data" == "[]" ]; then
-			echo "${RED}User $username is not provisoned on $env cluster. Please check settings. Skipping user.${NC}"
+			echo -e "${RED}User $username is not provisoned on $env cluster. Please check settings. Skipping user.${NC}"
 			continue
 	    fi
 	    preview=""
 	else
 		response=$(curl -s --header 'Accept: application/json' -X GET "https://api.prod-preview.openshift.io/api/users?filter[username]=$username")
-		data=$(echo $response | jq .data)
+		data=$(echo "$response" | jq .data)
 		if [ "$data" == "[]" ]; then
 			echo -e "${RED}User $username is not provisioned on $env cluster. Please check settings. Skipping user.${NC}" 
 			continue
@@ -39,35 +40,35 @@ do
 	#get url for login from form
 	url=$(grep "form id" loginfile.html | grep -o 'http.*.tab_id=.[^\"]*')
 	dataUrl="username=$username&password=$password&login=Log+in"
-	url=$(echo $url | sed 's/\&amp;/\&/g')
+	url=${url//\&amp;/\&}
 	
 	#send login and follow redirects  
-    url=$(curl -w '%{redirect_url}' -s -X POST -c cookie-file -b cookie-file -d $dataUrl $url)
-	found=$(echo $url | grep "token_json")
+    url=$(curl -w '%{redirect_url}' -s -X POST -c cookie-file -b cookie-file -d "$dataUrl" "$url")
+	found=$(echo "$url" | grep "token_json")
 	
-	while [ true ]
+	while true 
 	do
-		url=$(curl -c cookie-file -b cookie-file -s -o /dev/null -w '%{redirect_url}' $url)
+		url=$(curl -c cookie-file -b cookie-file -s -o /dev/null -w '%{redirect_url}' "$url")
 		if [[ ${#url} == 0 ]]; then
 			#all redirects were done but token was not found
 			break
 		fi
-		found=$(echo $url | grep "token_json")
-		if [[ ${#found} > 0 ]]; then
+		found=$(echo "$url" | grep "token_json")
+		if [[ ${#found} -gt 0 ]]; then
 			#some redirects were done and token was found as a part of url
 			break
 		fi
 	done
 
 	#substract active token
-	token=$(echo $url | grep -o ey.[^\%]* | head -1)
-	if [[ ${#token} > 0 ]]; then
+	token=$(echo "$url" | grep -o "ey.[^%]*" | head -1)
+	if [[ ${#token} -gt 0 ]]; then
 	#save each token into file tokens.txt in format: token;username;["","prod-preview"]
-		echo "$token;$username;$preview" >> tokens_file
+		echo "$token;$username;$preview" >> "$tokens_file"
 		echo -e "${GREEN}Token for user $username was found successfully.${NC}"
 	else
 		echo -e "${RED}Failed to obtain token for $username! Probably user password is incorrect. Continue with other users. ${NC}"
 	fi
 	token=""
 	rm cookie-file
-done
+done < users.properties

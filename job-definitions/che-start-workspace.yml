@@ -33,6 +33,7 @@
            owner: kkanova
            co-owners:
                - rhopp
+               - tdancs
                - pmacik
        - authorization:
            anonymous:
