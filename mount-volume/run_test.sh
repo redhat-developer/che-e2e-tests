@@ -21,13 +21,13 @@ PATH=$PATH:$(pwd)/
 
 echo "Running tests"
 ./simple-pod.sh $USERNAME $PASSWORD $URL $VOLUME_NAME $ATTEMPT_TIMEOUT $ITERATIONS
-if [ $? == 0 ]; then
+RESULT=$?
+if [ $RESULT == 0 ]; then
   ./zabbix.sh $URL $ZABBIX_PREFIX $ITERATIONS
 else
   echo "Tests have failed. Not reporting data."
 fi
 
-RESULT=$?
 set -e
 #oc get events
 
