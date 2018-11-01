@@ -87,3 +87,4 @@ function simplePodRunTest {
 
   echo "Tests were done."
 }
+
