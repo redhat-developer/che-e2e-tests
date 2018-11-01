@@ -32,6 +32,15 @@
               credential-id: 0cbd90a1-3d3b-4424-8ddb-b0f1ae3c66ac
               username: USERNAME
               password: PASSWORD
+              
+- wrapper:
+    name: user-credentials-free-stg-wrapper
+    wrappers:
+       - credentials-binding:
+          - username-password-separated:
+              credential-id: kkanova-osiotest1-free-stg
+              username: USERNAME
+              password: PASSWORD
 
 - mount-volume-template: &mount-volume-template
     name: 'mount-volume-template'
@@ -64,7 +73,7 @@
             branches:
                 - '*/master'
     triggers:
-        - timed: H * * * *
+        - timed: H */2 * * *
     wrappers:
         - user-properties-wrapper
         - workspace-cleanup:
@@ -72,7 +81,7 @@
     builders:
         - shell: |
             cd mount-volume
-            ./run_test.sh $USERNAME $PASSWORD {URL} {VOLUME_NAME} {ZABBIX_PREFIX} {ATTEMPT_TIMEOUT} {ITERATIONS}
+            ./run_test.sh -u $USERNAME -p $PASSWORD -r {URL} -v {VOLUME_NAME} -z {ZABBIX_PREFIX} -t {ATTEMPT_TIMEOUT} -i {ITERATIONS} {FILL_PVC}
     concurrent: false
     description: null
     disabled: false
@@ -110,6 +119,14 @@
         - user-credentials-large-2a-wrapper
     <<: *mount-volume-template
 
+- job-template:
+    name: 'che-mount-volume-free-stg'
+    project-type: freestyle
+    node: osioperf-master3
+    wrappers:
+        - user-credentials-free-stg-wrapper
+    <<: *mount-volume-template
+
 - project:
     name: devtools
     disabled: false
@@ -117,21 +134,32 @@
         - 'che-mount-volume-2':
             URL: https://api.starter-us-east-2.openshift.com:443
             cluster: 2
-            VOLUME_NAME: "claim-che-workspace"
+            VOLUME_NAME: "empty-volume"
             ZABBIX_PREFIX: "mount_volume-"
             ATTEMPT_TIMEOUT: 120
             ITERATIONS: 5
+            FILL_PVC: ""
         - 'che-mount-volume-2a':
             URL: https://api.starter-us-east-2a.openshift.com:443
             cluster: 2a
-            VOLUME_NAME: "claim-che-workspace"
+            VOLUME_NAME: "empty-volume"
             ZABBIX_PREFIX: "mount_volume-"
             ATTEMPT_TIMEOUT: 120
             ITERATIONS: 5
+            FILL_PVC: ""
         - 'che-mount-volume-large-2a':
             URL: https://api.starter-us-east-2a.openshift.com:443
             cluster: 2a
-            VOLUME_NAME: "mount-volume-test-large"
+            VOLUME_NAME: "angular-volume"
             ZABBIX_PREFIX: "mount_volume_large-"
-            ATTEMPT_TIMEOUT: 1200
+            ATTEMPT_TIMEOUT: 900
             ITERATIONS: 1
+            FILL_PVC: -f
+        - 'che-mount-volume-free-stg':
+            URL: https://api.free-stg.openshift.com
+            cluster: 2a
+            VOLUME_NAME: "empty-volume"
+            ZABBIX_PREFIX: "mount_volume-"
+            ATTEMPT_TIMEOUT: 120
+            ITERATIONS: 5
+            FILL_PVC: ""
