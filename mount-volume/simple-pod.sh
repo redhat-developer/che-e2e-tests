@@ -1,84 +1,79 @@
 #!/usr/bin/env bash
 # First parameter either "Start" or "Stop"
 function podHasStatus {
-    #pod status is not accessible - pod was stopped and deleted
-    SIMPLE_POD_JSON=$(oc get pod simple-pod -o json)
-    RETURN_CODE=$?
-    POD_STATUS=$(echo ${SIMPLE_POD_JSON} | jq --raw-output '.status.phase')
-    echo "Wanted: $1      Actual: ${POD_STATUS}"
-    if [[ ${POD_STATUS} == "Running" ]]; then
-        if [[ $1 == "Start" ]]; then
-            return 0
-        else
-            return 1
-        fi
-    elif [[ ${POD_STATUS} == "" ]]; then
-        if [[ $1 == "Stop" ]]; then
-            return 0
-        fi
-        if [ ${RETURN_CODE} -eq 0 ]; then
-            return 1
-        else
-            return 0
-        fi
-    else
-        return 1
+  ACTION=$1
+  POD_NAME=$2
+
+  SIMPLE_POD_JSON=$(oc get pod "$POD_NAME" -o json)
+  RETURN_CODE=$?
+
+  if [[ $RETURN_CODE -ne 0 ]]; then
+    if [[ $ACTION == "Stop" ]]; then
+      echo "Pod was stopped and removed."
+      return 0
+    else 
+      echo "Could not obtain information about pod. Trying again."
+      return 1
     fi
+  fi
+
+  POD_STATUS=$(echo "$SIMPLE_POD_JSON" | jq --raw-output '.status.phase')
+  if [[ $ACTION == "Start" ]]; then
+    if [[ $POD_STATUS == "Running" ]]; then
+      echo "Wanted: Running     Actual: ${POD_STATUS}"
+      echo "Pod is running."
+      return 0
+    else 
+      echo "Wanted: Running     Actual: ${POD_STATUS}"
+      return 1
+    fi
+  else
+    echo "Waiting for pod removal. Actual status: ${POD_STATUS}"
+    return 1
+  fi
 }
 
 function waitForPod {
-    TIMEOUT=$1
-    START_STOP=$2
-    CURRENT_TRY=1
-    if [[ $2 == "Start" ]]; then
-        echo "Waiting for pod to start"
-    elif [[ $2 == "Stop" ]]; then
-        echo "Waiting for pod to stop"
-    fi
+  START_STOP=$1
+  POD_NAME=$2
+  CURRENT_TRY_TIME=0
+  if [[ $START_STOP == "Start" ]]; then
+    echo "Waiting for pod to start"
+  elif [[ $START_STOP == "Stop" ]]; then
+    echo "Waiting for pod to be removed"
+  fi
 
-    start=$(($(date +%s%N)/1000000))
-    while [[ ${CURRENT_TRY} -le ${TIMEOUT} ]]; do
-        echo "Try #${CURRENT_TRY}"
-        if podHasStatus ${START_STOP}; then
-            echo "Pod has desired status"
-            end=$(($(date +%s%N)/1000000))
-            echo `expr $end - $start` >> $START_STOP.csv
-            return
-        else
-            CURRENT_TRY=$(($CURRENT_TRY+1))
-            sleep 1
-            continue
-        fi
-    done
-    echo "Waiting for pod to be running timed out. Exiting."
-    exit 1
+  start=$(($(date +%s%N)/1000000))
+  TIMEOUT_IN_MILISEC=$(( $ATTEMPT_TIMEOUT * 1000))
+  while [[ ${CURRENT_TRY_TIME} -le ${TIMEOUT_IN_MILISEC} ]]; do
+    end=$(($(date +%s%N)/1000000))
+    CURRENT_TRY_TIME=$(expr $end - $start)
+    if podHasStatus "$START_STOP" "$POD_NAME"; then
+      echo $CURRENT_TRY_TIME >> "$START_STOP".csv
+      return
+    else
+      sleep 1
+    fi
+  done
+  echo "Waiting for pod to change its state timed out. Exiting."
+  exit 1
 }
 
 function waitForPodToBeRunning {
-    waitForPod ${ATTEMPT_TIMEOUT} "Start"
+  waitForPod "Start" "simple-pod"
 }
 
 function waitForPodToStop {
-    waitForPod 120 "Stop"
+  waitForPod "Stop" "simple-pod"
 }
 
-COUNTER=1
-USERNAME=$1
-PASSWORD=$2
-URL=$3
-VOLUME_NAME=$4
-ATTEMPT_TIMEOUT=$5
-ITERATIONS=$6
+function simplePodRunTest {
+  COUNTER=1
+  echo "Number of iterations: ${ITERATIONS}"
 
-chrlen=$((${#USERNAME}-3))
-echo "running tests with user: ${USERNAME:0:3} ${USERNAME:3:$chrlen}"
-oc login ${URL} -u ${USERNAME} -p ${PASSWORD}
-oc project ${USERNAME}
-echo "max tries: ${ITERATIONS}"
+  SIMPLE_POD_CONFIGURATION_JSON=$(jq ".spec.volumes[].persistentVolumeClaim.claimName |= \"$VOLUME_NAME\"" simple-pod.json)
 
-SIMPLE_POD_CONFIGURATION_JSON=$(jq ".spec.volumes[].persistentVolumeClaim.claimName |= \"$VOLUME_NAME\"" simple-pod.json)
-
-while [[ ${COUNTER} -le ${ITERATIONS} ]]; do
+  while [[ ${COUNTER} -le ${ITERATIONS} ]]; do
     echo "ITERATION #${COUNTER}"
     echo "$SIMPLE_POD_CONFIGURATION_JSON" | oc apply -f -
     echo "$SIMPLE_POD_CONFIGURATION_JSON" | oc apply -f -
@@ -87,10 +82,8 @@ while [[ ${COUNTER} -le ${ITERATIONS} ]]; do
     oc delete pod simple-pod
     waitForPodToStop
 
-    sleep 10
+    COUNTER=$((COUNTER+1))
+  done
 
-    echo "Increasing iteration counter"
-    COUNTER=$(($COUNTER+1))
-done
-
-echo "Script finished"
+  echo "Tests were done."
+}
