@@ -34,7 +34,7 @@ else
   waitForPod "Start" "$POD_NAME"
 
   echo "Clonning project from https://github.com/angular/quickstart.git."
-  oc exec $POD_NAME -- git clone https://github.com/angular/quickstart.git
+  oc exec $POD_NAME -- git clone https://github.com/angular/quickstart.git /data/quickstart
   if [[ $? != 0 ]]; then 
     echo "Project could not be cloned. Cleaning environment and finishing tests."
     oc delete pod "$POD_NAME"
@@ -43,7 +43,7 @@ else
   fi
 
   echo "Running command \"npm install\" to download dependencies..."
-  oc exec $POD_NAME -- npm --prefix ./quickstart install ./quickstart
+  oc exec $POD_NAME -- npm --prefix /data/quickstart install /data/quickstart
   if [[ $? != 0 ]]; then 
     echo "The dependencies were not downloaded. Cleaning environment and finishing tests."
     oc delete pod "$POD_NAME"
@@ -51,7 +51,7 @@ else
     exit 1
   fi
 
-  DEPS=$(oc exec $POD_NAME -- find /projects/quickstart/node_modules | wc -l)
+  DEPS=$(oc exec $POD_NAME -- find /data/quickstart/node_modules | wc -l)
   if [[ $DEPS -ne 18710 ]]; then
     echo "WARN: Dependencies expected: 18710   Dependencies gotten: $DEPS"
     echo "Continuing tests."
