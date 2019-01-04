@@ -15,3 +15,4 @@ The pods are created on openshift.com and this tests verify that there are no pr
 ## che-functional-test (tests)
 
 These tests are testing rh-che and che-starter. Soon will be deprecated and replaced by tests in rh-che repo https://github.com/redhat-developer/rh-che.
+
