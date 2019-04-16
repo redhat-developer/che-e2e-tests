@@ -95,11 +95,18 @@ class TokenBehavior(TaskSet):
   id = ""
   openshiftToken = ""
   cluster = ""
+  cycles = 0
+  cyclesMax = 1
 
   def on_start(self):
     self.log("Username:" + self.locust.taskUserName
             #  + " Token:" + self.taskUserToken
              + " Environment:" + self.locust.taskUserEnvironment)
+    if (self.locust.taskUserName == "osiotest-workspace-2"):
+      self.log("Stopping test because account has stubborn remove pods")
+      raise StopLocust("Manually stopped the test because account has stuck remove pods.")
+    if (os.getenv("CYCLES_COUNT") != None):
+      self.cyclesMax = int(os.getenv("CYCLES_COUNT"))
     self.setOsTokenAndCluster()
     self.deleteExistingWorkspaces()
 
@@ -125,7 +132,7 @@ class TokenBehavior(TaskSet):
         name="getUserInfo", catch_response=True)
     infoResponseJson = infoResponse.json()
     self.cluster = infoResponseJson['data'][0]['attributes']['cluster']
-    self.clusterName = self.cluster.split(".")[1];
+    self.clusterName = self.cluster.split(".")[1]
     os_token_response = self.client.get(
         "https://auth.openshift.io/api/token?for=" + self.cluster,
         headers={"Authorization": "Bearer " + self.locust.taskUserToken},
@@ -135,6 +142,7 @@ class TokenBehavior(TaskSet):
 
   @task
   def createStartDeleteWorkspace(self):
+    print("\n["+self.clusterName+"] Running workspace start test "+str(self.cycles + 1)+" of "+str(self.cyclesMax)+"\n")
     self.log("Checking if there are some removing pods before creating and running new workspace.")
     self.waitUntilDeletingIsDone()
     self.id = self.createWorkspace()
@@ -148,7 +156,9 @@ class TokenBehavior(TaskSet):
     self.waitForWorkspaceToStopSelf()
     self.wait()
     self.deleteWorkspaceSelf()
-    raise StopLocust("Tests finished, unable to set Locust to run set number of times (https://github.com/locustio/locust/pull/656), issuing hard-stop.")
+    if (self.cycles == (self.cyclesMax - 1)):
+      raise StopLocust("Tests finished, unable to set Locust to run set number of times (https://github.com/locustio/locust/pull/656), issuing hard-stop.")
+    self.cycles += 1
 
   def createWorkspace(self):
     self.log("Creating workspace")
@@ -157,7 +167,7 @@ class TokenBehavior(TaskSet):
     response = self.client.post("/api/workspace", headers={
       "Authorization": "Bearer " + self.locust.taskUserToken,
       "Content-Type": "application/json"}, 
-     name="createWorkspace-"+self.clusterName, data=json, catch_response=True)
+     name="createWorkspace_"+self.clusterName, data=json, catch_response=True)
     self.log("Create workspace server api response:" + str(response.ok))
     try:
       if not response.ok:
@@ -178,7 +188,7 @@ class TokenBehavior(TaskSet):
     response = self.client.post("/api/workspace/" + self.id + "/runtime",
                                 headers={
                                   "Authorization": "Bearer " + self.locust.taskUserToken},
-                                name="startWorkspace-"+self.clusterName, catch_response=True)
+                                name="startWorkspace_"+self.clusterName, catch_response=True)
     try:
       content = response.content
       if not response.ok:
@@ -195,7 +205,7 @@ class TokenBehavior(TaskSet):
       now = time.time()
       if now - self.start > timeout_in_seconds:
         events.request_failure.fire(request_type="REPEATED_GET",
-                                    name="timeForStartingWorkspace-"+self.clusterName,
+                                    name="timeForStartingWorkspace_"+self.clusterName,
                                     response_time=self._tick_timer(),
                                     exception="Workspace wasn't able to start in " 
                                               + str(timeout_in_seconds)
@@ -208,7 +218,7 @@ class TokenBehavior(TaskSet):
       workspace_status = self.getWorkspaceStatusSelf()
     self.log("Workspace id " + self.id + " is RUNNING")
     events.request_success.fire(request_type="REPEATED_GET",
-                                name="timeForStartingWorkspace-"+self.clusterName,
+                                name="timeForStartingWorkspace_"+self.clusterName,
                                 response_time=self._tick_timer(),
                                 response_length=0)
 
@@ -223,7 +233,7 @@ class TokenBehavior(TaskSet):
       workspace_status = self.getWorkspaceStatus(id)
     self.log("Workspace id " + id + " is STOPPED")
     events.request_success.fire(request_type="REPEATED_GET",
-                                name="timeForStoppingWorkspace-"+self.clusterName,
+                                name="timeForStoppingWorkspace_"+self.clusterName,
                                 response_time=self._tick_timer(),
                                 response_length=0)
 
@@ -238,7 +248,7 @@ class TokenBehavior(TaskSet):
       return
     response = self.client.delete("/api/workspace/" + id + "/runtime", headers={
                                     "Authorization": "Bearer " + self.locust.taskUserToken},
-                                  name="stopWorkspace-"+self.clusterName, catch_response=True)
+                                  name="stopWorkspace_"+self.clusterName, catch_response=True)
     try:
       content = response.content
       if not response.ok:
@@ -255,7 +265,7 @@ class TokenBehavior(TaskSet):
     self.log("Deleting workspace id " + id)
     response = self.client.delete("/api/workspace/" + id, headers={
                                     "Authorization": "Bearer " + self.locust.taskUserToken},
-                                  name="deleteWorkspace-"+self.clusterName, catch_response=True)
+                                  name="deleteWorkspace_"+self.clusterName, catch_response=True)
     try:
       content = response.content
       if not response.ok:
@@ -283,10 +293,10 @@ class TokenBehavior(TaskSet):
       getPodsResponse = self.client.get(
           "https://console." + clusterSubstring + ".openshift.com/api/v1/namespaces/" + self.locust.taskUserName + "-che/pods",
           headers={"Authorization": "Bearer " + self.openshiftToken},
-          name="getPods-"+self.clusterName, catch_response=True)
+          name="getPods_"+self.clusterName, catch_response=True)
       podsJson = getPodsResponse.json()
     events.request_success.fire(request_type="REPEATED_GET",
-                                name="timeForRemovingPod",
+                                name="timeForRemovingPod_"+self.clusterName,
                                 response_time=self._tick_timer(),
                                 response_length=0)
     self.log("All removing pods finished.")
@@ -297,7 +307,7 @@ class TokenBehavior(TaskSet):
   def getWorkspaceStatus(self, id):
     response = self.client.get("/api/workspace/" + id, headers={
       "Authorization": "Bearer " + self.locust.taskUserToken},
-                               name="getWorkspaceStatus-"+self.clusterName, catch_response=True)
+                               name="getWorkspaceStatus_"+self.clusterName, catch_response=True)
     try:
       resp_json = response.json()
       content = response.content
@@ -320,7 +330,7 @@ class TokenBehavior(TaskSet):
   def deleteExistingWorkspaces(self):
     response = self.client.get("/api/workspace/", headers={
                                "Authorization": "Bearer " + self.locust.taskUserToken},
-                               name="getWorkspaces-"+self.clusterName, catch_response=True)
+                               name="getWorkspaces_"+self.clusterName, catch_response=True)
     try:
       resp_json = response.json()
       content = response.content
