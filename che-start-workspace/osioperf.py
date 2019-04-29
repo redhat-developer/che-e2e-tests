@@ -102,9 +102,6 @@ class TokenBehavior(TaskSet):
     self.log("Username:" + self.locust.taskUserName
             #  + " Token:" + self.taskUserToken
              + " Environment:" + self.locust.taskUserEnvironment)
-    if (self.locust.taskUserName == "osiotest-workspace-2"):
-      self.log("Stopping test because account has stubborn remove pods")
-      raise StopLocust("Manually stopped the test because account has stuck remove pods.")
     if (os.getenv("CYCLES_COUNT") != None):
       self.cyclesMax = int(os.getenv("CYCLES_COUNT"))
     self.setOsTokenAndCluster()
@@ -278,6 +275,7 @@ class TokenBehavior(TaskSet):
   def waitUntilDeletingIsDone(self):
     self._reset_timer()
     delay = 10
+    failcount = 0
     clusterSubstring = (self.cluster.split("."))[1]
     getPodsResponse = self.client.get(
         "https://console." + clusterSubstring + ".openshift.com/api/v1/namespaces/" + self.locust.taskUserName + "-che/pods",
@@ -295,6 +293,10 @@ class TokenBehavior(TaskSet):
           headers={"Authorization": "Bearer " + self.openshiftToken},
           name="getPods_"+self.clusterName, catch_response=True)
       podsJson = getPodsResponse.json()
+      failcount += 1
+      # After waiting for a minute, stop the locust test with generating the results
+      if (failcount >= 6):
+        raise StopLocust("The remove pod failed to finish execution within a minute. Stopping locust thread.")
     events.request_success.fire(request_type="REPEATED_GET",
                                 name="timeForRemovingPod_"+self.clusterName,
                                 response_time=self._tick_timer(),
