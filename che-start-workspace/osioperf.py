@@ -5,162 +5,19 @@ from locust.exception import StopLocust
 from datetime import datetime
 import time
 
-che6BodyJson = '''
-{
-    "commands": [
-        {
-            "commandLine": "scl enable rh-maven33 \u0027mvn compile vertx:debug -f ${current.project.path}\u0027",
-            "name": "debug",
-            "type": "custom",
-            "attributes": {
-                "previewUrl": "http://${server.port.8080}",
-                "goal": "Debug"
-            }
-        },
-        {
-            "commandLine": "scl enable rh-maven33 \u0027mvn compile vertx:run -f ${current.project.path}\u0027",
-            "name": "run",
-            "type": "custom",
-            "attributes": {
-                "previewUrl": "http://${server.port.8080}",
-                "goal": "Run"
-            }
-        },
-        {
-            "commandLine": "scl enable rh-maven33 \u0027mvn clean install -f ${current.project.path}\u0027",
-            "name": "build",
-            "type": "mvn",
-            "attributes": {
-                "previewUrl": "",
-                "goal": "Build"
-            }
-        }
-    ],
-    "defaultEnv": "default",
-    "description": "mycustomdescription",
-    "environments": {
-        "default": {
-            "recipe": {
-                "type": "dockerimage",
-                "location": "registry.devshift.net/che/vertx"
-            },
-            "machines": {
-                "dev-machine": {
-                    "agents": [
-                        "com.redhat.bayesian.lsp",
-                        "org.eclipse.che.ws-agent",
-                        "org.eclipse.che.terminal"
-                    ],
-                    "attributes": {
-                        "memoryLimitBytes": "2147483648"
-                    }
-                }
-            }
-        }
-    },
-    "name": "WORKSPACE_NAME",
-    "links": [],
-    "projects": [
-        {
-            "name": "vertx-http-booster",
-            "type": "maven",
-            "description": "Created via che-starter API",
-            "path": "/vertx-http-booster",
-            "source": {
-                "parameters": {
-                    "keepVcs": "true",
-                    "branch": "master"
-                },
-                "type": "git",
-                "location": "https://github.com/openshiftio-vertx-boosters/vertx-http-booster"
-            },
-            "links": [],
-            "mixins": [
-                "git"
-            ]
-        }
-    ]
-}
-'''
-
-che7BodyJson = '''
-{
-  "projects": [
-    {
-      "mixins": [],
-      "problems": [],
-      "source": {
-        "location": "https://github.com/che-samples/web-nodejs-sample.git",
-        "type": "git",
-        "parameters": {}
-      },
-      "description": "Simple NodeJS Project.",
-      "name": "nodejs-hello-world",
-      "type": "node-js",
-      "path": "/nodejs-hello-world",
-      "attributes": {
-        "language": [
-          "javascript"
-        ]
-      }
-    }
-  ],
-  "commands": [
-    {
-      "commandLine": "echo ${CHE_OSO_CLUSTER//api/console}",
-      "name": "Get OpenShift Console URL",
-      "type": "custom",
-      "attributes": {}
-    },
-    {
-      "commandLine": "cd ${current.project.path} \n node .",
-      "name": "nodejs-hello-world:run",
-      "type": "custom",
-      "attributes": {
-        "goal": "Run",
-        "previewUrl": "${server.3000/tcp}"
-      }
-    }
-  ],
-  "defaultEnv": "default",
-  "environments": {
-    "default": {
-      "recipe": {
-        "contentType": "application/x-yaml",
-        "type": "openshift",
-        "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-dev:nightly'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n"
-      },
-      "machines": {
-        "ws/dev": {
-          "servers": {},
-          "volumes": {
-            "projects": {
-              "path": "/projects"
-            }
-          },
-          "installers": [],
-          "env": {},
-          "attributes": {
-            "memoryLimitBytes": "536870912"
-          }
-        }
-      }
-    }
-  },
-  "name": "WORKSPACE_NAME",
-  "attributes": {
-    "plugins": "che-machine-exec-plugin:0.0.1",
-    "editor": "org.eclipse.che.editor.theia:1.0.0"
-  }
-}
-'''
-
 _users = -1
 _userTokens = []
 _userEnvironment = []
 _userNames = []
 _currentUser = 0
 _userLock = threading.RLock()
+_stackDefinitionFilePath = os.getenv("CHE_STACK_FILE")
+if (not os.path.isfile(_stackDefinitionFilePath)):
+  raise IOError("Stack input file does not exist: " + _stackDefinitionFilePath)
+if (not os.access(_stackDefinitionFilePath, os.R_OK)):
+  raise IOError("Cannot read from the stack file: " + _stackDefinitionFilePath)
+_stackDefinitionFile = open(_stackDefinitionFilePath, "r")
+_stackDefinitionFileRaw = _stackDefinitionFile.read()
 
 
 class TokenBehavior(TaskSet):
@@ -232,7 +89,7 @@ class TokenBehavior(TaskSet):
   def createWorkspace(self):
     self.log("Creating workspace")
     now_time_ms = "%.f" % (time.time() * 1000)
-    json = che7BodyJson.replace("WORKSPACE_NAME", now_time_ms)
+    json = _stackDefinitionFileRaw.replace("WORKSPACE_NAME", now_time_ms)
     response = self.client.post("/api/workspace", headers={
       "Authorization": "Bearer " + self.locust.taskUserToken,
       "Content-Type": "application/json"}, 

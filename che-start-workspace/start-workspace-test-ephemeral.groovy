@@ -6,7 +6,7 @@ def TOKENS_FILE = "tokens.txt"
 def CHE_SERVER_URL = "https://che.prod-preview.openshift.io"
 
 pipeline {
-    agent { label 'osioperf-master2' }
+    agent { label 'osioperf-master3' }
     environment {
         USERS_PROPERTIES_FILE = credentials('${USERS_PROPERTIES_FILE_ID}')
         USER_TOKENS = ""
@@ -44,7 +44,7 @@ pipeline {
                     set +x
                     export USER_TOKENS="$USER_TOKENS"
                     export CYCLES_COUNT="$CYCLES_COUNT"
-                    export CHE_STACK_FILE="../${RELATIVE_PATH}/che7_workspace.json"
+                    export CHE_STACK_FILE="../${RELATIVE_PATH}/che7_ephemeral.json"
                     locust -f "../${RELATIVE_PATH}/osioperf.py" --no-web -c `echo -e "$USER_TOKENS" | wc -l` -r 1 --only-summary --csv="$EXPORT_FILE"
                     set -x
                     """
