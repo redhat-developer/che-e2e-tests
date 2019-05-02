@@ -5,7 +5,7 @@ from locust.exception import StopLocust
 from datetime import datetime
 import time
 
-bodyJson = '''
+che6BodyJson = '''
 {
     "commands": [
         {
@@ -80,6 +80,78 @@ bodyJson = '''
             ]
         }
     ]
+}
+'''
+
+che7BodyJson = '''
+{
+  "projects": [
+    {
+      "mixins": [],
+      "problems": [],
+      "source": {
+        "location": "https://github.com/che-samples/web-nodejs-sample.git",
+        "type": "git",
+        "parameters": {}
+      },
+      "description": "Simple NodeJS Project.",
+      "name": "nodejs-hello-world",
+      "type": "node-js",
+      "path": "/nodejs-hello-world",
+      "attributes": {
+        "language": [
+          "javascript"
+        ]
+      }
+    }
+  ],
+  "commands": [
+    {
+      "commandLine": "echo ${CHE_OSO_CLUSTER//api/console}",
+      "name": "Get OpenShift Console URL",
+      "type": "custom",
+      "attributes": {}
+    },
+    {
+      "commandLine": "cd ${current.project.path} \n node .",
+      "name": "nodejs-hello-world:run",
+      "type": "custom",
+      "attributes": {
+        "goal": "Run",
+        "previewUrl": "${server.3000/tcp}"
+      }
+    }
+  ],
+  "defaultEnv": "default",
+  "environments": {
+    "default": {
+      "recipe": {
+        "contentType": "application/x-yaml",
+        "type": "openshift",
+        "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-dev:nightly'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n"
+      },
+      "machines": {
+        "ws/dev": {
+          "servers": {},
+          "volumes": {
+            "projects": {
+              "path": "/projects"
+            }
+          },
+          "installers": [],
+          "env": {},
+          "attributes": {
+            "memoryLimitBytes": "536870912"
+          }
+        }
+      }
+    }
+  },
+  "name": "WORKSPACE_NAME",
+  "attributes": {
+    "plugins": "che-machine-exec-plugin:0.0.1",
+    "editor": "org.eclipse.che.editor.theia:1.0.0"
+  }
 }
 '''
 
@@ -160,7 +232,7 @@ class TokenBehavior(TaskSet):
   def createWorkspace(self):
     self.log("Creating workspace")
     now_time_ms = "%.f" % (time.time() * 1000)
-    json = bodyJson.replace("WORKSPACE_NAME", now_time_ms)
+    json = che7BodyJson.replace("WORKSPACE_NAME", now_time_ms)
     response = self.client.post("/api/workspace", headers={
       "Authorization": "Bearer " + self.locust.taskUserToken,
       "Content-Type": "application/json"}, 
