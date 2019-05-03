@@ -12,7 +12,6 @@ pipeline {
         USER_TOKENS = ""
         LOG_DIR = ""
         ZABBIX_FILE = ""
-        // CYCLES_COUNT = 5
     }
     stages {
         stage ("Prepairing environment") {
@@ -84,33 +83,13 @@ pipeline {
                         def int avg_content_size = elements[8]
                         def float requests_per_second = elements[9]
                         def output_basestring = "qa-".concat(host).concat(" ").concat("che-start-workspace.").concat(method).concat(".").concat(name)
-                        def output_failed = output_basestring.concat("-failed").concat(" ")
-                                            .concat(String.valueOf(DATETIME_TAG)).concat(" ")
-                                            .concat(String.valueOf(failures))
-                        def output_failrate = output_basestring.concat("-fail_rate").concat(" ")
-                                              .concat(String.valueOf(DATETIME_TAG)).concat(" ")
-                                              .concat(String.valueOf(fail_rate))
-                        def output_average = output_basestring.concat("-rt_average").concat(" ")
-                                            .concat(String.valueOf(DATETIME_TAG)).concat(" ")
-                                            .concat(String.valueOf(average))
-                        def output_median = output_basestring.concat("-rt_median").concat(" ")
-                                            .concat(String.valueOf(DATETIME_TAG)).concat(" ")
-                                            .concat(String.valueOf(median))
-                        def output_min = output_basestring.concat("-rt_min").concat(" ")
-                                         .concat(String.valueOf(DATETIME_TAG)).concat(" ")
-                                         .concat(String.valueOf(minimum))
-                        def output_max = output_basestring.concat("-rt_max").concat(" ")
-                                         .concat(String.valueOf(DATETIME_TAG)).concat(" ")
-                                         .concat(String.valueOf(maximum))
+                        def output = output_basestring.concat(" ")
+                                     .concat(String.valueOf(DATETIME_TAG)).concat(" ")
+                                     .concat(String.valueOf(average))
                         sh (script: """
                         #!/bin/bash
                         set +x;
-                        echo $output_failed >> ${ZABBIX_FILE}
-                        echo $output_failrate >> ${ZABBIX_FILE}
-                        echo $output_average >> ${ZABBIX_FILE}
-                        echo $output_median >> ${ZABBIX_FILE}
-                        echo $output_min >> ${ZABBIX_FILE}
-                        echo $output_max >> ${ZABBIX_FILE}
+                        echo $output >> ${ZABBIX_FILE}
                         set -x;
                         """, returnStdout: false)
                     }

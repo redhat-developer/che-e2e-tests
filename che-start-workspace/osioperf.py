@@ -131,7 +131,7 @@ class TokenBehavior(TaskSet):
       now = time.time()
       if now - self.start > timeout_in_seconds:
         events.request_failure.fire(request_type="REPEATED_GET",
-                                    name="timeForStartingWorkspace_"+self.clusterName,
+                                    name="startWorkspace_"+self.clusterName,
                                     response_time=self._tick_timer(),
                                     exception="Workspace wasn't able to start in " 
                                               + str(timeout_in_seconds)
@@ -144,7 +144,7 @@ class TokenBehavior(TaskSet):
       workspace_status = self.getWorkspaceStatusSelf()
     self.log("Workspace id " + self.id + " is RUNNING")
     events.request_success.fire(request_type="REPEATED_GET",
-                                name="timeForStartingWorkspace_"+self.clusterName,
+                                name="startWorkspace_"+self.clusterName,
                                 response_time=self._tick_timer(),
                                 response_length=0)
 
@@ -159,7 +159,7 @@ class TokenBehavior(TaskSet):
       workspace_status = self.getWorkspaceStatus(id)
     self.log("Workspace id " + id + " is STOPPED")
     events.request_success.fire(request_type="REPEATED_GET",
-                                name="timeForStoppingWorkspace_"+self.clusterName,
+                                name="stopWorkspace_"+self.clusterName,
                                 response_time=self._tick_timer(),
                                 response_length=0)
 
@@ -213,8 +213,7 @@ class TokenBehavior(TaskSet):
     podsJson = getPodsResponse.json()
     while "rm-" in str(podsJson):
       rmpods = str(podsJson).count("rm-") / 7
-      self.log("There are still removing pods running. Trying again after " 
-            + str(delay) + " seconds.")
+      self.log("[" + str(failcount) + "] There are still removing pods running. Trying again after " + str(delay) + " seconds.")
       self.log("Number of removing pods running: " + str(rmpods))
       time.sleep(delay)
       getPodsResponse = self.client.get(
@@ -227,7 +226,7 @@ class TokenBehavior(TaskSet):
       if (failcount >= 6):
         raise StopLocust("The remove pod failed to finish execution within a minute. Stopping locust thread.")
     events.request_success.fire(request_type="REPEATED_GET",
-                                name="timeForRemovingPod_"+self.clusterName,
+                                name="deleteWorkspace_"+self.clusterName,
                                 response_time=self._tick_timer(),
                                 response_length=0)
     self.log("All removing pods finished.")
