@@ -6,13 +6,12 @@ def TOKENS_FILE = "tokens.txt"
 def CHE_SERVER_URL = "https://che.prod-preview.openshift.io"
 
 pipeline {
-    agent { label 'osioperf-master3' }
+    agent { label 'osioperf-master1' }
     environment {
         USERS_PROPERTIES_FILE = credentials('${USERS_PROPERTIES_FILE_ID}')
         USER_TOKENS = ""
         LOG_DIR = ""
         ZABBIX_FILE = ""
-        // CYCLES_COUNT = 5
     }
     stages {
         stage ("Prepairing environment") {
@@ -68,49 +67,22 @@ pipeline {
                         }
                         def name_host_metric = elements[1].replace("\"","").split("_")
                         def name = name_host_metric[0]
-                        if (name.equals("getWorkspaces")) {
+                        if (name.equals("getWorkspaces") | name.equals("getWorkspaceStatus")) {
                             echo "Skipping line, not a metric, part of another method"
                             continue
                         }
                         def host = name_host_metric[1]
-                        def int requests_count = elements[2]
-                        def int failures = elements[3]
-                        def int success = requests_count-failures
-                        def float fail_rate = (failures == 0) ? 0 : requests_count/failures*100
-                        def int median = elements[4]
                         def int average = elements[5]
-                        def int minimum = elements[6]
-                        def int maximum = elements[7]
-                        def int avg_content_size = elements[8]
-                        def float requests_per_second = elements[9]
-                        def output_basestring = "qa-".concat(host).concat(" ").concat("che-start-workspace.").concat(method).concat(".").concat(name)
-                        def output_failed = output_basestring.concat("-failed").concat(" ")
-                                            .concat(String.valueOf(DATETIME_TAG)).concat(" ")
-                                            .concat(String.valueOf(failures))
-                        def output_failrate = output_basestring.concat("-fail_rate").concat(" ")
-                                              .concat(String.valueOf(DATETIME_TAG)).concat(" ")
-                                              .concat(String.valueOf(fail_rate))
-                        def output_average = output_basestring.concat("-rt_average").concat(" ")
-                                            .concat(String.valueOf(DATETIME_TAG)).concat(" ")
-                                            .concat(String.valueOf(average))
-                        def output_median = output_basestring.concat("-rt_median").concat(" ")
-                                            .concat(String.valueOf(DATETIME_TAG)).concat(" ")
-                                            .concat(String.valueOf(median))
-                        def output_min = output_basestring.concat("-rt_min").concat(" ")
-                                         .concat(String.valueOf(DATETIME_TAG)).concat(" ")
-                                         .concat(String.valueOf(minimum))
-                        def output_max = output_basestring.concat("-rt_max").concat(" ")
-                                         .concat(String.valueOf(DATETIME_TAG)).concat(" ")
-                                         .concat(String.valueOf(maximum))
+                        def output_basestring = "qa-".concat(host).concat(" ")
+                                                .concat("che-start-workspace.").concat(method).concat(".")
+                                                .concat(name).concat(".eph")
+                        def output = output_basestring.concat(" ")
+                                     .concat(String.valueOf(DATETIME_TAG)).concat(" ")
+                                     .concat(String.valueOf(average))
                         sh (script: """
                         #!/bin/bash
                         set +x;
-                        echo $output_failed >> ${ZABBIX_FILE}
-                        echo $output_failrate >> ${ZABBIX_FILE}
-                        echo $output_average >> ${ZABBIX_FILE}
-                        echo $output_median >> ${ZABBIX_FILE}
-                        echo $output_min >> ${ZABBIX_FILE}
-                        echo $output_max >> ${ZABBIX_FILE}
+                        echo $output >> ${ZABBIX_FILE}
                         set -x;
                         """, returnStdout: false)
                     }

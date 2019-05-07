@@ -107,7 +107,7 @@ class TokenBehavior(TaskSet):
         response.success()
         return resp_json["id"]
     except ValueError:
-      response.failure("Got wrong response: [" + response.content + "]")
+      response.failure("Failed to process response value - createWorkspace")
 
   def startWorkspace(self):
     self.log("Starting workspace id " + str(self.id))
@@ -122,24 +122,36 @@ class TokenBehavior(TaskSet):
       else:
         response.success()
     except ValueError:
-      response.failure("Got wrong response: [" + content + "]")
+      response.failure("Failed to process response value - startWorkspace")
 
   def waitForWorkspaceToStart(self):
-    timeout_in_seconds = 300
+    timeout_in_seconds = 300 if os.getenv("WORKSPACE_START_TIMEOUT") == None else int(os.getenv("WORKSPACE_START_TIMEOUT"))
     workspace_status = self.getWorkspaceStatusSelf()
     while workspace_status != "RUNNING":
       now = time.time()
-      if now - self.start > timeout_in_seconds:
+      elapsed_time = int(now - self.start)
+      if (workspace_status == "STOPPED"):
+        events.request_failure.fire(request_type="REPEATED_GET",
+                                    name="startWorkspace_"+self.clusterName,
+                                    response_time=self._tick_timer(),
+                                    exception="Workspace became STOPPED after " 
+                                              + str(elapsed_time)
+                                              + " seconds.")
+        self.log("Workspace " + self.id + " became STOPPED after " 
+                 + str(elapsed_time) + " seconds.")
+        return
+      if elapsed_time > timeout_in_seconds:
         events.request_failure.fire(request_type="REPEATED_GET",
                                     name="startWorkspace_"+self.clusterName,
                                     response_time=self._tick_timer(),
                                     exception="Workspace wasn't able to start in " 
-                                              + str(timeout_in_seconds)
+                                              + str(elapsed_time)
                                               + " seconds.")
         self.log("Workspace " + self.id + " wasn't able to start in " 
-                 + str(timeout_in_seconds) + " seconds.")
+                 + str(elapsed_time) + " seconds.")
         return
-      self.log("Workspace id " + self.id + " is still not in state RUNNING ["+ workspace_status +"]")
+      self.log("Workspace id " + self.id + " is still not in state RUNNING ["
+               + workspace_status +"] {" + str(elapsed_time) + " of " + str(timeout_in_seconds) + "}")
       self.wait()
       workspace_status = self.getWorkspaceStatusSelf()
     self.log("Workspace id " + self.id + " is RUNNING")
@@ -152,9 +164,23 @@ class TokenBehavior(TaskSet):
     self.waitForWorkspaceToStop(self.id)
 
   def waitForWorkspaceToStop(self, id):
+    timeout_in_seconds = 60 if os.getenv("WORKSPACE_STOP_TIMEOUT") == None else int(os.getenv("WORKSPACE_STOP_TIMEOUT"))
     workspace_status = self.getWorkspaceStatus(id)
     while workspace_status != "STOPPED":
-      self.log("Workspace id " + id + " is still not in state STOPPED ["+ workspace_status +"]")
+      now = time.time()
+      elapsed_time = int(now - self.start)
+      if elapsed_time > timeout_in_seconds:
+        events.request_failure.fire(request_type="REPEATED_GET",
+                                    name="stopWorkspace_"+self.clusterName,
+                                    response_time=self._tick_timer(),
+                                    exception="Workspace wasn't able to stop in " 
+                                              + str(elapsed_time)
+                                              + " seconds.")
+        self.log("Workspace " + self.id + " wasn't able to stop in " 
+                 + str(elapsed_time) + " seconds.")
+        return
+      self.log("Workspace id " + id + " is still not in state STOPPED ["
+               + workspace_status +"] {" + str(elapsed_time) + " of " + str(timeout_in_seconds) + "}")
       self.wait()
       workspace_status = self.getWorkspaceStatus(id)
     self.log("Workspace id " + id + " is STOPPED")
@@ -182,7 +208,7 @@ class TokenBehavior(TaskSet):
       else:
         response.success()
     except ValueError:
-      response.failure("Got wrong response: [" + content + "]")
+      response.failure("Failed to process response value - stopWorkspace")
 
   def deleteWorkspaceSelf(self):
     self.deleteWorkspace(self.id)
@@ -199,7 +225,7 @@ class TokenBehavior(TaskSet):
       else:
         response.success()
     except ValueError:
-      response.failure("Got wrong response: [" + content + "]")
+      response.failure("Failed to process response value - deleteWorkspace")
 
   def waitUntilDeletingIsDone(self):
     self._reset_timer()
@@ -247,7 +273,7 @@ class TokenBehavior(TaskSet):
         response.success()
         return resp_json["status"]
     except ValueError:
-      response.failure("Got wrong response: [" + content + "]")
+      response.failure("Failed to process response value - getWorkspaceStatus")
 
   def _reset_timer(self):
     self.start = time.time()
@@ -276,7 +302,7 @@ class TokenBehavior(TaskSet):
             self.waitForWorkspaceToStop(wkspid)
           self.deleteWorkspace(wkspid)
     except ValueError:
-      response.failure("Got wrong response: [" + content + "]")
+      response.failure("Failed to process response value - deleteExistingWorkspaces")
 
   def log(self, message):
     print(self.locust.taskUserName + ": " + message)
