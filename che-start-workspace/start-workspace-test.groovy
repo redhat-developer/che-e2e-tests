@@ -67,21 +67,12 @@ pipeline {
                         }
                         def name_host_metric = elements[1].replace("\"","").split("_")
                         def name = name_host_metric[0]
-                        if (name.equals("getWorkspaces")) {
+                        if (name.equals("getWorkspaces") | name.equals("getWorkspaceStatus")) {
                             echo "Skipping line, not a metric, part of another method"
                             continue
                         }
                         def host = name_host_metric[1]
-                        def int requests_count = elements[2]
-                        def int failures = elements[3]
-                        def int success = requests_count-failures
-                        def float fail_rate = (failures == 0) ? 0 : requests_count/failures*100
-                        def int median = elements[4]
                         def int average = elements[5]
-                        def int minimum = elements[6]
-                        def int maximum = elements[7]
-                        def int avg_content_size = elements[8]
-                        def float requests_per_second = elements[9]
                         def output_basestring = "qa-".concat(host).concat(" ").concat("che-start-workspace.").concat(method).concat(".").concat(name)
                         def output = output_basestring.concat(" ")
                                      .concat(String.valueOf(DATETIME_TAG)).concat(" ")
