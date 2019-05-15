@@ -62,13 +62,11 @@ pipeline {
                         def elements = line.split(",")
                         def method = elements[0].replace("\"","")
                         if (method.equals("Method") || method.equals("None")) {
-                            echo "Skipping line, no data."
                             continue
                         }
                         def name_host_metric = elements[1].replace("\"","").split("_")
                         def name = name_host_metric[0]
                         if (name.equals("getWorkspaces") | name.equals("getWorkspaceStatus")) {
-                            echo "Skipping line, not a metric, part of another method"
                             continue
                         }
                         def host = name_host_metric[1]
@@ -86,8 +84,6 @@ pipeline {
                         set -x;
                         """, returnStdout: false)
                     }
-                    echo "Writing zabbix report done."
-                    echo readFile("${ZABBIX_FILE}")
                 }
             }
         }

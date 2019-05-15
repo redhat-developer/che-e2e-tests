@@ -43,9 +43,11 @@ class TokenBehavior(TaskSet):
     if "prod-preview" in self.locust.taskUserEnvironment:
       userInfoURL = "https://auth.prod-preview.openshift.io/api/userinfo"
       usersURL = "https://api.prod-preview.openshift.io/api/users?filter[username]="
+      tokensURL = "https://auth.prod-preview.openshift.io/api/token?for="
     else:
       userInfoURL = "https://auth.openshift.io/api/userinfo"
       usersURL = "https://api.openshift.io/api/users?filter[username]="
+      tokensURL = "https://auth.openshift.io/api/token?for="
     if "@" in self.locust.taskUserName:
       userInfo = self.client.get(userInfoURL,
                                  headers={
@@ -58,9 +60,12 @@ class TokenBehavior(TaskSet):
         name="getUserInfo", catch_response=True)
     infoResponseJson = infoResponse.json()
     self.cluster = infoResponseJson['data'][0]['attributes']['cluster']
-    self.clusterName = self.cluster.split(".")[1]
+    if "prod-preview" in self.locust.taskUserEnvironment:
+      self.clusterName = self.cluster.split(".")[1] + "-preview"
+    else:
+      self.clusterName = self.cluster.split(".")[1]
     os_token_response = self.client.get(
-        "https://auth.openshift.io/api/token?for=" + self.cluster,
+        tokensURL + self.cluster,
         headers={"Authorization": "Bearer " + self.locust.taskUserToken},
         name="getOpenshiftToken", catch_response=True)
     os_token_response_json = os_token_response.json()
@@ -341,7 +346,7 @@ class OsioperfLocust(Locust):
       _currentUser = 0
     _userLock.release()
     # User lock released, critical section end
-    host = "https://che.prod-preivew.openshift.io" if "prod-preview" in self.taskUserEnvironment else "https://che.openshift.io"
+    host = "https://che.prod-preview.openshift.io" if "prod-preview" in self.taskUserEnvironment else "https://che.openshift.io"
     self.client = HttpSession(base_url=host)
 
 class TokenUser(OsioperfLocust):
