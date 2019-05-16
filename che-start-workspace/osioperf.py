@@ -289,6 +289,7 @@ class TokenBehavior(TaskSet):
     return ret_val
 
   def deleteExistingWorkspaces(self):
+    self._reset_timer()
     response = self.client.get("/api/workspace/", headers={
                                "Authorization": "Bearer " + self.locust.taskUserToken},
                                name="getWorkspaces_"+self.clusterName, catch_response=True)
