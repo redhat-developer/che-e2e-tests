@@ -14,7 +14,7 @@ pipeline {
         ZABBIX_FILE = ""
     }
     options {
-        timeout(time: 13, unit: 'MINUTES') 
+        timeout(time: "${PIPELINE_TIMEOUT}", unit: 'MINUTES') 
     }
     stages {
         stage ("Prepairing environment") {
@@ -100,7 +100,15 @@ pipeline {
         }
         failure {
             // mail to: team@example.com, subject: 'The Pipeline failed :('
-            echo "NOP"
+            for (user in USER_TOKENS) {
+                def user_array = user.split(";")
+                def active_token = user_array[0]
+                def username = user_array[1]
+                def environment = user_array[2]
+                def reset_api_url = "https://api.openshift.io/api/user/services" if environment.equals("prod") else "https://api.prod-preview.openshift.io/api/user/services"
+                sh "curl -s -X DELETE --header 'Content-Type: application/json' --header 'Authorization: Bearer ${active_token}' ${reset_api_url}"
+                sh "curl -s -X PATCH --header 'Content-Type: application/json' --header 'Authorization: Bearer ${active_token}' ${reset_api_url}"
+            }
         }
     }
 }
