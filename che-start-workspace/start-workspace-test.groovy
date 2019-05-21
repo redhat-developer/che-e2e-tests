@@ -13,6 +13,9 @@ pipeline {
         LOG_DIR = ""
         ZABBIX_FILE = ""
     }
+    options {
+        timeout(time: 13, unit: 'MINUTES') 
+    }
     stages {
         stage ("Prepairing environment") {
             steps {
