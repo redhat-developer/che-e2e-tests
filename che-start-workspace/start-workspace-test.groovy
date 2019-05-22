@@ -105,7 +105,7 @@ pipeline {
                 def active_token = user_array[0]
                 def username = user_array[1]
                 def environment = user_array[2]
-                def reset_api_url = "https://api.openshift.io/api/user/services" if environment.equals("prod") else "https://api.prod-preview.openshift.io/api/user/services"
+                def reset_api_url = environment.equals("prod") : "https://api.openshift.io/api/user/services" ? "https://api.prod-preview.openshift.io/api/user/services"
                 sh "curl -s -X DELETE --header 'Content-Type: application/json' --header 'Authorization: Bearer ${active_token}' ${reset_api_url}"
                 sh "curl -s -X PATCH --header 'Content-Type: application/json' --header 'Authorization: Bearer ${active_token}' ${reset_api_url}"
             }
