@@ -4,17 +4,19 @@ def PROPERTIES_FILE = "users.properties"
 def EXPORT_FILE = "exports"
 def TOKENS_FILE = "tokens.txt"
 def CHE_SERVER_URL = "https://che.prod-preview.openshift.io"
+def USER_TOKENS = ""
+def JOB_TIMEOUT = "${PIPELINE_TIMEOUT}".toInteger()
+
+def silent_sh(cmd) {
+    sh('#!/bin/sh -e\n' + cmd)
+}
 
 pipeline {
-    agent { label 'osioperf-master1' }
+    agent { label 'osioperf-master2' }
     environment {
         USERS_PROPERTIES_FILE = credentials('${USERS_PROPERTIES_FILE_ID}')
-        USER_TOKENS = ""
         LOG_DIR = ""
         ZABBIX_FILE = ""
-    }
-    options {
-        timeout(time: "${PIPELINE_TIMEOUT}", unit: 'MINUTES') 
     }
     stages {
         stage ("Prepairing environment") {
@@ -35,6 +37,9 @@ pipeline {
             }
         }
         stage ("Running worksapce test") {
+            options {
+                timeout(time: JOB_TIMEOUT, unit: 'MINUTES') 
+            }
             steps {
                 script {
                     LOG_DIR = sh(returnStdout:true, script:"echo ${JOB_BASE_NAME}-${BUILD_NUMBER}").trim()
@@ -42,18 +47,19 @@ pipeline {
                     echo ("Creating logs directory: ${LOG_DIR}")
                 }
                 dir ("${LOG_DIR}") {
-                    sh """
-                    set +x
+                    silent_sh """
                     export USER_TOKENS="$USER_TOKENS"
                     export CYCLES_COUNT="$CYCLES_COUNT"
                     export CHE_STACK_FILE="../${RELATIVE_PATH}/che7_ephemeral.json"
                     locust -f "../${RELATIVE_PATH}/osioperf.py" --no-web -c `echo -e "$USER_TOKENS" | wc -l` -r 1 --only-summary --csv="$EXPORT_FILE"
-                    set -x
                     """
                 }
             }
         }
         stage ("Generating zabbix report") {
+            when {
+                expression { currentBuild.currentResult == "SUCCESS" }
+            }
             steps {
                 script {
                     def long DATETIME_TAG = System.currentTimeMillis() / 1000L
@@ -80,39 +86,46 @@ pipeline {
                         def output = output_basestring.concat(" ")
                                      .concat(String.valueOf(DATETIME_TAG)).concat(" ")
                                      .concat(String.valueOf(average))
-                        sh (script: """
-                        #!/bin/bash
-                        set +x;
-                        echo $output >> ${ZABBIX_FILE}
-                        set -x;
-                        """, returnStdout: false)
+                        silent_sh "echo $output >> ${ZABBIX_FILE}"
                     }
                 }
             }
         }
         stage ("Reporting to zabbix") {
+            when {
+                expression { currentBuild.currentResult == "SUCCESS" }
+            }
             steps {
-                sh "zabbix_sender -vv -i ${ZABBIX_FILE} -T -z ${ZABBIX_SERVER} -p ${ZABBIX_PORT}"
+                silent_sh "zabbix_sender -vv -i ${ZABBIX_FILE} -T -z ${ZABBIX_SERVER} -p ${ZABBIX_PORT}"
             }
         }
     }
     post("Cleanup") {
         always {
+            echo "Current build status: ${currentBuild.currentResult}"
             deleteDir()
         }
+        aborted {
+            echo "Jenkins job timed out."
+        }
         failure {
+            echo "Job failed, resetting environment for all users."
             // mail to: team@example.com, subject: 'The Pipeline failed :('
-            for (user in USER_TOKENS) {
-                def user_array = user.split(";")
-                def active_token = user_array[0]
-                def username = user_array[1]
-                def environment = user_array[2]
-                def reset_api_url = "https://api.openshift.io/api/user/services"
-                if (environment.equals("prod-preview")) {
-                    reset_api_url = "https://api.prod-preview.openshift.io/api/user/services"
+            script {
+                def user_tokens = USER_TOKENS.split("\n")
+                for (user in user_tokens) {
+                    def user_array = user.split(";")
+                    def active_token = user_array[0]
+                    def username = user_array[1]
+                    echo "Resetting environment for $username"
+                    def environment = user_array[2]
+                    def reset_api_url = "https://api.openshift.io/api/user/services"
+                    if (environment.equals("prod-preview")) {
+                        reset_api_url = "https://api.prod-preview.openshift.io/api/user/services"
+                    }
+                    silent_sh "curl -s -X DELETE --header 'Content-Type: application/json' --header 'Authorization: Bearer ${active_token}' ${reset_api_url}"
+                    silent_sh "curl -s -X PATCH --header 'Content-Type: application/json' --header 'Authorization: Bearer ${active_token}' ${reset_api_url}"
                 }
-                sh "curl -s -X DELETE --header 'Content-Type: application/json' --header 'Authorization: Bearer ${active_token}' ${reset_api_url}"
-                sh "curl -s -X PATCH --header 'Content-Type: application/json' --header 'Authorization: Bearer ${active_token}' ${reset_api_url}"
             }
         }
     }
