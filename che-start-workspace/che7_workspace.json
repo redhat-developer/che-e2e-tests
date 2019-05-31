@@ -46,7 +46,7 @@
   ],
   "name": "WORKSPACE_NAME",
   "attributes": {
-    "editor": "eclipse/che-theia/1.0.0",
+    "editor": "eclipse/che-theia/next",
     "plugins": "eclipse/che-machine-exec-plugin/0.0.1"
   },
   "commands": [
