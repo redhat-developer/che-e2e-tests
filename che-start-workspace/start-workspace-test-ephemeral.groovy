@@ -23,11 +23,11 @@ pipeline {
             steps {
                 echo ("Pulling git repositories")
                     checkout([$class: 'GitSCM', 
-                        branches: [[name: '*/467-feature-fix-workspace-startup-monitoring-jobs']], 
+                        branches: [[name: '*/master']], 
                         doGenerateSubmoduleConfigurations: false, 
                         extensions: [], 
                         submoduleCfg: [], 
-                        userRemoteConfigs: [[url: 'https://www.github.com/ScrewTSW/che-functional-tests.git']]
+                        userRemoteConfigs: [[url: 'https://www.github.com/redhat-developer/che-functional-tests']]
                     ])
                 echo ("Getting user active tokens")
                     sh "./${RELATIVE_PATH}/get_active_tokens.sh \"${TOKENS_FILE}\""
