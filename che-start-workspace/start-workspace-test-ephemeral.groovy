@@ -21,14 +21,6 @@ pipeline {
     stages {
         stage ("Prepairing environment") {
             steps {
-                echo ("Pulling git repositories")
-                    checkout([$class: 'GitSCM', 
-                        branches: [[name: '*/master']], 
-                        doGenerateSubmoduleConfigurations: false, 
-                        extensions: [], 
-                        submoduleCfg: [], 
-                        userRemoteConfigs: [[url: 'https://www.github.com/redhat-developer/che-functional-tests']]
-                    ])
                 echo ("Getting user active tokens")
                     sh "./${RELATIVE_PATH}/get_active_tokens.sh \"${TOKENS_FILE}\""
                     script {
@@ -51,6 +43,13 @@ pipeline {
                     export USER_TOKENS="$USER_TOKENS"
                     export CYCLES_COUNT="$CYCLES_COUNT"
                     export CHE_STACK_FILE="../${RELATIVE_PATH}/che7_ephemeral.json"
+                    export ZABBIX_SERVER="${ZABBIX_SERVER}"
+                    export ZABBIX_PORT="${ZABBIX_PORT}"
+                    export ZABBIX_EPHEMERAL="true"
+                    export START_SOFT_FAILURE_TIMEOUT="${START_SOFT_FAILURE_TIMEOUT}"
+                    export START_HARD_FAILURE_TIMEOUT="${START_HARD_FAILURE_TIMEOUT}"
+                    export STOP_SOFT_FAILURE_TIMEOUT="${STOP_SOFT_FAILURE_TIMEOUT}"
+                    export STOP_HARD_FAILURE_TIMEOUT="${STOP_HARD_FAILURE_TIMEOUT}"
                     locust -f "../${RELATIVE_PATH}/osioperf.py" --no-web -c `echo -e "$USER_TOKENS" | wc -l` -r 1 --only-summary --csv="$EXPORT_FILE"
                     """
                 }
