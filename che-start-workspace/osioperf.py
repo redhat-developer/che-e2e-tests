@@ -18,12 +18,19 @@ if (not os.access(_stackDefinitionFilePath, os.R_OK)):
   raise IOError("Cannot read from the stack file: " + _stackDefinitionFilePath)
 _stackDefinitionFile = open(_stackDefinitionFilePath, "r")
 _stackDefinitionFileRaw = _stackDefinitionFile.read()
+_zabbixServer = os.getenv("ZABBIX_SERVER")
+_zabbixPort = os.getenv("ZABBIX_PORT")
+_zabbixEphemeral = False if os.getenv("ZABBIX_EPHEMERAL") == None else True
 
 
 class TokenBehavior(TaskSet):
   id = ""
   openshiftToken = ""
   cluster = ""
+  soft_start_failure_cmd = ""
+  soft_stop_failure_cmd = ""
+  hard_start_failure_cmd = ""
+  hard_stop_failure_cmd = ""
   cycles = 0
   cyclesMax = 1
 
@@ -70,6 +77,26 @@ class TokenBehavior(TaskSet):
         name="getOpenshiftToken", catch_response=True)
     os_token_response_json = os_token_response.json()
     self.openshiftToken = os_token_response_json["access_token"]
+    self.soft_start_failure_cmd = "zabbix_sender -vv" + \
+      " -z " + _zabbixServer + \
+      " -p " + _zabbixPort + \
+      " -s qa-" + self.clusterName + \
+      " -k " + str("che-start-workspace.FAIL.start.soft.failure.eph" if _zabbixEphemeral else "che-start-workspace.FAIL.start.soft.failure")
+    self.soft_stop_failure_cmd = "zabbix_sender -vv" + \
+      " -z " + _zabbixServer + \
+      " -p " + _zabbixPort + \
+      " -s qa-" + self.clusterName + \
+      " -k " + str("che-start-workspace.FAIL.stop.soft.failure.eph" if _zabbixEphemeral else "che-start-workspace.FAIL.stop.soft.failure")
+    self.hard_start_failure_cmd = "zabbix_sender -vv" + \
+      " -z " + _zabbixServer + \
+      " -p " + _zabbixPort + \
+      " -s qa-" + self.clusterName + \
+      " -k " + str("che-start-workspace.FAIL.start.hard.failure.eph" if _zabbixEphemeral else "che-start-workspace.FAIL.start.hard.failure")
+    self.hard_stop_failure_cmd = "zabbix_sender -vv" + \
+      " -z " + _zabbixServer + \
+      " -p " + _zabbixPort + \
+      " -s qa-" + self.clusterName + \
+      " -k " + str("che-start-workspace.FAIL.stop.hard.failure.eph" if _zabbixEphemeral else "che-start-workspace.FAIL.stop.hard.failure")
 
   @task
   def createStartDeleteWorkspace(self):
@@ -130,7 +157,9 @@ class TokenBehavior(TaskSet):
       response.failure("Failed to process response value - startWorkspace")
 
   def waitForWorkspaceToStart(self):
-    timeout_in_seconds = 300 if os.getenv("WORKSPACE_START_TIMEOUT") == None else int(os.getenv("WORKSPACE_START_TIMEOUT"))
+    timeout_in_seconds = 300 if os.getenv("START_HARD_FAILURE_TIMEOUT") == None else int(os.getenv("START_HARD_FAILURE_TIMEOUT"))
+    soft_timeout_seconds = 60 if os.getenv("START_SOFT_FAILURE_TIMEOUT") == None else int(os.getenv("START_SOFT_FAILURE_TIMEOUT"))
+    isSoftFailure = False
     workspace_status = self.getWorkspaceStatusSelf()
     while workspace_status != "RUNNING":
       now = time.time()
@@ -144,7 +173,12 @@ class TokenBehavior(TaskSet):
                                               + " seconds.")
         self.log("Workspace " + self.id + " became STOPPED after " 
                  + str(elapsed_time) + " seconds.")
+        os.system(self.hard_start_failure_cmd+" -o 1 >/dev/null 2>&1")
         return
+      if elapsed_time > soft_timeout_seconds and isSoftFailure == False:
+        self.log("Workspace startup on "+self.clusterName+" failed with soft failure.")
+        os.system(self.soft_start_failure_cmd+" -o 1 >/dev/null 2>&1")
+        isSoftFailure = True
       if elapsed_time > timeout_in_seconds:
         events.request_failure.fire(request_type="REPEATED_GET",
                                     name="startWorkspace_"+self.clusterName,
@@ -154,6 +188,7 @@ class TokenBehavior(TaskSet):
                                               + " seconds.")
         self.log("Workspace " + self.id + " wasn't able to start in " 
                  + str(elapsed_time) + " seconds.")
+        os.system(self.hard_start_failure_cmd+" -o 1 >/dev/null 2>&1")
         return
       self.log("Workspace id " + self.id + " is still not in state RUNNING ["
                + workspace_status +"] {" + str(elapsed_time) + " of " + str(timeout_in_seconds) + "}")
@@ -164,16 +199,25 @@ class TokenBehavior(TaskSet):
                                 name="startWorkspace_"+self.clusterName,
                                 response_time=self._tick_timer(),
                                 response_length=0)
+    if (isSoftFailure == False):
+      os.system(self.soft_start_failure_cmd+" -o 0 >/dev/null 2>&1")
+    os.system(self.hard_start_failure_cmd+" -o 0 >/dev/null 2>&1")
 
   def waitForWorkspaceToStopSelf(self):
     self.waitForWorkspaceToStop(self.id)
 
   def waitForWorkspaceToStop(self, id):
-    timeout_in_seconds = 60 if os.getenv("WORKSPACE_STOP_TIMEOUT") == None else int(os.getenv("WORKSPACE_STOP_TIMEOUT"))
+    timeout_in_seconds = 60 if os.getenv("STOP_HARD_FAILURE_TIMEOUT") == None else int(os.getenv("STOP_HARD_FAILURE_TIMEOUT"))
+    soft_timeout_seconds = 5 if os.getenv("STOP_SOFT_FAILURE_TIMEOUT") == None else int(os.getenv("STOP_SOFT_FAILURE_TIMEOUT"))
+    isSoftFailure = False
     workspace_status = self.getWorkspaceStatus(id)
     while workspace_status != "STOPPED":
       now = time.time()
       elapsed_time = int(now - self.start)
+      if elapsed_time > soft_timeout_seconds and isSoftFailure == False:
+        self.log("Workspace stopping on "+self.clusterName+" failed with soft failure.")
+        os.system(self.soft_stop_failure_cmd+" -o 1 >/dev/null 2>&1")
+        isSoftFailure = True
       if elapsed_time > timeout_in_seconds:
         events.request_failure.fire(request_type="REPEATED_GET",
                                     name="stopWorkspace_"+self.clusterName,
@@ -183,6 +227,7 @@ class TokenBehavior(TaskSet):
                                               + " seconds.")
         self.log("Workspace " + self.id + " wasn't able to stop in " 
                  + str(elapsed_time) + " seconds.")
+        os.system(self.hard_stop_failure_cmd+" -o 1 >/dev/null 2>&1")
         return
       self.log("Workspace id " + id + " is still not in state STOPPED ["
                + workspace_status +"] {" + str(elapsed_time) + " of " + str(timeout_in_seconds) + "}")
@@ -193,6 +238,9 @@ class TokenBehavior(TaskSet):
                                 name="stopWorkspace_"+self.clusterName,
                                 response_time=self._tick_timer(),
                                 response_length=0)
+    if (isSoftFailure == False):
+      os.system(self.soft_stop_failure_cmd+" -o 0 >/dev/null 2>&1")
+    os.system(self.hard_stop_failure_cmd+" -o 0 >/dev/null 2>&1")
 
   def stopWorkspaceSelf(self):
     return self.stopWorkspace(self.id)
@@ -349,6 +397,7 @@ class OsioperfLocust(Locust):
     # User lock released, critical section end
     host = "https://che.prod-preview.openshift.io" if "prod-preview" in self.taskUserEnvironment else "https://che.openshift.io"
     self.client = HttpSession(base_url=host)
+
 
 class TokenUser(OsioperfLocust):
   task_set = TokenBehavior
